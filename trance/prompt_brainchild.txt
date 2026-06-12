@@ -1,0 +1,12 @@
+Please provide a detailed musical analysis of the classic trance track **"Synfonica" by Brainchild**, breaking it down into the following specific components so I can use the analysis as a structured input for an AI music generation tool:
+1. **Genre & Style**: Confirm the subgenre (e.g., progressive trance, uplifting trance) and era/style characteristics.
+2. **Tempo & Key**: Estimated BPM and musical key/scale.
+3. **Song Structure**: Outline the track's arrangement (e.g., intro, breakdown, build-up, drop, outro) with approximate timestamps if possible.
+4. **Melody & Harmony**: Describe the main melodic themes, chord progressions, and any notable harmonic elements.
+5. **Bassline**: Describe the bass pattern, style, and rhythm.
+6. **Drums & Percussion**: Detail the drum patterns, kick style, hi-hats, and any percussive elements typical of the track.
+7. **Synths & Sound Design**: Identify the types of synthesizer sounds used (e.g., supersaw leads, pad textures, arpeggios), their character, and how they are layered.
+8. **Samples & Vocals**: Note any vocal samples, spoken word, or other audio samples used.
+9. **Effects & Production Techniques**: Highlight key effects such as reverb, delay, filters, risers, or any signature production techniques.
+10. **Emotional Tone & Energy Arc**: Describe the overall mood and how the energy evolves throughout the track.
+Please present the analysis in a clear, structured format using the headings above, with enough technical detail that it can serve as a reference blueprint for recreating a similar-sounding track using an AI music generation tool.
