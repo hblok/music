@@ -311,6 +311,45 @@ no melody, no events, and **no lulls** — a slow AGC levels the bus
   pedal**, the only tonal content, keeping the storm in tune with the
   music underneath.
 
+### 13. `kanly.wav` — *Kanly* (3:40)
+**Script:** `generate_kanly.py`
+
+The daytime mirror of *Night Pursuit*, and its answer. Where that track
+ends with the desert winning (the worm erases the hunt), this one is the
+lone rider who **completes** the kill at dawn — and finds only emptiness
+on the other side of it. *Kanly* is the Dune word for the formal
+blood-feud; the rider crosses open sand to settle one. Reference:
+**Lawrence of Arabia's** relentless crossings and the **John Wick**
+single-minded assassin. A six-act story at 112 BPM where no section
+repeats verbatim.
+
+- **Act I — Dawn** (0:00): the shared wind + drone recipe (for
+  crossfading), brightened by a rising **sunrise shimmer** — a swept
+  noise band and warm partials carrying the **major third F#**, the
+  warmth the night tracks deny. A **ney** call quotes the world's Theme A:
+  the rider wakes, the sun crests the dune.
+- **Act II — The Ride** (0:24): **galloping hoofbeats** (a new recipe —
+  dry dusty thuds in a triplet canter, lead/trail hooves alternating L/R)
+  are the engine. A gated sub on the stride; the oud states **Theme R**,
+  the rider's theme, in D Phrygian dominant (Hijaz) with its exotic
+  augmented second. Relentless but patient.
+- **Act III — The Wait** (1:15): the gallop cuts dead. **Destiny's clock**
+  (the *Night Pursuit* tick) counts alone over a held-breath sub and a
+  **tremolo-string** bed on the E♭–F# augmented second; the duduk asks one
+  question, unanswered. He waits at the elder's door.
+- **Act IV — The Hunt** (1:41): a noise **riser** launches the gallop back,
+  doubled and wider, over **war drums**, driving 16th-note bass and full
+  maqsum darbuka; Theme R an octave up, urgent. The closing-in.
+- **Act V — The Kill** (2:28): one decisive blow — the highest-energy
+  moment of the track, a sub-boom under a short metallic **blade ring** —
+  and the groove stops dead. Not the worm. A man's blade.
+- **Act VI — Emptiness** (2:32): the hollow after. The drone **sinks 6%**
+  with a faint flat-second partial (the *Fall of Arrakeen* agony recipe),
+  a lone broken duduk plays Theme R in dying fragments, and the wind
+  floods back — ducked below the dawn, colder and emptier. One far
+  hoofbeat that never repeats: the horse walking away. The kanly is
+  settled and it bought nothing.
+
 ## The Musical Ideas
 
 **One key, one mode family.** Everything is rooted on **D**. The calm track
@@ -353,6 +392,7 @@ python3 generate_arrakis_winds_v3.py # -> /workspace/music/arrakis_winds_v3.wav
 python3 generate_spice_must_flow.py  # -> /workspace/music/spice_must_flow.wav
 python3 generate_stillsuit.py        # -> /workspace/music/stillsuit.wav
 python3 generate_sandstorm_coriolis.py # -> /workspace/music/sandstorm_coriolis.wav
+python3 generate_kanly.py            # -> /workspace/music/kanly.wav
 ```
 
 For game-engine delivery, WAVs convert to mp3 with ffmpeg:

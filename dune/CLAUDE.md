@@ -100,6 +100,38 @@ Every script follows the same shape:
 - **Frame drum (daf) + roll**: 180–1400 Hz bandpassed noise + 95 Hz skin
   tone, 120 ms. Roll = hits at an accelerating rate (9→20 /s) with gain
   ramping 0.3→1.0 — the standard section-launch gesture.
+- **Galloping hoofbeats** (kanly — the lone-rider engine): a dry dusty
+  thud — fast downward pitch-thump (sine 200→62 Hz, exp rate 55, decay
+  ~40/s) + 220–1700 Hz bandpassed "sand kicked up" noise burst at 0.45,
+  short ~120 ms, NO reverb (it's on the ground). Two variants (lead/trail
+  hoof) with slightly different f0/decay. Pattern on a TRIPLET grid (3
+  hits per beat); per-beat gain cells like `[1.0, 0, 0.55]` (DUM·da) and
+  `[0.85, 0.5, 0.55]` (DUM da da) alternated across the bar = a canter;
+  busier cells `[1.0, 0.6, 0.7]` = a full gallop for the chase. Alternate
+  lead/trail hooves L/R per hit (constant-power pan) so the gait itself
+  pans — reads unmistakably as a horse crossing open sand, relentless.
+- **Sunrise shimmer** (kanly — DAWN warmth, the anti-night gesture): a
+  rising swept-noise band (8 fixed bandpass bands 700→3000 Hz,
+  triangular time-windows so the center sweeps up = light spreading) plus
+  warm partials carrying the **major third F#** (D5/F#5/A5 sines, each
+  pulsed to silence via `clip(sin,0,1)**2`). One swell that crests at
+  ~14 s and fades by ~28 s — the sun is up, no need to keep shimmering, so
+  the anti-tinnitus rule is satisfied by fading within a minute. The major
+  third is the tell: every other track lives on the E♭ flat-second
+  shadow; F# in the light is the one warm, hopeful color in the palette.
+- **Decisive single blow / "the kill"** (kanly — contrast with
+  night_pursuit's worm): the human counter to "the desert wins". A
+  sub-boom (brown noise → 150 Hz lowpass, 30 ms attack, + falling sub core
+  60→30 Hz via cumsum) for the body, under a short metallic **blade ring**
+  — 4 inharmonic damped sines (2300/3470/5150/6900 Hz, decay 18–40/s) +
+  a 2–8 kHz bandpassed transient, ~30% reverb, gone in <1 s, with a 4 ms
+  ITD between L/R so it "cuts across". Then SILENCE: end every rhythmic
+  layer's bar range AT the kill bar, so the dead air after the ring is the
+  blow landing. Weight the strike so the kill is the loudest section by
+  RMS (~0.20 vs a ~0.14 chase) — a deep blow is felt more than peaked, so
+  RMS dominance, not sample-peak, is the right target (pushing the boom's
+  literal peak higher just steals normalization headroom — the
+  fall_of_arrakeen lesson).
 - **Tremolo strings**: per chord note, 3 detuned copies (±0.4–0.5 %) of an
   additive saw (harmonics 1–8, 1/k gains), bandpassed 180–2600 Hz, then a
   10–12 Hz tremolo `(0.5+0.5·sin)**1.2` that touches silence every cycle
