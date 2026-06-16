@@ -35,17 +35,25 @@ UI-free. This one-way boundary is strict: breaking it is a bug.
 | `analysis/loudness.py` | `section_rms_report`, `rms_trend_slope`, `peak_headroom_db`, `intro_vs_aftermath` |
 | `analysis/loops.py` | `seam_report`, `rms_flatness_report`, `full_loop_report` |
 | `playback/clock.py` | `PlaybackClock` — sample/bar/beat position, thread-safe via GIL |
-| `playback/service.py` | `PlaybackService` — sounddevice OutputStream; gracefully degrades if no audio device |
+| `playback/service.py` | `PlaybackService` — single-buffer OR mixer-mode (`with_mixer()`); degrades gracefully without audio |
+| `playback/cache.py` | `ContentAddressedCache` — in-memory LRU + on-disk .npy; SHA-256 keyed; thread-safe |
+| `playback/scheduler.py` | `RenderScheduler` — ThreadPoolExecutor job queue; coalesces rapid edits; stale-while-fresh pattern |
+| `playback/mixer.py` | `CallbackMixer` — N channel slots; gain/mute/solo; seamless loop + hot-swap at loop boundary |
+| `document/__init__.py` | `forge.document` package (no Qt, no DSP) — mutable project model |
+| `document/channels.py` | `PatternChannel`, `TextureChannel`, `AutomationChannel`, `StepData`, `Breakpoint` |
+| `document/transaction.py` | `Transaction`, `FieldChange`, `channel_content_hash` (SHA-256, 16 hex) |
+| `document/history.py` | `History` — undo/redo stack; slider-drag coalescing via `push(coalesce=True)` |
+| `document/model.py` | `ProjectDoc` — typed edit API (`set_param`, `set_step`, `toggle_step`, `reroll`, `copy_steps`, `paste_steps`); observer callbacks; `channel_cache_key()` |
 | `ui/window.py` | `MainWindow` — QMainWindow with transport, render button, File→Open/Save |
 | `ui/transport.py` | `TransportWidget` — play/pause/stop/seek slider + bar:beat label |
-| `ui/instrument_panel.py` | `InstrumentPanel` — auto-builds sliders/checkboxes from ParamSchema |
+| `ui/instrument_panel.py` | `InstrumentPanel` — auto-builds sliders/checkboxes from ParamSchema; `WorkshopPanel` — doc-bound with seed control + scheduler-backed audition |
 | `ui/mixer.py` | `MixerWidget` — per-layer volume faders + mute buttons |
-| `ui/pattern_editor.py` | `PatternEditor` — 16-step button grid, emits PatternSpec dict |
+| `ui/pattern_editor.py` | `PatternEditor` — 16-step toggle grid; `TrackerEditor` — full tracker grid (keyboard, accent/ghost/prob, copy/paste, doc-bound) |
 | `ui/project_view.py` | `InstrumentBrowser`, `ProjectTree` |
 | `spec/schema.py` | `TrackSpec`, `PatternSpec`, `SectionSpec`, `ProjectSpec` dataclasses |
 | `spec/validate.py` | `validate_project`, `validate_pattern` — raise ValueError on bad input |
 | `spec/serialize.py` | `save_project(project, path)`, `load_project(path)` — stdlib JSON + pathlib |
-| `control.py` | **Facade**: `list_instruments`, `render_instrument`, `render_pattern`, `render_track`, `load_project`, `save_project` |
+| `control.py` | **Facade**: `list_instruments`, `render_instrument`, `render_pattern`, `render_track`, `render_channel`, `load_project`, `save_project` |
 | `runner.py` | `render_project(project, path)` — save spec + render WAV + print; `project_main(build_fn, default_out)` — argparse entry point for example scripts |
 
 ## Instrument protocol
@@ -132,12 +140,48 @@ Steps: `0`/`False`/`None` = silent; `1`/`True` = fire; dict = `{"on": bool,
 
 ```bash
 python3 -m unittest discover -s forge/tests -p "test_*.py"
-# 390 tests, all green as of Phase 10
+# 555 tests, all green as of Plan 3 Phase 5
 ```
 
 Tests use `unittest` (not pytest). All tests are in `forge/tests/`.
 Qt tests use `QT_QPA_PLATFORM=offscreen` (set at the top of each Qt test
 file — no display needed).
+
+New test files added in Plan 3:
+- `test_document.py`       — document model, transactions, history (74 tests)
+- `test_cache_scheduler.py`— cache + scheduler (25 tests)
+- `test_mixer.py`          — callback mixer (24 tests)
+- `test_tracker_editor.py` — TrackerEditor + TrackerRow (33 tests)
+
+## Document model (Plan 3 addition)
+
+The `forge.document` package provides a mutable project model used by the
+tracker GUI.  Key contracts:
+
+- **No Qt, no DSP** in `forge.document.*` — fully testable headless.
+- Every mutation goes through `ProjectDoc`'s typed edit API, which records a
+  `Transaction` and pushes it to `History` for undo/redo.
+- `doc.channel_cache_key(idx)` returns a SHA-256 hash of the channel's
+  render-relevant data; the hash changes when anything that affects audio
+  changes and stays the same after pure UI changes.
+- `doc.subscribe(callback)` registers an observer called after every edit
+  (including undo/redo).  The callback receives the `Transaction`.
+- `History.push(txn, coalesce=True)` merges with the previous entry if both
+  touch the same paths — used for slider drags.
+
+## Cache / Scheduler / Mixer (Plan 3 addition)
+
+- `ContentAddressedCache` — in-memory LRU + on-disk `.npy` store.
+  Keys = `channel_cache_key()`; stored as float32 stereo arrays.
+- `RenderScheduler` — wraps a `ThreadPoolExecutor`; `get_or_schedule(key, fn,
+  on_done)` returns `(cached_buf, True)` on a hit, `(None, False)` on a miss
+  and schedules the render.  `on_done(key, buf)` is called from the worker
+  thread — UI code must marshal back to Qt (e.g. `QTimer.singleShot(0, ...)`).
+- `CallbackMixer` — multi-channel loop mixer.  `load_channel(name, arr)` queues
+  a hot-swap; the swap fires at the next loop boundary.  `mix_offline(n)`
+  drives the same logic headless (tests + Phase 0 spike).
+- `PlaybackService.with_mixer()` — creates a mixer-mode service; access via
+  `svc.mixer`.
 
 ## Key design decisions (non-obvious, worth preserving)
 

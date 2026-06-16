@@ -56,10 +56,13 @@ python -m forge.ui.main --bpm 138
 
 ## Plans
 
-`plans/implementation_plan2_modular_framework.md` is the authoritative
-implementation guide for forge. The other plan files (`music_plan*.md`) cover
-alternate directions (JS port, tracker GUI, full DAW) that have NOT been
-implemented.
+`plans/implementation_plan2_modular_framework.md` — forge (complete).
+`plans/implementation_plan3_tracker_gui.md` — tracker GUI (Phases 0–5 complete;
+  Phases 6–9 pending). Phases 0–5 add: `forge/document/` (mutable project
+  model + transactions + undo/redo), `forge/playback/cache.py` (content-
+  addressed cache), `forge/playback/scheduler.py` (background render queue),
+  `forge/playback/mixer.py` (multi-channel callback mixer), `WorkshopPanel`
+  (Phase 4), `TrackerEditor` (Phase 5). 165 new tests; 555 total.
 
 ## Conventions shared across the whole repo
 

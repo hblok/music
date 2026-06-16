@@ -1,8 +1,10 @@
-# Token cost estimate — forge implementation (Phases 0-10)
+# Token cost estimate — forge implementation (Phases 0-10) + Plan 3 (Phases 0-5)
 
 Reference numbers for planning future full-plan implementation sessions.
 Measured from the actual forge build: 11 phases, 9,441 lines, 390 tests,
 completed in 2 sessions using Claude Sonnet 4.6 at high effort.
+
+Plan 3 (Phases 0–5) added ~3,100 lines and 165 tests in one session.
 
 ## Phase-by-phase breakdown
 
@@ -73,7 +75,7 @@ total tokens (input + output combined).  Practical capacity:
    establish context. The summary itself takes ~8k tokens. Net cost is low;
    plan a break between heavy and light halves of a large project.
 
-## Codebase at completion
+## Codebase at completion (forge Plan 2)
 
 | Metric | Value |
 |--------|-------|
@@ -85,3 +87,28 @@ total tokens (input + output combined).  Practical capacity:
 | Instrument families | 6 |
 | Instruments registered | 27 |
 | Control facade methods live | 6 / 6 |
+
+## Plan 3 tracker GUI — Phase 0-5 actual costs
+
+Completed in one session (Claude Sonnet 4.6, high effort).
+
+| Phase | Lines | Output tokens | Size | Description |
+|-------|------:|-------------:|------|-------------|
+| 0 | ~310 | ~3k | light | Tracker spike (examples/tracker_spike.py); latency: 853ms miss / 0ms hit |
+| 1 | ~600 | ~6k | medium | `forge/document/`: channels, transaction, history, model (74 tests) |
+| 2 | ~420 | ~4k | medium | `playback/cache.py` + `playback/scheduler.py` + control.render_channel (25 tests) |
+| 3 | ~330 | ~3k | medium | `playback/mixer.py` + service.with_mixer() (24 tests) |
+| 4 | ~450 | ~4k | medium | `WorkshopPanel` in instrument_panel.py (9 tests) |
+| 5 | ~940 | ~9k | heavy | `TrackerEditor` + `TrackerRow` in pattern_editor.py (33 tests) |
+| **Total** | **~3,050** | **~29k** | | 165 new tests; 555 total |
+
+**Actual vs plan estimates:**
+- Plan estimated ~3,750 lines for Phases 0–4; actual ~2,110 (more concise).
+- Phase 5 (heavy) at ~940 lines matched the plan estimate well.
+- Total output ~29k vs plan's ~36k estimate — implementations were tighter.
+- Wall time: approximately 45–60 minutes for all 6 phases.
+
+**Latency spike measurement (Phase 0, kick drum, Sonnet 4.6 environment):**
+- Cache miss (first render): ~853 ms
+- Cache hit (same params): ~0 ms
+- Sub-second swap confirmed — Phase 0 spike accepted, no fallback needed.
