@@ -28,7 +28,8 @@ def list_instruments() -> list[dict]:
 
     Each entry: ``{"id": str, "family": str, "params": list[ParamSchema]}``.
     """
-    raise NotImplementedError("list_instruments: Phase 3 not yet implemented")
+    from forge.instruments.registry import list_instruments as _list
+    return _list()
 
 
 def render_instrument(
@@ -43,7 +44,11 @@ def render_instrument(
         params:        Parameter dict; keys match the instrument's param schema.
         seed:          RNG seed for this render.
     """
-    raise NotImplementedError("render_instrument: Phase 3 not yet implemented")
+    from forge.instruments.registry import get_instrument
+    from forge.core.rng import RngContext
+    entry = get_instrument(instrument_id)
+    rng = RngContext(seed).spawn(instrument_id).rng
+    return entry["fn"](params, rng)
 
 
 # ---------------------------------------------------------------------------
