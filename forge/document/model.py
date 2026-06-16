@@ -75,6 +75,7 @@ class ProjectDoc:
         self._fade_out_s = 2.0
 
         self._channels: list[AnyChannel] = []
+        self._sections: list[dict] = []
         self._history = History()
         self._observers: list[Observer] = []
 
@@ -315,6 +316,34 @@ class ProjectDoc:
 
     # ---------------------------------------------------------------- envelope edits (TextureChannel)
 
+    def remove_breakpoint(self, channel_idx: int, bp_idx: int) -> None:
+        """Remove breakpoint at *bp_idx* from a TextureChannel's envelope."""
+        ch = self._channels[channel_idx]
+        if not isinstance(ch, TextureChannel):
+            raise TypeError("remove_breakpoint only applies to TextureChannel")
+        if not (0 <= bp_idx < len(ch.envelope)):
+            raise IndexError(f"breakpoint index {bp_idx} out of range")
+        old = ch.envelope.pop(bp_idx)
+        txn = Transaction(f"remove breakpoint {bp_idx}")
+        txn.add_change(("channel", channel_idx, "envelope_add", bp_idx), old, None)
+        self._history.push(txn)
+        self._notify(txn)
+
+    def replace_envelope(self, channel_idx: int, breakpoints) -> None:
+        """Replace the entire envelope of a TextureChannel (list of (bar, value))."""
+        ch = self._channels[channel_idx]
+        if not isinstance(ch, TextureChannel):
+            raise TypeError("replace_envelope only applies to TextureChannel")
+        new_bps = [(float(b[0]), float(b[1])) for b in breakpoints]
+        old_bps = [(b.bar, b.value) for b in ch.envelope]
+        if old_bps == new_bps:
+            return
+        txn = Transaction("replace envelope")
+        txn.add_change(("channel", channel_idx, "envelope_replace"), old_bps, new_bps)
+        ch.envelope = [Breakpoint(bar, val) for bar, val in new_bps]
+        self._history.push(txn)
+        self._notify(txn)
+
     def add_breakpoint(self, channel_idx: int, bar: float, value: float) -> int:
         ch = self._channels[channel_idx]
         if not isinstance(ch, TextureChannel):
@@ -344,6 +373,119 @@ class ProjectDoc:
             self._history.push(txn)
             self._notify(txn)
 
+    # ---------------------------------------------------------------- automation bp edits (AutomationChannel)
+
+    def add_automation_bp(self, channel_idx: int, bar: float, value: float) -> int:
+        """Add a breakpoint to an AutomationChannel; returns new index."""
+        ch = self._channels[channel_idx]
+        if not isinstance(ch, AutomationChannel):
+            raise TypeError("add_automation_bp only applies to AutomationChannel")
+        bp = Breakpoint(float(bar), float(value))
+        idx = len(ch.breakpoints)
+        txn = Transaction("add automation breakpoint")
+        txn.add_change(("channel", channel_idx, "auto_bp_add", idx), None, bp)
+        ch.breakpoints.append(bp)
+        self._history.push(txn)
+        self._notify(txn)
+        return idx
+
+    def set_automation_bp(self, channel_idx: int, bp_idx: int, bar: float, value: float) -> None:
+        """Set bar and value of an existing AutomationChannel breakpoint."""
+        ch = self._channels[channel_idx]
+        if not isinstance(ch, AutomationChannel):
+            raise TypeError("set_automation_bp only applies to AutomationChannel")
+        bp = ch.breakpoints[bp_idx]
+        txn = Transaction("set automation breakpoint")
+        if bp.bar != bar:
+            txn.add_change(("channel", channel_idx, "auto_bp", bp_idx, "bar"), bp.bar, float(bar))
+            bp.bar = float(bar)
+        if bp.value != value:
+            txn.add_change(("channel", channel_idx, "auto_bp", bp_idx, "value"), bp.value, float(value))
+            bp.value = float(value)
+        if not txn.is_empty():
+            self._history.push(txn)
+            self._notify(txn)
+
+    def replace_automation_bps(self, channel_idx: int, breakpoints) -> None:
+        """Replace all breakpoints of an AutomationChannel (list of (bar, value))."""
+        ch = self._channels[channel_idx]
+        if not isinstance(ch, AutomationChannel):
+            raise TypeError("replace_automation_bps only applies to AutomationChannel")
+        new_bps = [(float(b[0]), float(b[1])) for b in breakpoints]
+        old_bps = [(b.bar, b.value) for b in ch.breakpoints]
+        if old_bps == new_bps:
+            return
+        txn = Transaction("replace automation breakpoints")
+        txn.add_change(("channel", channel_idx, "auto_bps_replace"), old_bps, new_bps)
+        ch.breakpoints = [Breakpoint(bar, val) for bar, val in new_bps]
+        self._history.push(txn)
+        self._notify(txn)
+
+    # ---------------------------------------------------------------- section management
+
+    @property
+    def sections(self) -> list[dict]:
+        return list(self._sections)
+
+    def _ensure_sections(self) -> None:
+        if not hasattr(self, "_sections"):
+            self._sections: list[dict] = []
+
+    def add_section(self, name: str, length_bars: int) -> int:
+        """Append a section; returns its new index."""
+        self._ensure_sections()
+        idx = len(self._sections)
+        entry = {"name": name, "length_bars": int(length_bars)}
+        txn = Transaction(f"add section {name!r}")
+        txn.add_change(("sections", idx), None, entry)
+        self._sections.append(entry)
+        self._history.push(txn)
+        self._notify(txn)
+        return idx
+
+    def remove_section(self, idx: int) -> None:
+        self._ensure_sections()
+        old = self._sections[idx]
+        txn = Transaction(f"remove section {idx}")
+        txn.add_change(("sections", idx), old, None)
+        self._sections.pop(idx)
+        self._history.push(txn)
+        self._notify(txn)
+
+    def rename_section(self, idx: int, name: str) -> None:
+        self._ensure_sections()
+        old = self._sections[idx]["name"]
+        if old == name:
+            return
+        txn = Transaction("rename section")
+        txn.add_change(("section", idx, "name"), old, name)
+        self._sections[idx]["name"] = name
+        self._history.push(txn)
+        self._notify(txn)
+
+    def set_section_length(self, idx: int, length_bars: int) -> None:
+        self._ensure_sections()
+        old = self._sections[idx]["length_bars"]
+        if old == length_bars:
+            return
+        txn = Transaction("set section length")
+        txn.add_change(("section", idx, "length_bars"), old, int(length_bars))
+        self._sections[idx]["length_bars"] = int(length_bars)
+        self._history.push(txn)
+        self._notify(txn)
+
+    def move_section(self, from_idx: int, to_idx: int) -> None:
+        """Move section from *from_idx* to *to_idx* (reorder)."""
+        self._ensure_sections()
+        if from_idx == to_idx:
+            return
+        txn = Transaction("move section")
+        txn.add_change(("section_move",), (from_idx, to_idx), (to_idx, from_idx))
+        item = self._sections.pop(from_idx)
+        self._sections.insert(to_idx, item)
+        self._history.push(txn)
+        self._notify(txn)
+
     # ---------------------------------------------------------------- undo/redo
 
     def undo(self) -> bool:
@@ -367,7 +509,9 @@ class ProjectDoc:
     # ---------------------------------------------------------------- serialization
 
     def to_dict(self) -> dict:
+        self._ensure_sections()
         return {
+            "schema_version": "3.0",
             "title": self._title,
             "bpm": self._bpm,
             "sr": self._sr,
@@ -376,6 +520,7 @@ class ProjectDoc:
             "target": self._target,
             "fade_out_s": self._fade_out_s,
             "channels": [ch.to_dict() for ch in self._channels],
+            "sections": list(self._sections),
         }
 
     @classmethod
@@ -391,6 +536,8 @@ class ProjectDoc:
         doc._fade_out_s = float(d.get("fade_out_s", 2.0))
         for ch_dict in d.get("channels", []):
             doc._channels.append(channel_from_dict(ch_dict))
+        doc._ensure_sections()
+        doc._sections = list(d.get("sections", []))
         return doc
 
     # ---------------------------------------------------------------- internal apply
@@ -464,3 +611,48 @@ class ProjectDoc:
                             ch.envelope.pop(bp_idx)
                     else:
                         ch.envelope.append(value)
+
+            elif sub == "envelope_replace":
+                if isinstance(ch, TextureChannel):
+                    ch.envelope = [Breakpoint(bar, val) for bar, val in value]
+
+            elif sub == "auto_bp_add":
+                bp_idx = path[3]
+                if isinstance(ch, AutomationChannel):
+                    if value is None:
+                        if 0 <= bp_idx < len(ch.breakpoints):
+                            ch.breakpoints.pop(bp_idx)
+                    else:
+                        ch.breakpoints.append(value)
+
+            elif sub == "auto_bp":
+                bp_idx, field = path[3], path[4]
+                if isinstance(ch, AutomationChannel):
+                    setattr(ch.breakpoints[bp_idx], field, value)
+
+            elif sub == "auto_bps_replace":
+                if isinstance(ch, AutomationChannel):
+                    ch.breakpoints = [Breakpoint(bar, val) for bar, val in value]
+
+        elif kind == "sections":
+            self._ensure_sections()
+            idx = path[1]
+            if value is None:
+                if 0 <= idx < len(self._sections):
+                    self._sections.pop(idx)
+            elif idx <= len(self._sections):
+                if idx == len(self._sections):
+                    self._sections.append(value)
+                else:
+                    self._sections.insert(idx, value)
+
+        elif kind == "section":
+            self._ensure_sections()
+            idx, field = path[1], path[2]
+            self._sections[idx][field] = value
+
+        elif kind == "section_move":
+            self._ensure_sections()
+            from_idx, to_idx = value
+            item = self._sections.pop(from_idx)
+            self._sections.insert(to_idx, item)

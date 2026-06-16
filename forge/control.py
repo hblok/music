@@ -193,3 +193,50 @@ def render_channel(
         "tracks": [channel.to_track_dict()],
     }
     return render_pattern(pattern_dict, seed=seed)
+
+
+def render_texture_channel(
+    channel: "forge.document.channels.TextureChannel",  # type: ignore[name-defined]
+    length_bars: int,
+    bpm: float,
+    *,
+    seed: int = 0,
+    sr: int = 44100,
+) -> "forge.core.buffer.AudioBuffer":  # type: ignore[name-defined]
+    """Render a TextureChannel with its envelope applied as a gain curve.
+
+    The instrument is rendered at the full length derived from *length_bars* and
+    *bpm*.  If the channel has envelope breakpoints, they are applied as a
+    piecewise-linear gain multiplier (0.0–1.0 range) over time.
+
+    Args:
+        channel:     A TextureChannel from ``forge.document.channels``.
+        length_bars: Render length in bars.
+        bpm:         Project tempo.
+        seed:        RNG seed.
+        sr:          Sample rate.
+    """
+    import numpy as np
+    from forge.document.channels import TextureChannel as _TexCh
+    if not isinstance(channel, _TexCh):
+        raise TypeError("render_texture_channel expects a TextureChannel")
+
+    bar_dur_s = 4.0 * 60.0 / bpm  # seconds per bar
+    duration_s = float(length_bars) * bar_dur_s
+
+    params = dict(channel.params)
+    params["duration"] = duration_s
+
+    buf = render_instrument(channel.instrument_id, params, seed=seed + channel.seed)
+
+    if channel.envelope:
+        sorted_env = sorted(channel.envelope, key=lambda b: b.bar)
+        bar_dur_samples = sr * bar_dur_s
+        xs = np.array([b.bar * bar_dur_samples for b in sorted_env])
+        ys = np.array([b.value for b in sorted_env])
+        n = buf.data.shape[0]
+        t = np.arange(n, dtype=np.float64)
+        gain = np.interp(t, xs, ys, left=ys[0], right=ys[-1])
+        buf.data *= gain[:, np.newaxis]
+
+    return buf
