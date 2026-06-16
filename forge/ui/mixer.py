@@ -96,6 +96,14 @@ class MixerWidget(QWidget):
 
     def _emit(self) -> None:
         self.levelsChanged.emit(self.levels())
+        backend = getattr(self, "_backend_mixer", None)
+        if backend is not None:
+            for name, strip in self._strips.items():
+                try:
+                    backend.set_gain(name, strip.volume)
+                    backend.set_muted(name, strip.muted)
+                except KeyError:
+                    pass
 
     def levels(self) -> dict:
         """Current levels: ``{name: {"volume": float, "muted": bool}}``."""
@@ -107,3 +115,36 @@ class MixerWidget(QWidget):
     def set_volume(self, name: str, v: float) -> None:
         if name in self._strips:
             self._strips[name].set_volume(v)
+
+    def set_mixer(self, mixer: "forge.playback.mixer.CallbackMixer") -> None:  # type: ignore[name-defined]
+        """Bind this widget's faders/mutes to a live ``CallbackMixer``.
+
+        After calling this, any fader or mute change in the UI is immediately
+        forwarded to the mixer's ``set_gain`` / ``set_muted`` methods.  Call
+        with *mixer=None* to disconnect.
+        """
+        self._backend_mixer = mixer
+        if mixer is not None:
+            # Push current UI state to mixer
+            for name, strip in self._strips.items():
+                try:
+                    mixer.set_gain(name, strip.volume)
+                    mixer.set_muted(name, strip.muted)
+                except KeyError:
+                    pass
+
+    def add_strip(self, name: str) -> None:
+        """Add a new strip for *name* (idempotent)."""
+        if name in self._strips:
+            return
+        strip = _Strip(name, self)
+        strip.changed.connect(self._emit)
+        self._strips[name] = strip
+        self.layout().addWidget(strip)
+
+    def remove_strip(self, name: str) -> None:
+        """Remove the strip for *name* (no-op if absent)."""
+        strip = self._strips.pop(name, None)
+        if strip is not None:
+            strip.setParent(None)
+            strip.deleteLater()

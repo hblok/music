@@ -89,6 +89,11 @@ class TransportWidget(QWidget):
             frac = min(pos_bars / self._slider_total_bars, 1.0)
             self._seek_slider.setValue(int(frac * 1000))
         self.positionChanged.emit(pos_bars)
+        # Render-queue indicator tooltip
+        sched = getattr(self, "_scheduler", None)
+        if sched is not None:
+            n = sched.pending_count()
+            self._pos_label.setToolTip(f"Rendering: {n} channel(s)" if n > 0 else "")
 
     # ------------------------------------------------------------------
     # Public API
@@ -96,3 +101,12 @@ class TransportWidget(QWidget):
     def set_total_bars(self, n_bars: float) -> None:
         """Update slider scale to match track length."""
         self._slider_total_bars = max(n_bars, 1.0)
+
+    def set_scheduler(self, scheduler: "forge.playback.scheduler.RenderScheduler") -> None:  # type: ignore[name-defined]
+        """Attach a scheduler so the transport shows a render-queue indicator in the tooltip."""
+        self._scheduler = scheduler
+
+    def set_loop_range(self, start_bar: float, end_bar: float) -> None:
+        """Record a section loop range (used by the arrangement view)."""
+        self._loop_start = start_bar
+        self._loop_end = end_bar
