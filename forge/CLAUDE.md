@@ -43,17 +43,21 @@ UI-free. This one-way boundary is strict: breaking it is a bug.
 | `document/channels.py` | `PatternChannel`, `TextureChannel`, `AutomationChannel`, `StepData`, `Breakpoint` |
 | `document/transaction.py` | `Transaction`, `FieldChange`, `channel_content_hash` (SHA-256, 16 hex) |
 | `document/history.py` | `History` — undo/redo stack; slider-drag coalescing via `push(coalesce=True)` |
-| `document/model.py` | `ProjectDoc` — typed edit API (`set_param`, `set_step`, `toggle_step`, `reroll`, `copy_steps`, `paste_steps`); observer callbacks; `channel_cache_key()` |
-| `ui/window.py` | `MainWindow` — QMainWindow with transport, render button, File→Open/Save |
-| `ui/transport.py` | `TransportWidget` — play/pause/stop/seek slider + bar:beat label |
-| `ui/instrument_panel.py` | `InstrumentPanel` — auto-builds sliders/checkboxes from ParamSchema; `WorkshopPanel` — doc-bound with seed control + scheduler-backed audition |
-| `ui/mixer.py` | `MixerWidget` — per-layer volume faders + mute buttons |
+| `document/model.py` | `ProjectDoc` — typed edit API; section management; automation + envelope BP API; `channel_cache_key()` |
+| `document/autosave.py` | `AutoSave` — transaction-counting autosave; atomic write; `recover(path)` / `clear(path)` |
+| `ui/window.py` | `MainWindow` — transport, render, File→Open/Save (engine + tracker), Export WAV |
+| `ui/transport.py` | `TransportWidget` — play/pause/stop/seek + `set_scheduler()` queue indicator + `set_loop_range()` |
+| `ui/instrument_panel.py` | `InstrumentPanel` — auto-sliders; `WorkshopPanel` — doc-bound, scheduler-backed audition |
+| `ui/mixer.py` | `MixerWidget` — faders + mute; `set_mixer(CallbackMixer)` binding; `add_strip` / `remove_strip` |
 | `ui/pattern_editor.py` | `PatternEditor` — 16-step toggle grid; `TrackerEditor` — full tracker grid (keyboard, accent/ghost/prob, copy/paste, doc-bound) |
+| `ui/automation_lane.py` | `BreakpointCurveWidget` — drag/drop curve editor; `TextureLane` / `AutomationLane` — doc-bound lanes |
+| `ui/arrangement.py` | `ArrangementView` — section order list with add/remove/rename/reorder/duplicate (all transactional) |
+| `ui/ab_compare.py` | `ABCompareWidget` — A/B parameter snapshot + toggle; no render stall |
 | `ui/project_view.py` | `InstrumentBrowser`, `ProjectTree` |
 | `spec/schema.py` | `TrackSpec`, `PatternSpec`, `SectionSpec`, `ProjectSpec` dataclasses |
 | `spec/validate.py` | `validate_project`, `validate_pattern` — raise ValueError on bad input |
-| `spec/serialize.py` | `save_project(project, path)`, `load_project(path)` — stdlib JSON + pathlib |
-| `control.py` | **Facade**: `list_instruments`, `render_instrument`, `render_pattern`, `render_track`, `render_channel`, `load_project`, `save_project` |
+| `spec/serialize.py` | `save_project` / `load_project` (engine); `save_project_doc` / `load_project_doc` (tracker, atomic write); `migrate_project_dict` (Plan 2 → 3) |
+| `control.py` | **Facade**: `list_instruments`, `render_instrument`, `render_pattern`, `render_track`, `render_channel`, `render_texture_channel`, `export_wav_from_doc`, `load_project`, `save_project` |
 | `runner.py` | `render_project(project, path)` — save spec + render WAV + print; `project_main(build_fn, default_out)` — argparse entry point for example scripts |
 
 ## Instrument protocol
@@ -140,7 +144,7 @@ Steps: `0`/`False`/`None` = silent; `1`/`True` = fire; dict = `{"on": bool,
 
 ```bash
 python3 -m unittest discover -s forge/tests -p "test_*.py"
-# 555 tests, all green as of Plan 3 Phase 5
+# 674 tests, all green as of Plan 3 Phase 9
 ```
 
 Tests use `unittest` (not pytest). All tests are in `forge/tests/`.
@@ -152,8 +156,15 @@ New test files added in Plan 3:
 - `test_cache_scheduler.py`— cache + scheduler (25 tests)
 - `test_mixer.py`          — callback mixer (24 tests)
 - `test_tracker_editor.py` — TrackerEditor + TrackerRow (33 tests)
+- `test_automation_lane.py`— BreakpointCurveWidget, TextureLane, AutomationLane,
+                             render_texture_channel, section management (51 tests)
+- `test_arrangement.py`    — ArrangementView, MixerWidget extensions, transport (23 tests)
+- `test_lifecycle.py`      — save/load, migration, WAV export, legacy import (22 tests)
+- `test_phase9.py`         — AutoSave, ABCompareWidget, render-queue status (23 tests)
 
-## Document model (Plan 3 addition)
+## Plan 3 additions — full summary
+
+### Document model
 
 The `forge.document` package provides a mutable project model used by the
 tracker GUI.  Key contracts:
@@ -169,7 +180,7 @@ tracker GUI.  Key contracts:
 - `History.push(txn, coalesce=True)` merges with the previous entry if both
   touch the same paths — used for slider drags.
 
-## Cache / Scheduler / Mixer (Plan 3 addition)
+### Cache / Scheduler / Mixer
 
 - `ContentAddressedCache` — in-memory LRU + on-disk `.npy` store.
   Keys = `channel_cache_key()`; stored as float32 stereo arrays.
@@ -182,6 +193,46 @@ tracker GUI.  Key contracts:
   drives the same logic headless (tests + Phase 0 spike).
 - `PlaybackService.with_mixer()` — creates a mixer-mode service; access via
   `svc.mixer`.
+
+### Texture channels & automation (Phase 6)
+
+- `TextureChannel` fully supported: `replace_envelope()`, `remove_breakpoint()`.
+- `AutomationChannel` fully supported: `add/set/replace_automation_bps()`.
+- `ProjectDoc.add_section` / `remove_section` / `rename_section` / `move_section`
+  / `set_section_length` — section order list; all transactional + undoable.
+- `control.render_texture_channel(channel, length_bars, bpm)` — renders
+  continuous texture with piecewise-linear envelope as gain.
+- `BreakpointCurveWidget` — drag/drop Qt curve editor (add/move/remove dots).
+- `TextureLane` / `AutomationLane` — doc-bound wrappers; write via
+  `replace_envelope` / `replace_automation_bps`.
+
+### Arrangement view (Phase 7)
+
+- `ArrangementView` — section list QListWidget with full CRUD; emits
+  `sectionSelected(start_bar, length_bars)` for transport loop range.
+- `MixerWidget.set_mixer(CallbackMixer)` — binds fader/mute changes to the
+  live audio mixer; `add_strip` / `remove_strip` for dynamic channels.
+- `TransportWidget.set_scheduler(scheduler)` — render-queue depth as tooltip;
+  `set_loop_range(start, end)` for section loop markers.
+
+### Project lifecycle (Phase 8)
+
+- `spec/serialize.save_project_doc(doc, path)` — atomic JSON write (tmp→rename).
+- `spec/serialize.load_project_doc(path)` — loads Plan 2 or Plan 3 files,
+  migrating automatically via `migrate_project_dict`.
+- `control.export_wav_from_doc(doc, path, *, loop_fold=False)` — renders all
+  pattern channels and writes a mastered WAV; optional seamless-loop fold.
+- `MainWindow` File menu: Open/Save Tracker Project + Export WAV.
+- `ProjectDoc.to_dict()` emits `schema_version: "3.0"`.
+
+### Workflow polish (Phase 9)
+
+- `AutoSave(doc, path, interval=N)` — transaction-counting autosave;
+  `flush()` / `stop()` / `recover(path)` / `clear(path)`.
+  Atomic write (tmp→rename); bound-method stored as `_callback` for reliable
+  `unsubscribe`.
+- `ABCompareWidget` — A/B snapshot + toggle; restores via direct attribute
+  replacement + `_notify`; emits `stateChanged("A"|"B")`.
 
 ## Key design decisions (non-obvious, worth preserving)
 

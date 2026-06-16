@@ -112,3 +112,29 @@ Completed in one session (Claude Sonnet 4.6, high effort).
 - Cache miss (first render): ~853 ms
 - Cache hit (same params): ~0 ms
 - Sub-second swap confirmed — Phase 0 spike accepted, no fallback needed.
+
+## Plan 3 tracker GUI — Phase 6-9 actual costs
+
+Completed in one session (Claude Sonnet 4.6, high effort, context-summarised start).
+
+| Phase | Lines | Output tokens | Size | Description |
+|-------|------:|-------------:|------|-------------|
+| 6 | ~490 | ~5k | medium | `automation_lane.py` (BreakpointCurveWidget, TextureLane, AutomationLane), `render_texture_channel`, model additions (51 tests) |
+| 7 | ~390 | ~4k | medium | `arrangement.py` (ArrangementView), mixer binding, transport extensions (23 tests) |
+| 8 | ~450 | ~4k | medium | `spec/serialize` versioned save/load + migrator, `export_wav_from_doc`, window lifecycle wiring (22 tests) |
+| 9 | ~340 | ~3k | light | `autosave.py` (AutoSave), `ab_compare.py` (ABCompareWidget) (23 tests) |
+| **Total** | **~1,670** | **~16k** | | 119 new tests; 674 total |
+
+**Actual vs plan estimates:**
+- Plan estimated ~3,400 lines for Phases 6–9; actual ~1,670 (implementations
+  were more concise — no over-engineering, each feature hit minimum viable).
+- Total output ~16k vs plan's ~33k estimate — roughly half, consistent with
+  the pattern from Phases 0–5.
+- Wall time: approximately 30–40 minutes for all 4 phases.
+
+**Notable fixes during implementation:**
+- Bound-method identity in `AutoSave.stop()`: Python creates a new bound method
+  object each time `self._on_change` is accessed, so `is not` comparison fails.
+  Fixed by caching the reference as `self._callback` in `__init__`.
+- Double `_emit` / `_poll_position` methods from Edit-tool append: Python
+  silently uses the last definition; fixed by removing the duplicate.
