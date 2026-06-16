@@ -144,11 +144,14 @@ def render_track(
 def load_project(path: Path) -> dict[str, Any]:
     """Load a project document from a JSON file.
 
-    Returns the parsed project dict (see forge.spec.schema).
+    Returns the parsed and validated project dict (see forge.spec.schema).
+    Raises FileNotFoundError, json.JSONDecodeError, or ValueError on bad input.
     """
-    raise NotImplementedError("load_project: Phase 9 not yet implemented")
+    from forge.spec.serialize import load_project_dict
+    return load_project_dict(Path(path))
 
 
 def save_project(project: dict[str, Any], path: Path) -> None:
     """Serialize a project document to a JSON file."""
-    raise NotImplementedError("save_project: Phase 9 not yet implemented")
+    from forge.spec.serialize import save_project as _save
+    _save(project, Path(path))
