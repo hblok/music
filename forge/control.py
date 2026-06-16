@@ -64,7 +64,8 @@ def render_pattern(
         pattern: Pattern document (see forge.spec.schema.PatternSpec).
         seed:    RNG seed.
     """
-    raise NotImplementedError("render_pattern: Phase 4 not yet implemented")
+    from forge.patterns.groove import render_pattern_spec
+    return render_pattern_spec(pattern, seed=seed)
 
 
 # ---------------------------------------------------------------------------
