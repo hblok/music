@@ -17,6 +17,7 @@ import threading
 from PySide6.QtCore import Qt, QThread, Signal, QObject
 from PySide6.QtWidgets import (
     QApplication,
+    QFileDialog,
     QLabel,
     QMainWindow,
     QProgressBar,
@@ -89,7 +90,12 @@ class MainWindow(QMainWindow):
 
         # --- menu bar ---
         file_menu = self.menuBar().addMenu("&File")
+        file_menu.addAction("&Open project…", self._on_open)
+        file_menu.addAction("&Save project…", self._on_save)
+        file_menu.addSeparator()
         file_menu.addAction("&Quit", QApplication.quit)
+
+        self._current_project: dict | None = None
 
         transport_menu = self.menuBar().addMenu("&Transport")
         transport_menu.addAction("&Play", service.play)
@@ -141,3 +147,32 @@ class MainWindow(QMainWindow):
         self._progress.setVisible(False)
         self._status_label.setText(f"Render error: {msg}")
         self._render_thread.quit()
+
+    def _on_open(self) -> None:
+        path, _ = QFileDialog.getOpenFileName(
+            self, "Open Project", "", "Forge Projects (*.json)"
+        )
+        if not path:
+            return
+        try:
+            from forge import control
+            self._current_project = control.load_project(path)
+            self._status_label.setText(f"Opened: {path}")
+        except Exception as e:  # noqa: BLE001
+            self._status_label.setText(f"Open error: {e}")
+
+    def _on_save(self) -> None:
+        if self._current_project is None:
+            self._status_label.setText("No project loaded — render something first")
+            return
+        path, _ = QFileDialog.getSaveFileName(
+            self, "Save Project", "", "Forge Projects (*.json)"
+        )
+        if not path:
+            return
+        try:
+            from forge import control
+            control.save_project(self._current_project, path)
+            self._status_label.setText(f"Saved: {path}")
+        except Exception as e:  # noqa: BLE001
+            self._status_label.setText(f"Save error: {e}")
