@@ -93,9 +93,15 @@ class MainWindow(QMainWindow):
         file_menu.addAction("&Open project…", self._on_open)
         file_menu.addAction("&Save project…", self._on_save)
         file_menu.addSeparator()
+        file_menu.addAction("Open &Tracker project…", self._on_open_doc)
+        file_menu.addAction("Save Tracker project…", self._on_save_doc)
+        file_menu.addSeparator()
+        file_menu.addAction("&Export WAV…", self._on_export_wav)
+        file_menu.addSeparator()
         file_menu.addAction("&Quit", QApplication.quit)
 
         self._current_project: dict | None = None
+        self._current_doc = None  # ProjectDoc | None
 
         transport_menu = self.menuBar().addMenu("&Transport")
         transport_menu.addAction("&Play", service.play)
@@ -176,3 +182,65 @@ class MainWindow(QMainWindow):
             self._status_label.setText(f"Saved: {path}")
         except Exception as e:  # noqa: BLE001
             self._status_label.setText(f"Save error: {e}")
+
+    def _on_open_doc(self) -> None:
+        path, _ = QFileDialog.getOpenFileName(
+            self, "Open Tracker Project", "", "Tracker Projects (*.json)"
+        )
+        if not path:
+            return
+        try:
+            from forge.spec.serialize import load_project_doc
+            self._current_doc = load_project_doc(path)
+            self._status_label.setText(f"Loaded tracker project: {path}")
+        except Exception as e:  # noqa: BLE001
+            self._status_label.setText(f"Load error: {e}")
+
+    def _on_save_doc(self) -> None:
+        if self._current_doc is None:
+            self._status_label.setText("No tracker project open")
+            return
+        path, _ = QFileDialog.getSaveFileName(
+            self, "Save Tracker Project", "", "Tracker Projects (*.json)"
+        )
+        if not path:
+            return
+        try:
+            from forge.spec.serialize import save_project_doc
+            save_project_doc(self._current_doc, path)
+            self._status_label.setText(f"Saved: {path}")
+        except Exception as e:  # noqa: BLE001
+            self._status_label.setText(f"Save error: {e}")
+
+    def _on_export_wav(self) -> None:
+        doc = self._current_doc
+        if doc is None:
+            self._status_label.setText("No tracker project open — load one first")
+            return
+        path, _ = QFileDialog.getSaveFileName(
+            self, "Export WAV", "", "WAV files (*.wav)"
+        )
+        if not path:
+            return
+        self._render_btn.setEnabled(False)
+        self._progress.setVisible(True)
+        self._status_label.setText("Exporting WAV…")
+
+        def do_export():
+            from forge import control
+            return control.export_wav_from_doc(doc, path)
+
+        self._render_thread = QThread(self)
+        self._worker = _RenderWorker(do_export)
+        self._worker.moveToThread(self._render_thread)
+        self._render_thread.started.connect(self._worker.run)
+        self._worker.finished.connect(lambda _: self._on_export_done(path))
+        self._worker.error.connect(self._on_render_error)
+        self._render_thread.start()
+
+    def _on_export_done(self, path: str) -> None:
+        self._render_btn.setEnabled(True)
+        self._progress.setVisible(False)
+        self._status_label.setText(f"Exported: {path}")
+        if self._render_thread:
+            self._render_thread.quit()

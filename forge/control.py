@@ -195,6 +195,60 @@ def render_channel(
     return render_pattern(pattern_dict, seed=seed)
 
 
+def export_wav_from_doc(
+    doc: "forge.document.model.ProjectDoc",  # type: ignore[name-defined]
+    path: "Path",
+    *,
+    length_bars: int | None = None,
+    loop_fold: bool = False,
+) -> "forge.core.buffer.AudioBuffer":  # type: ignore[name-defined]
+    """Render a ``ProjectDoc``'s pattern channels and write to a WAV file.
+
+    All ``PatternChannel`` entries are rendered together as a single pattern
+    mix.  Texture and automation channels are currently skipped (their
+    rendering is handled separately via ``render_texture_channel``).
+
+    Args:
+        doc:          Live ProjectDoc.
+        path:         Output WAV path.
+        length_bars:  Override render length.  If *None*, inferred from the
+                      doc's sections (or defaults to 8 bars).
+        loop_fold:    If *True*, apply ``loop_fold`` for a seamless loop
+                      suitable for game state music.
+    """
+    from forge.core.mastering import master, write_wav
+    from forge.document.channels import PatternChannel
+
+    if length_bars is None:
+        if doc.sections:
+            length_bars = sum(s["length_bars"] for s in doc.sections)
+        else:
+            length_bars = 8
+
+    tracks = [
+        ch.to_track_dict()
+        for ch in doc.channels
+        if isinstance(ch, PatternChannel)
+    ]
+    pattern_dict = {
+        "bpm": doc.bpm,
+        "length_bars": length_bars,
+        "n_steps": 16,
+        "tracks": tracks,
+    }
+    buf = render_pattern(pattern_dict, seed=doc.seed)
+
+    if loop_fold:
+        from forge.core.grid import Grid
+        from forge.core.loopfold import loop_fold as _fold
+        grid = Grid(doc.bpm, doc.sr)
+        buf = _fold(buf, length_bars, xf_bars=min(2, length_bars // 2), grid=grid)
+
+    buf = master(buf)
+    write_wav(buf, Path(path))
+    return buf
+
+
 def render_texture_channel(
     channel: "forge.document.channels.TextureChannel",  # type: ignore[name-defined]
     length_bars: int,
