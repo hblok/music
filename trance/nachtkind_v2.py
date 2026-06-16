@@ -365,8 +365,12 @@ print("crashes committed")
 
 # ---------------------------------------------------------------- bass
 # Rolling early-90s octave bass: root/octave 16ths, hypnotic, rooted on
-# the tonic except where the theme's harmony pulls it. Slightly resonant
-# lowpass; the cutoff is the transition tool (filter sweeps, not fades).
+# the tonic except where the theme's harmony pulls it. Voiced WARM: the
+# old version had an acid bite — a raw saw plus a sharp resonant peak
+# (Q=3.5) screaming right at the cutoff, hard-clipped. Here the spectrum
+# is rolled off (1/k^1.3), the resonance is gentle (Q=1.2, low blend) so
+# it's a round bump not a nasal whistle, a sine sub adds body, and the
+# drive is soft. The cutoff is still the transition tool (filter sweeps).
 
 bass_cache = {}
 
@@ -380,13 +384,14 @@ def bass_note(midi, cutoff, dur=STEP * 0.92):
     td = np.arange(n) / SR
     x = np.zeros(n)
     for k in range(1, min(24, int(3000 / f)) + 1):
-        x += np.sin(2 * np.pi * k * f * td) / k
+        x += np.sin(2 * np.pi * k * f * td) / k ** 1.3    # rolled-off, rounder
     sos_lp = signal.butter(2, cutoff, "low", fs=SR, output="sos")
     y = signal.sosfilt(sos_lp, x)
-    bpk, apk = signal.iirpeak(cutoff, Q=3.5, fs=SR)
-    y = y + 0.7 * signal.lfilter(bpk, apk, y)
-    y = np.tanh(1.5 * y)
-    y *= (1 - np.exp(-td / 0.003)) * np.clip((dur - td) / 0.02, 0, 1)
+    bpk, apk = signal.iirpeak(cutoff, Q=1.2, fs=SR)        # gentle, not nasal
+    y = y + 0.3 * signal.lfilter(bpk, apk, y)
+    y += 0.35 * np.sin(2 * np.pi * (f / 2) * td)           # round sub for body
+    y = np.tanh(0.9 * y)                                   # soft, not crunchy
+    y *= (1 - np.exp(-td / 0.004)) * np.clip((dur - td) / 0.02, 0, 1)
     y /= np.max(np.abs(y)) + 1e-12
     bass_cache[key] = y
     return y
@@ -578,31 +583,36 @@ print("pads committed")
 # ---------------------------------------------------------------- lead
 # The signature move: a warm detuned analog lead (saw stack, NOT a
 # supersaw) soaring over the piano theme through the whole main section,
-# with a tempo-synced dotted-8th ping-pong delay.
+# with a tempo-synced dotted-8th ping-pong delay. Smoothed out from the
+# old buzzy version: rolled-off partials (1/k^1.3) so it sings rather
+# than rasps, a pure sine core under it for body, a slower bloom-in, a
+# darker lowpass, and only a whisper of drive — no teeth-pulling.
 
 def lead_phrase():
     total = sum(d for _, d in LEAD_NOTES) * BEAT
     n = int((total + 2.5) * SR)
     tt = np.arange(n) / SR
     f_curve = glide_curve([(m, d * BEAT) for m, d in LEAD_NOTES], n, tau=0.06)
-    vib = 1.0 + 0.0035 * np.sin(2 * np.pi * 5.5 * tt) * np.clip(tt / 1.5, 0, 1)
+    vib = 1.0 + 0.003 * np.sin(2 * np.pi * 5.0 * tt) * np.clip(tt / 1.8, 0, 1)
     K = max(3, int(7000 / np.max(f_curve)))
 
-    def saw(det):
+    def reed(det):
+        # a saw with its top partials rolled off — sings, doesn't buzz
         ph = 2 * np.pi * np.cumsum(f_curve * det * vib) / SR
         v = np.zeros(n)
         for k in range(1, K + 1):
-            v += np.sin(k * ph) / k
+            v += np.sin(k * ph) / k ** 1.3
         return v
 
-    base = saw(1.0)
-    vL = base + saw(0.9965)
-    vR = base + saw(1.0038)
-    env = np.minimum(np.clip(tt / 0.4, 0, 1),
-                     np.clip((total + 0.8 - tt) / 1.5, 0, 1))
-    sos_w = signal.butter(2, 4000, "low", fs=SR, output="sos")
-    vL = np.tanh(1.2 * signal.sosfilt(sos_w, vL * env))
-    vR = np.tanh(1.2 * signal.sosfilt(sos_w, vR * env))
+    base = reed(1.0)
+    body = np.sin(2 * np.pi * np.cumsum(f_curve * vib) / SR)   # round core
+    vL = base + reed(0.9965) + 0.30 * body
+    vR = base + reed(1.0038) + 0.30 * body
+    env = np.minimum(np.clip(tt / 0.6, 0, 1),                  # gentler bloom
+                     np.clip((total + 0.8 - tt) / 1.8, 0, 1))
+    sos_w = signal.butter(2, 2600, "low", fs=SR, output="sos")
+    vL = np.tanh(0.8 * signal.sosfilt(sos_w, vL * env))        # whisper of drive
+    vR = np.tanh(0.8 * signal.sosfilt(sos_w, vR * env))
     peak = max(np.max(np.abs(vL)), np.max(np.abs(vR)), 1e-12)
     return vL / peak, vR / peak
 
@@ -631,8 +641,8 @@ for b0 in range(B_MAIN, B_DECON, 8):
             LEAD_NOTES[:] = save
         add_at(lay_L, LEAD_HI_L, t0, 0.30)
         add_at(lay_R, LEAD_HI_R, t0, 0.30)
-lay_L = reverb(lay_L, IR_L, wet=0.40)
-lay_R = reverb(lay_R, IR_R, wet=0.40)
+lay_L = reverb(lay_L, IR_L, wet=0.45)
+lay_R = reverb(lay_R, IR_R, wet=0.45)
 commit(lay_L, lay_R, 0.24)
 print("lead committed")
 
