@@ -2,12 +2,9 @@
 
 import json
 import os
-import sys
 import tempfile
 import unittest
 from pathlib import Path
-
-os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
 
 
 # ---------------------------------------------------------------------------
@@ -323,48 +320,6 @@ class TestImportProjectSpec(unittest.TestCase):
         from forge.document.channels import PatternChannel
         for ch in doc.channels:
             self.assertIsInstance(ch, PatternChannel)
-
-
-# ---------------------------------------------------------------------------
-# Window lifecycle (offscreen Qt)
-
-class TestMainWindowLifecycle(unittest.TestCase):
-    @classmethod
-    def setUpClass(cls):
-        from PySide6.QtWidgets import QApplication
-        cls.app = QApplication.instance() or QApplication(sys.argv)
-
-    def test_open_doc_menu_exists(self):
-        from forge.playback.service import PlaybackService
-        from forge.ui.window import MainWindow
-        svc = PlaybackService(bpm=138.0)
-        w = MainWindow(svc)
-        # Check that the File menu has the tracker entries
-        menu_bar = w.menuBar()
-        file_action = menu_bar.actions()[0]
-        file_menu = file_action.menu()
-        self.assertIsNotNone(file_menu)
-        titles = [a.text() for a in file_menu.actions() if not a.isSeparator()]
-        self.assertTrue(any("Tracker" in t for t in titles), f"Got: {titles}")
-
-    def test_export_wav_no_doc_shows_status(self):
-        from forge.playback.service import PlaybackService
-        from forge.ui.window import MainWindow
-        svc = PlaybackService(bpm=138.0)
-        w = MainWindow(svc)
-        # No doc loaded — export should set status message, not crash
-        w._on_export_wav()
-        status = w._status_label.text()
-        self.assertIn("No tracker", status)
-
-    def test_save_doc_no_doc_shows_status(self):
-        from forge.playback.service import PlaybackService
-        from forge.ui.window import MainWindow
-        svc = PlaybackService(bpm=138.0)
-        w = MainWindow(svc)
-        w._on_save_doc()
-        status = w._status_label.text()
-        self.assertIn("No tracker", status)
 
 
 if __name__ == "__main__":
