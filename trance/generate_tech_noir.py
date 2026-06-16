@@ -5,8 +5,9 @@ film score in the style of Brad Fiedel's Terminator theme (1984): not
 dance music — an industrial-tinged machine ostinato in 13/16 time
 (grouped 3+3+3+2+2, the famous "herky-jerky" limp) at ~100 BPM quarter
 pulse, D minor. Prophet-style punchy saw bass pulse, anvil clangs and
-gated metallic drum slams (no hi-hats, no four-on-the-floor), a brassy
-Oberheim-style five-note fanfare motif, and a mournful lyrical
+gated metallic drum slams (no hi-hats, no four-on-the-floor), a warm
+Oberheim-style five-note fanfare motif (rounded and glowing, not
+blaring), and a mournful lyrical
 counter-theme floating over the relentless rhythm. Big dark plate
 reverb on the metal, dry forward bass, no filter sweeps, no risers,
 no sidechain. Ends cold.
@@ -14,7 +15,7 @@ no sidechain. Ends cold.
   0:00  Isolated anvil clangs in empty space; a dark pad creeps in.
   0:20  THE OSTINATO — the 13/16 bass pulse + gated slams lock in,
         machine-like, and never stop.
-  0:51  Main motif: the stark five-note brass fanfare, repeated and
+  0:51  Main motif: the warm five-note brass fanfare, repeated and
         varied (alternate statements end hollow, a fifth below).
   1:42  Lyrical middle — the mournful love theme (i–bVI–bVII) floats
         over the unchanged machine; slams pull back, pads warm.
@@ -25,6 +26,37 @@ no sidechain. Ends cold.
 
 Harmony: static modal D minor — tonic pedal under the motif, i–bVI–bVII
 under the love theme. Instrumental, no vocals.
+
+Reading the chord symbols  (a crash course, since they look cryptic):
+
+  A Roman numeral names a chord by WHICH STEP of the key its root sits
+  on, counting up from the key note (the "tonic"). Our key is D minor,
+  whose seven notes are:   D  E  F  G  A  Bb  C   = steps 1..7 = I..VII.
+
+  Two things are encoded in how the numeral is written:
+
+    • CASE = the chord's quality.  lower-case = minor,  UPPER = major.
+        i    -> chord built on step 1, minor   = D  F  A   (D minor)
+        VII  -> chord built on step 7, major
+
+    • A leading "b" (flat) = the root sits a semitone LOWER than that
+      same numeral would in the parallel MAJOR key. (We measure the
+      flats against the major scale because it's the "unaltered" ruler.)
+        In D MAJOR, step 6 is B  and step 7 is C#.
+        In D MINOR, those fall to Bb and C — each a semitone down —
+        so we flag the lowering by writing them  bVI  and  bVII.
+
+  Putting it together, the love-theme loop  i–bVI–bVII  in D minor is:
+
+        i    = Dm   (D  F  A)    minor, the home chord
+        bVI  = Bb   (Bb D  F)    major, root a semitone below B
+        bVII = C    (C  E  G)    major, root a semitone below C#
+
+      i  ->  bVI  ->  bVII   =   Dm  ->  Bb  ->  C
+
+  It's the archetypal dark-but-climbing minor-key loop (the natural-minor
+  / "Aeolian" sound) behind countless film and synth-rock laments — which
+  is exactly why the mournful love theme is built on it.
 
 Output: /workspace/music/tech_noir.wav + tech_noir.mp3 (192k, ffmpeg).
 """
@@ -360,41 +392,52 @@ print("taps committed")
 
 
 # ---------------------------------------------------------- brass motif
-# Oberheim-style poly brass: three detuned saws, a pitch scoop into each
-# phrase, dark lowpass, gentle chorus width via reciprocal detune split.
+# Oberheim-style poly brass, voiced WARM rather than blaring. The old
+# version stabbed: raw saws (bright 1/k spectrum) shoved hard through a
+# tanh and switched on with a fast 0.12 s attack — a bite right in the
+# 2–4 kHz "honk" band that fights the ear. Here we round it off:
+#   - reed-ish spectrum (1/k^1.35) so upper partials fall away faster,
+#   - a pure sine "body" core mixed under for low-mid glow,
+#   - a slow, raised-cosine ~0.2 s attack so each note blooms in,
+#   - a lower lowpass and only a whisper of saturation.
+# It should now sit *with* the machine, not jab over it.
 
-def brass_phrase(notes, lowpass=2200.0):
+def brass_phrase(notes, lowpass=1600.0):
     total = sum(d for _, d in notes) * SIXT
     n = int((total + 2.0) * SR)
     tt = np.arange(n) / SR
-    f_curve = glide_curve([(m, d * SIXT) for m, d in notes], n, tau=0.045)
-    f_curve *= 1.0 - 0.035 * np.exp(-tt / 0.09)           # the scoop
-    vib = 1.0 + 0.0028 * np.sin(2 * np.pi * 4.7 * tt) * np.clip(tt / 1.2, 0, 1)
-    K = max(3, int(6500 / np.max(f_curve)))
+    f_curve = glide_curve([(m, d * SIXT) for m, d in notes], n, tau=0.05)
+    f_curve *= 1.0 - 0.018 * np.exp(-tt / 0.12)           # a gentler scoop
+    vib = 1.0 + 0.0024 * np.sin(2 * np.pi * 4.5 * tt) * np.clip(tt / 1.4, 0, 1)
+    K = max(3, int(5200 / np.max(f_curve)))
 
-    def saw(det):
+    def reed(det):
+        # a saw with its upper partials rolled off — the difference
+        # between a round "brass" and a buzzy "saw"
         ph = 2 * np.pi * np.cumsum(f_curve * det * vib) / SR
         v = np.zeros(n)
         for k in range(1, K + 1):
-            v += np.sin(k * ph) / k
+            v += np.sin(k * ph) / k ** 1.35
         return v
 
-    base = saw(1.0)
-    vL = base + saw(0.9955)
-    vR = base + saw(1.0045)
-    env = np.minimum(np.clip(tt / 0.12, 0, 1),
-                     np.clip((total + 0.30 - tt) / 0.8, 0, 1))
+    base = reed(1.0)
+    body = np.sin(2 * np.pi * np.cumsum(f_curve * vib) / SR)   # round core
+    vL = base + reed(0.9968) + 0.35 * body
+    vR = base + reed(1.0032) + 0.35 * body
+    atk = np.clip(tt / 0.20, 0, 1)                        # slow bloom-in
+    atk = 0.5 - 0.5 * np.cos(np.pi * atk)                 # rounded, not linear
+    env = np.minimum(atk, np.clip((total + 0.35 - tt) / 1.0, 0, 1))
     sos_w = signal.butter(2, lowpass, "low", fs=SR, output="sos")
-    vL = np.tanh(1.3 * signal.sosfilt(sos_w, vL * env))
-    vR = np.tanh(1.3 * signal.sosfilt(sos_w, vR * env))
+    vL = np.tanh(0.8 * signal.sosfilt(sos_w, vL * env))   # a whisper of drive
+    vR = np.tanh(0.8 * signal.sosfilt(sos_w, vR * env))
     peak = max(np.max(np.abs(vL)), np.max(np.abs(vR)), 1e-12)
     return vL / peak, vR / peak
 
 
 BRASS_A = brass_phrase(MOTIF_A)
 BRASS_B = brass_phrase(MOTIF_B)
-BRASS_A_HI = brass_phrase([(m + 12, d) for m, d in MOTIF_A], lowpass=3200.0)
-BRASS_B_HI = brass_phrase([(m + 12, d) for m, d in MOTIF_B], lowpass=3200.0)
+BRASS_A_HI = brass_phrase([(m + 12, d) for m, d in MOTIF_A], lowpass=2400.0)
+BRASS_B_HI = brass_phrase([(m + 12, d) for m, d in MOTIF_B], lowpass=2400.0)
 
 lay_L = np.zeros(N)
 lay_R = np.zeros(N)
@@ -407,11 +450,11 @@ for b0, i in statements:
     add_at(lay_R, xR, bar_t(b0), g)
     if b0 >= B_RET:                                       # octave doubling
         hL, hR = (BRASS_A_HI if i % 2 == 0 else BRASS_B_HI)
-        add_at(lay_L, hL, bar_t(b0), 0.38)
-        add_at(lay_R, hR, bar_t(b0), 0.38)
-lay_L = reverb(lay_L, IR_L, wet=0.35)
-lay_R = reverb(lay_R, IR_R, wet=0.35)
-commit(lay_L, lay_R, 0.26)
+        add_at(lay_L, hL, bar_t(b0), 0.30)
+        add_at(lay_R, hR, bar_t(b0), 0.30)
+lay_L = reverb(lay_L, IR_L, wet=0.38)
+lay_R = reverb(lay_R, IR_R, wet=0.38)
+commit(lay_L, lay_R, 0.23)
 print("brass motif committed")
 
 
