@@ -155,3 +155,41 @@ def save_project(project: dict[str, Any], path: Path) -> None:
     """Serialize a project document to a JSON file."""
     from forge.spec.serialize import save_project as _save
     _save(project, Path(path))
+
+
+# ---------------------------------------------------------------------------
+# Tracker channel / section rendering (Phase 2+ scheduler entry points)
+
+def render_channel(
+    channel: "forge.document.channels.PatternChannel",  # type: ignore[name-defined]
+    bpm: float,
+    length_bars: int,
+    *,
+    n_steps: int = 16,
+    seed: int = 0,
+    sr: int = 44100,
+) -> "forge.core.buffer.AudioBuffer":  # type: ignore[name-defined]
+    """Render a single PatternChannel to an AudioBuffer.
+
+    This is a pure, picklable function — safe to call from a background
+    thread or process pool.
+
+    Args:
+        channel:     A PatternChannel from ``forge.document.channels``.
+        bpm:         Project tempo.
+        length_bars: Pattern length in bars.
+        n_steps:     Steps per bar (default 16).
+        seed:        RNG seed for this render.
+        sr:          Sample rate.
+    """
+    from forge.document.channels import PatternChannel as _PatCh
+    if not isinstance(channel, _PatCh):
+        raise TypeError("render_channel expects a PatternChannel")
+
+    pattern_dict = {
+        "bpm": bpm,
+        "length_bars": length_bars,
+        "n_steps": n_steps,
+        "tracks": [channel.to_track_dict()],
+    }
+    return render_pattern(pattern_dict, seed=seed)
