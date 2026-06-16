@@ -46,6 +46,7 @@ UI-free. This one-way boundary is strict: breaking it is a bug.
 | `spec/validate.py` | `validate_project`, `validate_pattern` — raise ValueError on bad input |
 | `spec/serialize.py` | `save_project(project, path)`, `load_project(path)` — stdlib JSON + pathlib |
 | `control.py` | **Facade**: `list_instruments`, `render_instrument`, `render_pattern`, `render_track`, `load_project`, `save_project` |
+| `runner.py` | `render_project(project, path)` — save spec + render WAV + print; `project_main(build_fn, default_out)` — argparse entry point for example scripts |
 
 ## Instrument protocol
 
