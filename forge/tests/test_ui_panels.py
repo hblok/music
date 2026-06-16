@@ -205,5 +205,122 @@ class TestPatternEditor(unittest.TestCase):
         self.assertEqual(row.steps().count(1), 4)
 
 
+# ---------------------------------------------------------------------------
+# Phase 4: WorkshopPanel
+
+class TestWorkshopPanel(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        from PySide6.QtWidgets import QApplication
+        cls.app = QApplication.instance() or QApplication(sys.argv)
+
+    def _make(self, instrument_id="kick"):
+        import tempfile
+        from pathlib import Path
+        from forge.document.channels import PatternChannel
+        from forge.document.model import ProjectDoc
+        from forge.playback.cache import ContentAddressedCache
+        from forge.playback.scheduler import RenderScheduler
+        from forge.ui.instrument_panel import WorkshopPanel
+
+        tmp = tempfile.mkdtemp()
+        cache = ContentAddressedCache(cache_dir=Path(tmp))
+        sched = RenderScheduler(cache, n_workers=1)
+        doc = ProjectDoc(title="test", bpm=138.0)
+        doc.add_channel(PatternChannel(instrument_id))
+        panel = WorkshopPanel(0, doc, sched, bpm=138.0, length_bars=2)
+        return panel, doc, sched
+
+    def test_workshop_panel_creates(self):
+        panel, doc, sched = self._make()
+        panel.show()
+        self.assertTrue(panel.isVisible())
+        panel.close()
+        sched.shutdown()
+
+    def test_title_matches_instrument(self):
+        panel, doc, sched = self._make("hat")
+        self.assertEqual(panel.title(), "hat")
+        sched.shutdown()
+
+    def test_current_params_returns_dict(self):
+        panel, doc, sched = self._make()
+        p = panel.current_params()
+        self.assertIsInstance(p, dict)
+        sched.shutdown()
+
+    def test_seed_spin_reflects_channel_seed(self):
+        panel, doc, sched = self._make()
+        doc.set_seed(0, 77)
+        # The panel should sync (observer is called synchronously)
+        self.assertEqual(panel._seed_spin.value(), 77)
+        sched.shutdown()
+
+    def test_reroll_changes_seed_in_doc(self):
+        panel, doc, sched = self._make()
+        doc.set_seed(0, 7)
+        panel._on_reroll()
+        self.assertNotEqual(doc.channel(0).seed, 7)
+        sched.shutdown()
+
+    def test_param_change_creates_doc_transaction(self):
+        panel, doc, sched = self._make()
+        # Simulate slider move for the first float param
+        schema = next((s for s in panel._schemas if s.get("kind", "float") == "float"), None)
+        if schema is None:
+            self.skipTest("no float param in kick schemas")
+        name = schema["name"]
+        lo = float(schema.get("lo") or 0.0)
+        # Directly call the internal change handler
+        panel._controls[name].set_value(lo)
+        panel._on_param_changed(name)
+        self.assertTrue(doc.history.can_undo())
+        sched.shutdown()
+
+    def test_undo_syncs_back_to_panel(self):
+        """After a param edit and an undo, the panel slider reflects the undone state."""
+        panel, doc, sched = self._make()
+        schema = next((s for s in panel._schemas if s.get("kind", "float") == "float"), None)
+        if schema is None:
+            self.skipTest("no float param")
+        name = schema["name"]
+        lo = float(schema.get("lo") or 0.0)
+        hi = float(schema.get("hi") or 1.0)
+        default = float(schema.get("default", lo))
+
+        # Set param to hi via doc directly (not via slider, to avoid coalesce complications)
+        doc.set_param(0, name, hi)
+        self.assertAlmostEqual(panel._controls[name].value, hi, delta=(hi - lo) * 0.02)
+
+        # Undo → param removed (back to "not set"); panel should revert to schema default
+        doc.undo()
+        expected = doc.channel(0).params.get(name, default)
+        self.assertAlmostEqual(panel._controls[name].value, expected, delta=(hi - lo) * 0.02)
+        sched.shutdown()
+
+    def test_status_label_exists(self):
+        panel, doc, sched = self._make()
+        self.assertIsNotNone(panel._status_label)
+        sched.shutdown()
+
+    def test_instrument_type_error(self):
+        from forge.document.channels import TextureChannel
+        from forge.document.model import ProjectDoc
+        from forge.playback.cache import ContentAddressedCache
+        from forge.playback.scheduler import RenderScheduler
+        from forge.ui.instrument_panel import WorkshopPanel
+        import tempfile
+        from pathlib import Path
+
+        tmp = tempfile.mkdtemp()
+        cache = ContentAddressedCache(cache_dir=Path(tmp))
+        sched = RenderScheduler(cache)
+        doc = ProjectDoc()
+        doc.add_channel(TextureChannel("wind"))
+        with self.assertRaises(TypeError):
+            WorkshopPanel(0, doc, sched)
+        sched.shutdown()
+
+
 if __name__ == "__main__":
     unittest.main()
