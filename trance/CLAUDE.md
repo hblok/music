@@ -14,8 +14,9 @@ this file only covers what is specific to the trance tracks.
   take kept for reference.)
 - **nachtkind** — `nachtkind_v2.py` (current), `nachtkind_v1.py` (kept) —
   early-90s Frankfurt / Eye Q trance, 139 BPM, G minor, gothic piano + lead.
-- **lost (trance)** — `lost_v3.py` (script) → renders `lost_v4.wav` — a
-  one-piece emotional-trance reworking of the ambient `../ambient/lost.py`.
+- **lost (trance)** — `lost_v4.py` (current) → renders `lost_v5.wav`;
+  `lost_v3.py` (→ `lost_v4.wav`) kept for reference — a one-piece
+  emotional-trance reworking of the ambient `../ambient/lost.py`.
 
 Seeds are thematic: `1984` (tech_noir, the year the machine arrived), `1993`
 (nachtkind, the year *Brainchild* came out).
@@ -46,9 +47,10 @@ voice without changing its notes, turn these knobs together:
 Applied so far: tech_noir brass (`brass_phrase`, the `reed()` inner fn),
 nachtkind `bass_note` + `lead_phrase`, lost_v3 `lead_phrase` (its comment
 literally reads *"Fixed from v3: warm detuned saw, harmonics rolled off, low
-cutoff, a sub"*). **Known remaining offender:** `lost_v3.py:bass_note` still
-has the old `iirpeak(Q=3.5)`+0.7 and `tanh(1.6)` — it is the next warming
-candidate if that bass is called harsh.
+cutoff, a sub"*), and `lost_v4.py:bass_note` (the rolling octave bass —
+`iirpeak` Q 3.5→1.2 / blend 0.7→0.3, `1/k`→`1/k**1.3`, drives 1.6–1.9→0.9–1.1).
+`lost_v3.py` still has the old harsh bass — keep it for A/B reference, but
+`lost_v4.py` is the one to build on.
 
 ## Synthesis recipes (track-specific)
 
