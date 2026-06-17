@@ -75,6 +75,8 @@ class MainWindow(QMainWindow):
         self._tracker_editors: list = []
         self._workshop: QWidget | None = None
         self._autosave = None
+        self._channel_mutes: dict[int, bool] = {}
+        self._channel_volumes: dict[int, float] = {}
 
         self.setWindowTitle("Forge — Tracker")
         self.resize(1200, 750)
@@ -127,25 +129,11 @@ class MainWindow(QMainWindow):
         splitter.addWidget(self._arrangement)
         splitter.setStretchFactor(0, 0)
 
-        # Centre: channel toolbar + scrollable tracker rows
+        # Centre: scrollable tracker rows
         tracker_panel = QWidget()
         tracker_vbox = QVBoxLayout(tracker_panel)
         tracker_vbox.setContentsMargins(0, 0, 0, 0)
         tracker_vbox.setSpacing(2)
-
-        # Channel management toolbar
-        ch_bar = QHBoxLayout()
-        ch_bar.setContentsMargins(2, 2, 2, 2)
-        add_ch_btn = QPushButton("+ Channel")
-        add_ch_btn.setFixedHeight(24)
-        add_ch_btn.clicked.connect(self._on_add_channel)
-        rem_ch_btn = QPushButton("− Channel")
-        rem_ch_btn.setFixedHeight(24)
-        rem_ch_btn.clicked.connect(self._on_remove_channel)
-        ch_bar.addWidget(add_ch_btn)
-        ch_bar.addWidget(rem_ch_btn)
-        ch_bar.addStretch()
-        tracker_vbox.addLayout(ch_bar)
 
         self._tracker_scroll = QScrollArea()
         self._tracker_scroll.setWidgetResizable(True)
@@ -248,6 +236,13 @@ class MainWindow(QMainWindow):
             editor = TrackerEditor(idx, self._doc, parent=self._tracker_container)
             editor.channelChanged.connect(self._on_channel_changed)
             editor.cursorMoved.connect(lambda _step, i=idx: self._select_channel(i))
+            editor.volumeChanged.connect(self._on_channel_volume_changed)
+            editor.muteChanged.connect(self._on_channel_mute_changed)
+            editor.soloRequested.connect(self._on_channel_solo)
+            editor.removeRequested.connect(self._on_remove_channel_by_idx)
+            # Restore saved mute/volume state if present
+            if idx in self._channel_mutes:
+                editor.set_muted(self._channel_mutes[idx])
             if self._active_section is not None:
                 editor.set_section(self._active_section)
             self._tracker_layout.insertWidget(
@@ -296,6 +291,7 @@ class MainWindow(QMainWindow):
             length_bars=4,
         )
         workshop.auditionReady.connect(self._on_audition_ready)
+        workshop.addChannelRequested.connect(self._on_add_channel_with_instrument)
         self._workshop_area_layout.addWidget(workshop)
         self._workshop = workshop
 
@@ -377,7 +373,10 @@ class MainWindow(QMainWindow):
     # Render-and-play
 
     def _on_play_requested(self) -> None:
-        """Render the full project then start playback."""
+        """Toggle play/pause; render first if the buffer is stale."""
+        if self._service.is_playing:
+            self._service.pause()
+            return
         if self._buf_valid:
             self._service.play()
             return
@@ -386,10 +385,11 @@ class MainWindow(QMainWindow):
         self._status_label.setText("Rendering for playback…")
         self._progress.setVisible(True)
         doc = self._doc
+        muted = {idx for idx, m in self._channel_mutes.items() if m}
 
         def do_render():
             from forge import control
-            return control.render_doc_for_playback(doc)
+            return control.render_doc_for_playback(doc, muted_channels=muted)
 
         self._play_thread = QThread(self)
         self._play_worker = _RenderWorker(do_render)
@@ -428,29 +428,36 @@ class MainWindow(QMainWindow):
     # ------------------------------------------------------------------
     # Channel management
 
-    def _on_add_channel(self) -> None:
-        from PySide6.QtWidgets import QInputDialog
-        from forge import control
-        instruments = [e["id"] for e in control.list_instruments()]
-        iid, ok = QInputDialog.getItem(
-            self, "Add Channel", "Choose instrument:", instruments, 0, False
-        )
-        if ok and iid:
-            from forge.document.channels import PatternChannel
-            self._doc.add_channel(PatternChannel(iid))
-
-    def _on_remove_channel(self) -> None:
+    def _on_add_channel_with_instrument(self, iid: str) -> None:
         from forge.document.channels import PatternChannel
-        pat_channels = [
-            (i, ch) for i, ch in enumerate(self._doc.channels)
-            if isinstance(ch, PatternChannel)
-        ]
-        if not pat_channels:
-            return
-        sel = min(self._selected_channel, len(pat_channels) - 1)
-        real_idx = pat_channels[sel][0]
-        self._doc.remove_channel(real_idx)
-        self._selected_channel = max(0, sel - 1)
+        self._doc.add_channel(PatternChannel(iid))
+
+    def _on_remove_channel_by_idx(self, channel_idx: int) -> None:
+        self._channel_mutes.pop(channel_idx, None)
+        self._channel_volumes.pop(channel_idx, None)
+        self._doc.remove_channel(channel_idx)
+        self._selected_channel = max(0, self._selected_channel - 1)
+
+    def _on_channel_volume_changed(self, channel_idx: int, volume: float) -> None:
+        self._channel_volumes[channel_idx] = volume
+        self._buf_valid = False
+
+    def _on_channel_mute_changed(self, channel_idx: int, muted: bool) -> None:
+        self._channel_mutes[channel_idx] = muted
+        self._buf_valid = False
+
+    def _on_channel_solo(self, channel_idx: int) -> None:
+        """Solo channel_idx: if already soloed, unmute all; else mute all others."""
+        other_editors = [e for e in self._tracker_editors if e._channel_idx != channel_idx]
+        already_solo = all(
+            self._channel_mutes.get(e._channel_idx, False) for e in other_editors
+        )
+        if already_solo and other_editors:
+            for e in self._tracker_editors:
+                e.set_muted(False)
+        else:
+            for e in self._tracker_editors:
+                e.set_muted(e._channel_idx != channel_idx)
 
     # ------------------------------------------------------------------
     # Slots

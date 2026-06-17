@@ -225,6 +225,7 @@ class WorkshopPanel(QGroupBox):
 
     auditionReady = Signal(int, object)  # (channel_idx, np.ndarray)
     statusChanged = Signal(str)          # "rendering…" / "cached"
+    addChannelRequested = Signal(str)    # instrument_id — user wants a new channel
 
     def __init__(
         self,
@@ -266,6 +267,13 @@ class WorkshopPanel(QGroupBox):
         self._inst_combo.setCurrentText(ch.instrument_id)
         self._inst_combo.currentTextChanged.connect(self._on_instrument_changed)
         inst_row.addWidget(self._inst_combo)
+        add_ch_btn = QPushButton("+")
+        add_ch_btn.setFixedSize(24, 24)
+        add_ch_btn.setToolTip("Add a new channel with this instrument")
+        add_ch_btn.clicked.connect(
+            lambda: self.addChannelRequested.emit(self._inst_combo.currentText())
+        )
+        inst_row.addWidget(add_ch_btn)
         outer.addLayout(inst_row)
 
         # Param form (rebuilt per instrument)

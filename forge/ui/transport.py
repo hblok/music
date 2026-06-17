@@ -34,8 +34,9 @@ class TransportWidget(QWidget):
 
         # --- widgets ---
         self._play_btn = QPushButton("▶")
-        self._pause_btn = QPushButton("⏸")
+        self._play_btn.setFixedWidth(36)
         self._stop_btn = QPushButton("⏹")
+        self._stop_btn.setFixedWidth(36)
         self._pos_label = QLabel("  1:1")
         self._pos_label.setFixedWidth(60)
         self._seek_slider = QSlider(Qt.Orientation.Horizontal)
@@ -45,13 +46,12 @@ class TransportWidget(QWidget):
         # --- layout ---
         layout = QHBoxLayout(self)
         layout.setContentsMargins(4, 4, 4, 4)
-        for w in (self._play_btn, self._pause_btn, self._stop_btn,
+        for w in (self._play_btn, self._stop_btn,
                   self._pos_label, self._seek_slider):
             layout.addWidget(w)
 
         # --- connections ---
         self._play_btn.clicked.connect(self._on_play)
-        self._pause_btn.clicked.connect(self._on_pause)
         self._stop_btn.clicked.connect(self._on_stop)
         self._seek_slider.sliderMoved.connect(self._on_seek)
 
@@ -69,9 +69,6 @@ class TransportWidget(QWidget):
     def _on_play(self) -> None:
         self._service.play()
 
-    def _on_pause(self) -> None:
-        self._service.pause()
-
     def _on_stop(self) -> None:
         self._service.stop()
         self._seek_slider.setValue(0)
@@ -83,12 +80,13 @@ class TransportWidget(QWidget):
 
     def _poll_position(self) -> None:
         pos_bars = self._service.position_bars
-        label = self._service.bar_beat_string
-        self._pos_label.setText(label)
+        self._pos_label.setText(self._service.bar_beat_string)
         if self._slider_total_bars > 0:
             frac = min(pos_bars / self._slider_total_bars, 1.0)
             self._seek_slider.setValue(int(frac * 1000))
         self.positionChanged.emit(pos_bars)
+        # Keep play button in sync with actual playback state
+        self._play_btn.setText("⏸" if self._service.is_playing else "▶")
         # Render-queue indicator tooltip
         sched = getattr(self, "_scheduler", None)
         if sched is not None:

@@ -251,15 +251,24 @@ def export_wav_from_doc(
 
 def render_doc_for_playback(
     doc: "forge.document.model.ProjectDoc",  # type: ignore[name-defined]
+    *,
+    muted_channels: "set[int] | None" = None,
 ) -> "forge.core.buffer.AudioBuffer":  # type: ignore[name-defined]
-    """Render all PatternChannels to a single AudioBuffer for live playback.
+    """Render all (non-muted) PatternChannels to a single AudioBuffer for live playback.
 
     Like ``export_wav_from_doc`` but returns the buffer without writing a file.
     Used by the Play button to render the project before handing off to
     PlaybackService.
+
+    Args:
+        doc:             Live ProjectDoc.
+        muted_channels:  Set of channel indices to skip (muted in the UI).
     """
     from forge.core.mastering import master
     from forge.document.channels import PatternChannel
+
+    if muted_channels is None:
+        muted_channels = set()
 
     if doc.sections:
         length_bars = sum(s["length_bars"] for s in doc.sections)
@@ -268,8 +277,8 @@ def render_doc_for_playback(
 
     tracks = [
         ch.to_track_dict()
-        for ch in doc.channels
-        if isinstance(ch, PatternChannel)
+        for i, ch in enumerate(doc.channels)
+        if isinstance(ch, PatternChannel) and i not in muted_channels
     ]
     if not tracks:
         from forge.core.buffer import AudioBuffer

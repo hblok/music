@@ -47,6 +47,7 @@ from PySide6.QtWidgets import (
     QPushButton,
     QScrollArea,
     QSizePolicy,
+    QSlider,
     QSpinBox,
     QToolButton,
     QVBoxLayout,
@@ -505,8 +506,12 @@ class TrackerEditor(QWidget):
         parent:      Optional parent widget.
     """
 
-    channelChanged = Signal(int)   # emitted after every edit (channel_idx)
-    cursorMoved = Signal(int)      # emitted when keyboard cursor moves (step_idx)
+    channelChanged = Signal(int)        # emitted after every edit (channel_idx)
+    cursorMoved = Signal(int)           # emitted when cursor moves (step_idx)
+    volumeChanged = Signal(int, float)  # (channel_idx, 0.0–1.0)
+    muteChanged = Signal(int, bool)     # (channel_idx, muted)
+    soloRequested = Signal(int)         # channel_idx wants to be the only active channel
+    removeRequested = Signal(int)       # channel_idx should be deleted
 
     def __init__(
         self,
@@ -522,7 +527,7 @@ class TrackerEditor(QWidget):
         super().__init__(parent)
         self._channel_idx = channel_idx
         self._doc = doc
-        self._cursor = 0              # keyboard cursor position
+        self._cursor = 0
         self._sel_start: int | None = None
         self._sel_end: int | None = None
         self._clipboard: list | None = None
@@ -530,28 +535,55 @@ class TrackerEditor(QWidget):
 
         self.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
 
-        outer = QVBoxLayout(self)
+        outer = QHBoxLayout(self)
+        outer.setContentsMargins(2, 2, 2, 2)
         outer.setSpacing(4)
 
-        # Header row: instrument label + step numbers
-        hdr = QHBoxLayout()
-        hdr.addWidget(QLabel("Channel:"))
+        # ── Left control panel ──────────────────────────────────────────────
+        ctrl = QWidget()
+        ctrl.setFixedWidth(136)
+        ctrl_v = QVBoxLayout(ctrl)
+        ctrl_v.setContentsMargins(0, 0, 0, 0)
+        ctrl_v.setSpacing(3)
+
         self._inst_label = QLabel(ch.instrument_id)
         font = QFont()
         font.setBold(True)
+        font.setPointSize(8)
         self._inst_label.setFont(font)
-        hdr.addWidget(self._inst_label)
-        hdr.addStretch()
+        ctrl_v.addWidget(self._inst_label)
 
-        hdr.addWidget(QLabel("Steps:"))
-        self._n_steps_spin = QSpinBox()
-        self._n_steps_spin.setRange(1, 64)
-        self._n_steps_spin.setValue(ch.n_steps)
-        self._n_steps_spin.setFixedWidth(60)
-        hdr.addWidget(self._n_steps_spin)
-        outer.addLayout(hdr)
+        self._vol_slider = QSlider(Qt.Orientation.Horizontal)
+        self._vol_slider.setRange(0, 100)
+        self._vol_slider.setValue(80)
+        self._vol_slider.setFixedHeight(16)
+        self._vol_slider.setToolTip("Volume (0–100 %)")
+        self._vol_slider.valueChanged.connect(
+            lambda v: self.volumeChanged.emit(channel_idx, v / 100.0)
+        )
+        ctrl_v.addWidget(self._vol_slider)
 
-        # Tracker row (single channel row for now; arrangement adds multiple)
+        btn_row = QHBoxLayout()
+        btn_row.setSpacing(2)
+        self._mute_btn = QPushButton("M")
+        self._mute_btn.setCheckable(True)
+        self._mute_btn.setFixedSize(32, 22)
+        self._mute_btn.setToolTip("Mute this channel")
+        self._mute_btn.toggled.connect(
+            lambda checked: self.muteChanged.emit(channel_idx, checked)
+        )
+        self._solo_btn = QPushButton("S")
+        self._solo_btn.setFixedSize(32, 22)
+        self._solo_btn.setToolTip("Solo — mute all other channels")
+        self._solo_btn.clicked.connect(lambda: self.soloRequested.emit(channel_idx))
+        btn_row.addWidget(self._mute_btn)
+        btn_row.addWidget(self._solo_btn)
+        btn_row.addStretch()
+        ctrl_v.addLayout(btn_row)
+
+        outer.addWidget(ctrl)
+
+        # ── Step grid ───────────────────────────────────────────────────────
         self._row = TrackerRow(ch.instrument_id, ch.n_steps, self)
         self._row.stepToggled.connect(self._on_step_toggled)
         self._row.accentToggled.connect(self._on_accent_toggled)
@@ -560,23 +592,29 @@ class TrackerEditor(QWidget):
 
         scroll = QScrollArea()
         scroll.setWidgetResizable(True)
+        scroll.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
         scroll.setWidget(self._row)
-        outer.addWidget(scroll)
+        outer.addWidget(scroll, stretch=1)
 
-        # Keyboard shortcut hint
-        hint = QLabel(
-            "Space=toggle  A=accent  G=ghost  P=params  "
-            "←/→=navigate  Ctrl+C/V=copy/paste  Del=clear  Ctrl+Z/Y=undo/redo"
-        )
-        hint.setStyleSheet("color: #888; font-size: 10px;")
-        hint.setWordWrap(True)
-        outer.addWidget(hint)
+        # ── Remove button ────────────────────────────────────────────────────
+        rem_btn = QPushButton("×")
+        rem_btn.setFixedSize(24, 24)
+        rem_btn.setToolTip("Remove this channel")
+        rem_btn.clicked.connect(lambda: self.removeRequested.emit(channel_idx))
+        outer.addWidget(rem_btn)
 
         # Initial refresh
         self._refresh_all()
 
         # Subscribe to doc changes
         doc.subscribe(self._on_doc_changed)
+
+    # ---------------------------------------------------------------- public setters (for solo logic)
+
+    def set_muted(self, muted: bool) -> None:
+        """Set mute state without triggering extra signals if already set."""
+        if self._mute_btn.isChecked() != muted:
+            self._mute_btn.setChecked(muted)
 
     # ---------------------------------------------------------------- section support
 
