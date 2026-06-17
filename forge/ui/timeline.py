@@ -20,6 +20,18 @@ _ROW_H = 18        # height per channel row
 _HEADER_H = 22     # height of section-name header strip
 _LABEL_W = 64      # width of left channel-label column
 
+# One hue per channel (cycles if more channels than colours)
+_CHANNEL_COLORS = [
+    QColor(58,  142, 232),   # blue
+    QColor(58,  185, 110),   # green
+    QColor(232, 120,  58),   # orange
+    QColor(155,  58, 232),   # purple
+    QColor(232,  58, 130),   # pink
+    QColor(40,  190, 190),   # teal
+    QColor(200, 170,  40),   # gold
+    QColor(220,  60,  60),   # red
+]
+
 
 class TimelineWidget(QWidget):
     """Step-pattern arrangement overview.
@@ -39,6 +51,7 @@ class TimelineWidget(QWidget):
         super().__init__(parent)
         self._doc = doc
         self._active_section: int | None = None
+        self._position_bars: float = 0.0
         self.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum)
         doc.subscribe(self._on_doc_changed)
 
@@ -52,6 +65,11 @@ class TimelineWidget(QWidget):
 
     def set_active_section(self, idx: int | None) -> None:
         self._active_section = idx
+        self.update()
+
+    def set_position(self, position_bars: float) -> None:
+        """Update the playhead position (called ~12 fps by the transport poll)."""
+        self._position_bars = position_bars
         self.update()
 
     # ------------------------------------------------------------------
@@ -105,12 +123,17 @@ class TimelineWidget(QWidget):
         font.setPointSize(8)
         painter.setFont(font)
 
-        # Draw channel labels on the left
-        painter.setPen(QColor("#333"))
-        for row_i, (_, ch) in enumerate(channel_rows):
+        # Draw channel labels on the left, each in its channel colour
+        for row_i, (ch_idx, ch) in enumerate(channel_rows):
             y = _HEADER_H + row_i * _ROW_H
+            ch_color = _CHANNEL_COLORS[ch_idx % len(_CHANNEL_COLORS)]
+            # Subtle tinted background for the label column
+            tint = QColor(ch_color)
+            tint.setAlpha(30)
+            painter.fillRect(0, y, _LABEL_W, _ROW_H, tint)
+            painter.setPen(ch_color.darker(140))
             painter.drawText(
-                2, y, _LABEL_W - 4, _ROW_H,
+                4, y, _LABEL_W - 6, _ROW_H,
                 Qt.AlignmentFlag.AlignVCenter | Qt.AlignmentFlag.AlignLeft,
                 ch.instrument_id[:8],
             )
@@ -142,9 +165,12 @@ class TimelineWidget(QWidget):
             # Channel rows
             for row_i, (ch_idx, ch) in enumerate(channel_rows):
                 y = _HEADER_H + row_i * _ROW_H
+                ch_color = _CHANNEL_COLORS[ch_idx % len(_CHANNEL_COLORS)]
 
-                row_bg = QColor("#fafafa") if row_i % 2 == 0 else QColor("#f0f0f0")
-                painter.fillRect(x, y, sec_w, _ROW_H, row_bg)
+                # Row background: subtle channel-colour tint
+                tint = QColor(ch_color)
+                tint.setAlpha(18)
+                painter.fillRect(x, y, sec_w, _ROW_H, tint)
 
                 # Resolve steps: section override if present, else channel default
                 cs = sec.get("channel_steps", {})
@@ -158,26 +184,33 @@ class TimelineWidget(QWidget):
 
                 n = len(steps)
                 if n > 0 and sec_w >= n:
-                    # Draw individual step blocks
                     step_w = sec_w / n
                     for si, step in enumerate(steps):
                         if step.on:
                             sx = int(x + si * step_w)
                             sw = max(1, int(step_w) - 1)
-                            color = QColor("#e8a03a") if step.accent else QColor("#3a8ee8")
-                            painter.fillRect(sx, y + 3, sw, _ROW_H - 6, color)
+                            # Accent = brighter/white highlight; normal = channel colour
+                            dot_color = ch_color.lighter(160) if step.accent else ch_color
+                            painter.fillRect(sx, y + 3, sw, _ROW_H - 6, dot_color)
                 elif n > 0:
-                    # Section too narrow for individual steps — show density bar
                     on_count = sum(1 for s in steps if s.on)
                     if on_count:
-                        alpha = min(255, int(100 + 155 * on_count / n))
-                        painter.fillRect(x, y + 3, sec_w, _ROW_H - 6, QColor(58, 142, 232, alpha))
+                        density = QColor(ch_color)
+                        density.setAlpha(min(255, int(80 + 175 * on_count / n)))
+                        painter.fillRect(x, y + 3, sec_w, _ROW_H - 6, density)
 
             x += sec_w
 
         # Trailing border
         painter.setPen(QPen(QColor("#ccc"), 1))
         painter.drawLine(x, 0, x, total_h - 2)
+
+        # Playhead — red vertical line at current position
+        if self._position_bars > 0:
+            frac = min(self._position_bars / total_bars, 1.0)
+            px = _LABEL_W + int(frac * draw_w)
+            painter.setPen(QPen(QColor("#e83a3a"), 2))
+            painter.drawLine(px, 0, px, total_h - 1)
 
         painter.end()
 

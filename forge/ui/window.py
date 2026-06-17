@@ -464,6 +464,7 @@ class MainWindow(QMainWindow):
 
     def _on_position(self, pos_bars: float) -> None:
         self._status_label.setText(f"Position: {self._service.bar_beat_string}")
+        self._timeline.set_position(pos_bars)
 
     def _on_section_selected(self, start_bar: int, length_bars: int) -> None:
         self._transport.set_loop_range(start_bar, start_bar + length_bars)

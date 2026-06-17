@@ -541,27 +541,34 @@ class TrackerEditor(QWidget):
 
         # ── Left control panel ──────────────────────────────────────────────
         ctrl = QWidget()
-        ctrl.setFixedWidth(136)
-        ctrl_v = QVBoxLayout(ctrl)
-        ctrl_v.setContentsMargins(0, 0, 0, 0)
-        ctrl_v.setSpacing(3)
+        ctrl.setFixedWidth(120)
+        ctrl_h = QHBoxLayout(ctrl)
+        ctrl_h.setContentsMargins(0, 2, 4, 2)
+        ctrl_h.setSpacing(4)
+
+        # Vertical volume slider
+        self._vol_slider = QSlider(Qt.Orientation.Vertical)
+        self._vol_slider.setRange(0, 100)
+        self._vol_slider.setValue(80)
+        self._vol_slider.setFixedWidth(18)
+        self._vol_slider.setMinimumHeight(50)
+        self._vol_slider.setToolTip("Volume (0–100 %)")
+        self._vol_slider.valueChanged.connect(
+            lambda v: self.volumeChanged.emit(channel_idx, v / 100.0)
+        )
+        ctrl_h.addWidget(self._vol_slider)
+
+        # Label + buttons
+        right_v = QVBoxLayout()
+        right_v.setContentsMargins(0, 0, 0, 0)
+        right_v.setSpacing(3)
 
         self._inst_label = QLabel(ch.instrument_id)
         font = QFont()
         font.setBold(True)
         font.setPointSize(8)
         self._inst_label.setFont(font)
-        ctrl_v.addWidget(self._inst_label)
-
-        self._vol_slider = QSlider(Qt.Orientation.Horizontal)
-        self._vol_slider.setRange(0, 100)
-        self._vol_slider.setValue(80)
-        self._vol_slider.setFixedHeight(16)
-        self._vol_slider.setToolTip("Volume (0–100 %)")
-        self._vol_slider.valueChanged.connect(
-            lambda v: self.volumeChanged.emit(channel_idx, v / 100.0)
-        )
-        ctrl_v.addWidget(self._vol_slider)
+        right_v.addWidget(self._inst_label)
 
         btn_row = QHBoxLayout()
         btn_row.setSpacing(2)
@@ -578,9 +585,10 @@ class TrackerEditor(QWidget):
         self._solo_btn.clicked.connect(lambda: self.soloRequested.emit(channel_idx))
         btn_row.addWidget(self._mute_btn)
         btn_row.addWidget(self._solo_btn)
-        btn_row.addStretch()
-        ctrl_v.addLayout(btn_row)
+        right_v.addLayout(btn_row)
+        right_v.addStretch()
 
+        ctrl_h.addLayout(right_v)
         outer.addWidget(ctrl)
 
         # ── Step grid ───────────────────────────────────────────────────────
