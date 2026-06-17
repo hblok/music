@@ -18,6 +18,7 @@ from PySide6.QtCore import Qt, QThread, Signal, QObject, QTimer
 from PySide6.QtGui import QKeySequence, QShortcut
 from PySide6.QtWidgets import (
     QApplication,
+    QDockWidget,
     QFileDialog,
     QHBoxLayout,
     QLabel,
@@ -97,10 +98,15 @@ class MainWindow(QMainWindow):
         root.setContentsMargins(4, 4, 4, 4)
         root.setSpacing(4)
 
-        # Transport
+        # Transport — intercept play button so we can render first
         self._transport = TransportWidget(service, parent=central)
         self._transport.positionChanged.connect(self._on_position)
         self._transport.set_scheduler(self._scheduler)
+        self._transport._play_btn.clicked.disconnect()
+        self._transport._play_btn.clicked.connect(self._on_play_requested)
+        self._play_thread: QThread | None = None
+        self._play_worker: _RenderWorker | None = None
+        self._buf_valid = False  # True after successful render
         root.addWidget(self._transport)
 
         # Timeline (bird's-eye step pattern view)
@@ -154,14 +160,19 @@ class MainWindow(QMainWindow):
         splitter.addWidget(tracker_panel)
         splitter.setStretchFactor(1, 1)
 
-        # Right: mixer
-        from forge.ui.mixer import MixerWidget
-        self._mixer = MixerWidget([], parent=splitter)
-        self._mixer.setMinimumWidth(160)
-        splitter.addWidget(self._mixer)
-        splitter.setStretchFactor(2, 0)
-
         root.addWidget(splitter, stretch=1)
+
+        # Mixer in a floating dock widget
+        from forge.ui.mixer import MixerWidget
+        self._mixer = MixerWidget([], parent=self)
+        self._mixer_dock = QDockWidget("Mixer", self)
+        self._mixer_dock.setWidget(self._mixer)
+        self._mixer_dock.setAllowedAreas(
+            Qt.DockWidgetArea.RightDockWidgetArea
+            | Qt.DockWidgetArea.LeftDockWidgetArea
+            | Qt.DockWidgetArea.BottomDockWidgetArea
+        )
+        self.addDockWidget(Qt.DockWidgetArea.RightDockWidgetArea, self._mixer_dock)
 
         # Bottom panel: workshop area + A/B compare
         bottom = QHBoxLayout()
@@ -259,8 +270,12 @@ class MainWindow(QMainWindow):
 
         while self._workshop_area_layout.count():
             item = self._workshop_area_layout.takeAt(0)
-            if item.widget():
-                item.widget().deleteLater()
+            w = item.widget()
+            if w:
+                # Unsubscribe before deletion so stale callbacks don't pile up
+                if hasattr(w, "_on_doc_changed") and hasattr(w, "_doc"):
+                    w._doc.unsubscribe(w._on_doc_changed)
+                w.deleteLater()
         self._workshop = None
 
         pat_channels = [
@@ -305,6 +320,8 @@ class MainWindow(QMainWindow):
         self._selected_channel = 0
         self._active_section = None
         self._tracker_editors = []
+        self._buf_valid = False
+        self._service.stop()
         self._doc = doc
         doc.subscribe(self._on_doc_channel_changed)
 
@@ -357,10 +374,52 @@ class MainWindow(QMainWindow):
             self._autosave = None
 
     # ------------------------------------------------------------------
+    # Render-and-play
+
+    def _on_play_requested(self) -> None:
+        """Render the full project then start playback."""
+        if self._buf_valid:
+            self._service.play()
+            return
+        if self._play_thread is not None and self._play_thread.isRunning():
+            return
+        self._status_label.setText("Rendering for playback…")
+        self._progress.setVisible(True)
+        doc = self._doc
+
+        def do_render():
+            from forge import control
+            return control.render_doc_for_playback(doc)
+
+        self._play_thread = QThread(self)
+        self._play_worker = _RenderWorker(do_render)
+        self._play_worker.moveToThread(self._play_thread)
+        self._play_thread.started.connect(self._play_worker.run)
+        self._play_worker.finished.connect(self._on_play_render_done)
+        self._play_worker.error.connect(self._on_render_error)
+        self._play_thread.start()
+
+    def _on_play_render_done(self, buf) -> None:
+        self._progress.setVisible(False)
+        self._service.load(buf)
+        self._buf_valid = True
+        length_bars = (
+            sum(s["length_bars"] for s in self._doc.sections)
+            if self._doc.sections else 8
+        )
+        self._transport.set_total_bars(float(length_bars))
+        self._service.play()
+        self._status_label.setText("Playing")
+        if self._play_thread:
+            self._play_thread.quit()
+            self._play_thread = None
+
+    # ------------------------------------------------------------------
     # Doc change observer (channel add/remove)
 
     def _on_doc_channel_changed(self, txn) -> None:
         """Rebuild channel rows and mixer when channels are added or removed."""
+        self._buf_valid = False  # any edit → Play will re-render before next playback
         if any(c.path[0] == "channels" for c in txn.changes):
             self._rebuild_tracker_rows()
             self._rebuild_mixer_strips()

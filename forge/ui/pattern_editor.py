@@ -73,9 +73,9 @@ class StepButton(QPushButton):
 
     def _update_style(self) -> None:
         if self.isChecked():
-            self.setStyleSheet("background-color: #4a9eff; border: 1px solid #2266aa;")
+            self.setStyleSheet("background-color: #3a8ee8; border: 1px solid #1a5fa8; color: #fff;")
         else:
-            self.setStyleSheet("background-color: #2a2a2a; border: 1px solid #555;")
+            self.setStyleSheet("background-color: #e0e0e0; border: 1px solid #aaa; color: #333;")
 
 
 class PatternRow(QWidget):
@@ -250,12 +250,12 @@ class _StepCell(QWidget):
 
     # Colours
     _C_ON = "#3a8ee8"
-    _C_OFF = "#2a2a2a"
+    _C_OFF = "#e0e0e0"
     _C_ON_ACCENT = "#e8a03a"
-    _C_ON_GHOST = "#3a8e6e"
-    _C_ON_PROB = "#8e3ae8"     # probabilistic (probability < 1.0)
+    _C_ON_GHOST = "#3aae6e"
+    _C_ON_PROB = "#9855d4"
     _C_CURSOR = "#e83a6e"
-    _C_SELECTED = "#666688"
+    _C_SELECTED = "#8090cc"
 
     def __init__(self, step_idx: int, parent: QWidget | None = None) -> None:
         super().__init__(parent)
@@ -314,10 +314,13 @@ class _StepCell(QWidget):
                 bg = self._C_ON
         else:
             bg = self._C_OFF
-        border_color = "#888" if self._cursor else "#444"
+        is_light_bg = bg == self._C_OFF
+        text_color = "#444" if is_light_bg else "#fff"
+        border_color = "#666" if self._cursor else "#bbb" if is_light_bg else "#0006"
         self.setStyleSheet(
             f"background-color: {bg}; border: 1px solid {border_color};"
         )
+        self._label.setStyleSheet(f"color: {text_color}; background: transparent; border: none;")
 
     def mousePressEvent(self, event) -> None:
         self.clicked.emit(self.step_idx)

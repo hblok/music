@@ -86,7 +86,7 @@ class TimelineWidget(QWidget):
 
         painter = QPainter(self)
         painter.setRenderHint(QPainter.RenderHint.Antialiasing, False)
-        painter.fillRect(self.rect(), QColor("#181818"))
+        painter.fillRect(self.rect(), QColor("#f5f5f5"))
 
         if not sections:
             painter.setPen(QColor("#666"))
@@ -106,7 +106,7 @@ class TimelineWidget(QWidget):
         painter.setFont(font)
 
         # Draw channel labels on the left
-        painter.setPen(QColor("#999"))
+        painter.setPen(QColor("#333"))
         for row_i, (_, ch) in enumerate(channel_rows):
             y = _HEADER_H + row_i * _ROW_H
             painter.drawText(
@@ -126,9 +126,9 @@ class TimelineWidget(QWidget):
             is_active = sec_i == self._active_section
 
             # Section header
-            hdr_color = QColor("#3a5a8a") if is_active else QColor("#252535")
+            hdr_color = QColor("#3a8ee8") if is_active else QColor("#dde4ee")
             painter.fillRect(x, 0, sec_w, _HEADER_H, hdr_color)
-            painter.setPen(QColor("#ddd") if is_active else QColor("#888"))
+            painter.setPen(QColor("#ffffff") if is_active else QColor("#333"))
             painter.drawText(
                 x + 3, 0, sec_w - 6, _HEADER_H,
                 Qt.AlignmentFlag.AlignVCenter | Qt.AlignmentFlag.AlignLeft,
@@ -136,14 +136,14 @@ class TimelineWidget(QWidget):
             )
 
             # Left border
-            painter.setPen(QPen(QColor("#444"), 1))
+            painter.setPen(QPen(QColor("#ccc"), 1))
             painter.drawLine(x, 0, x, total_h - 2)
 
             # Channel rows
             for row_i, (ch_idx, ch) in enumerate(channel_rows):
                 y = _HEADER_H + row_i * _ROW_H
 
-                row_bg = QColor("#1e1e1e") if row_i % 2 == 0 else QColor("#1a1a1a")
+                row_bg = QColor("#fafafa") if row_i % 2 == 0 else QColor("#f0f0f0")
                 painter.fillRect(x, y, sec_w, _ROW_H, row_bg)
 
                 # Resolve steps: section override if present, else channel default
@@ -170,13 +170,13 @@ class TimelineWidget(QWidget):
                     # Section too narrow for individual steps — show density bar
                     on_count = sum(1 for s in steps if s.on)
                     if on_count:
-                        alpha = min(255, int(180 + 75 * on_count / n))
+                        alpha = min(255, int(100 + 155 * on_count / n))
                         painter.fillRect(x, y + 3, sec_w, _ROW_H - 6, QColor(58, 142, 232, alpha))
 
             x += sec_w
 
         # Trailing border
-        painter.setPen(QPen(QColor("#444"), 1))
+        painter.setPen(QPen(QColor("#ccc"), 1))
         painter.drawLine(x, 0, x, total_h - 2)
 
         painter.end()

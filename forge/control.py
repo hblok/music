@@ -249,6 +249,42 @@ def export_wav_from_doc(
     return buf
 
 
+def render_doc_for_playback(
+    doc: "forge.document.model.ProjectDoc",  # type: ignore[name-defined]
+) -> "forge.core.buffer.AudioBuffer":  # type: ignore[name-defined]
+    """Render all PatternChannels to a single AudioBuffer for live playback.
+
+    Like ``export_wav_from_doc`` but returns the buffer without writing a file.
+    Used by the Play button to render the project before handing off to
+    PlaybackService.
+    """
+    from forge.core.mastering import master
+    from forge.document.channels import PatternChannel
+
+    if doc.sections:
+        length_bars = sum(s["length_bars"] for s in doc.sections)
+    else:
+        length_bars = 8
+
+    tracks = [
+        ch.to_track_dict()
+        for ch in doc.channels
+        if isinstance(ch, PatternChannel)
+    ]
+    if not tracks:
+        from forge.core.buffer import AudioBuffer
+        return AudioBuffer(doc.sr, doc.sr)  # 1 s of silence
+
+    pattern_dict = {
+        "bpm": doc.bpm,
+        "length_bars": length_bars,
+        "n_steps": 16,
+        "tracks": tracks,
+    }
+    buf = render_pattern(pattern_dict, seed=doc.seed)
+    return master(buf)
+
+
 def render_texture_channel(
     channel: "forge.document.channels.TextureChannel",  # type: ignore[name-defined]
     length_bars: int,

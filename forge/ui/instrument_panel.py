@@ -468,6 +468,12 @@ class WorkshopPanel(QGroupBox):
         self._applying = True
         try:
             ch = self._doc.channel(self._channel_idx)
+            # Handle instrument change (undo/redo or external edit)
+            if self._inst_combo.currentText() != ch.instrument_id:
+                self._inst_combo.setCurrentText(ch.instrument_id)
+                self._rebuild_params(ch.instrument_id)
+                self.setTitle(ch.instrument_id)
+                return
             # Sync seed spin
             self._seed_spin.setValue(ch.seed)
             # Sync param controls
@@ -476,7 +482,6 @@ class WorkshopPanel(QGroupBox):
                 if schema is None:
                     continue
                 kind = schema.get("kind", "float")
-                # Use ch.params value if set, else fall back to schema default
                 v = ch.params.get(name, schema.get("default"))
                 if v is None:
                     continue
