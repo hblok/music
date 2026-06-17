@@ -173,14 +173,17 @@ class TestWindowSaveLoad(unittest.TestCase):
         win.close()
         svc.close()
 
-    def test_on_save_without_project_shows_status(self):
+    def test_add_remove_channel(self):
         from forge.playback.service import PlaybackService
         from forge.ui.window import MainWindow
+        from forge.document.channels import PatternChannel
         svc = PlaybackService(sr=44100, bpm=120.0)
         win = MainWindow(svc)
-        win._on_save()  # no project loaded
-        status = win._status_label.text()
-        self.assertIn("No project", status)
+        initial = len([ch for ch in win._doc.channels if isinstance(ch, PatternChannel)])
+        win._doc.add_channel(PatternChannel("snare"))
+        self.assertEqual(len([ch for ch in win._doc.channels if isinstance(ch, PatternChannel)]), initial + 1)
+        win._doc.remove_channel(len(win._doc.channels) - 1)
+        self.assertEqual(len([ch for ch in win._doc.channels if isinstance(ch, PatternChannel)]), initial)
         win.close()
         svc.close()
 

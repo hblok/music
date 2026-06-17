@@ -523,6 +523,7 @@ class TrackerEditor(QWidget):
         self._sel_start: int | None = None
         self._sel_end: int | None = None
         self._clipboard: list | None = None
+        self._active_section: int | None = None
 
         self.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
 
@@ -574,40 +575,68 @@ class TrackerEditor(QWidget):
         # Subscribe to doc changes
         doc.subscribe(self._on_doc_changed)
 
+    # ---------------------------------------------------------------- section support
+
+    def set_section(self, section_idx: int | None) -> None:
+        """Switch to editing a specific section's pattern (None = channel default)."""
+        self._active_section = section_idx
+        self._refresh_all()
+
+    def _get_steps(self) -> list:
+        """Return current steps (section override or channel default)."""
+        if self._active_section is not None:
+            return self._doc.get_section_steps(self._active_section, self._channel_idx)
+        ch = self._doc.channel(self._channel_idx)
+        return list(ch.steps)
+
     # ---------------------------------------------------------------- refresh
 
     def _refresh_all(self) -> None:
-        ch = self._doc.channel(self._channel_idx)
-        self._row.refresh_all(ch.steps)
+        steps = self._get_steps()
+        self._row.refresh_all(steps)
         self._row.set_cursor(self._cursor)
+        ch = self._doc.channel(self._channel_idx)
+        self._inst_label.setText(ch.instrument_id)
 
     def _refresh_step(self, step_idx: int) -> None:
-        ch = self._doc.channel(self._channel_idx)
-        self._row.refresh_step(step_idx, ch.steps[step_idx])
+        steps = self._get_steps()
+        self._row.refresh_step(step_idx, steps[step_idx])
 
     # ---------------------------------------------------------------- mouse interactions
 
     def _on_step_toggled(self, step_idx: int) -> None:
         self._cursor = step_idx
-        self._doc.toggle_step(self._channel_idx, step_idx)
+        self.cursorMoved.emit(step_idx)  # clicking a step selects this channel
+        if self._active_section is not None:
+            self._doc.toggle_section_step(self._active_section, self._channel_idx, step_idx)
+        else:
+            self._doc.toggle_step(self._channel_idx, step_idx)
         self.channelChanged.emit(self._channel_idx)
 
     def _on_accent_toggled(self, step_idx: int) -> None:
-        ch = self._doc.channel(self._channel_idx)
-        self._doc.set_step(self._channel_idx, step_idx, "accent", not ch.steps[step_idx].accent)
+        steps = self._get_steps()
+        new_val = not steps[step_idx].accent
+        if self._active_section is not None:
+            self._doc.set_section_step(self._active_section, self._channel_idx, step_idx, "accent", new_val)
+        else:
+            self._doc.set_step(self._channel_idx, step_idx, "accent", new_val)
         self.channelChanged.emit(self._channel_idx)
 
     def _on_ghost_toggled(self, step_idx: int) -> None:
-        ch = self._doc.channel(self._channel_idx)
-        self._doc.set_step(self._channel_idx, step_idx, "ghost", not ch.steps[step_idx].ghost)
+        steps = self._get_steps()
+        new_val = not steps[step_idx].ghost
+        if self._active_section is not None:
+            self._doc.set_section_step(self._active_section, self._channel_idx, step_idx, "ghost", new_val)
+        else:
+            self._doc.set_step(self._channel_idx, step_idx, "ghost", new_val)
         self.channelChanged.emit(self._channel_idx)
 
     def _on_prob_clicked(self, step_idx: int) -> None:
         self._open_prob_dialog(step_idx)
 
     def _open_prob_dialog(self, step_idx: int) -> None:
-        ch = self._doc.channel(self._channel_idx)
-        step = ch.steps[step_idx]
+        steps = self._get_steps()
+        step = steps[step_idx]
         from PySide6.QtWidgets import QInputDialog
         prob, ok = QInputDialog.getDouble(
             self,
@@ -619,7 +648,10 @@ class TrackerEditor(QWidget):
             2,
         )
         if ok:
-            self._doc.set_step(self._channel_idx, step_idx, "probability", prob)
+            if self._active_section is not None:
+                self._doc.set_section_step(self._active_section, self._channel_idx, step_idx, "probability", prob)
+            else:
+                self._doc.set_step(self._channel_idx, step_idx, "probability", prob)
             self.channelChanged.emit(self._channel_idx)
 
     def _open_param_dialog(self, step_idx: int) -> None:
@@ -658,21 +690,32 @@ class TrackerEditor(QWidget):
 
         # Toggle on/off
         if key == Qt.Key.Key_Space:
-            self._doc.toggle_step(self._channel_idx, self._cursor)
+            if self._active_section is not None:
+                self._doc.toggle_section_step(self._active_section, self._channel_idx, self._cursor)
+            else:
+                self._doc.toggle_step(self._channel_idx, self._cursor)
             self.channelChanged.emit(self._channel_idx)
             return
 
         # Accent
         if key == Qt.Key.Key_A and not (mods & Qt.KeyboardModifier.ControlModifier):
-            step = ch.steps[self._cursor]
-            self._doc.set_step(self._channel_idx, self._cursor, "accent", not step.accent)
+            steps = self._get_steps()
+            new_val = not steps[self._cursor].accent
+            if self._active_section is not None:
+                self._doc.set_section_step(self._active_section, self._channel_idx, self._cursor, "accent", new_val)
+            else:
+                self._doc.set_step(self._channel_idx, self._cursor, "accent", new_val)
             self.channelChanged.emit(self._channel_idx)
             return
 
         # Ghost
         if key == Qt.Key.Key_G:
-            step = ch.steps[self._cursor]
-            self._doc.set_step(self._channel_idx, self._cursor, "ghost", not step.ghost)
+            steps = self._get_steps()
+            new_val = not steps[self._cursor].ghost
+            if self._active_section is not None:
+                self._doc.set_section_step(self._active_section, self._channel_idx, self._cursor, "ghost", new_val)
+            else:
+                self._doc.set_step(self._channel_idx, self._cursor, "ghost", new_val)
             self.channelChanged.emit(self._channel_idx)
             return
 
@@ -692,23 +735,41 @@ class TrackerEditor(QWidget):
         if key == Qt.Key.Key_C and (mods & Qt.KeyboardModifier.ControlModifier):
             start = self._sel_start if self._sel_start is not None else self._cursor
             end = self._sel_end if self._sel_end is not None else self._cursor + 1
-            self._clipboard = self._doc.copy_steps(self._channel_idx, start, end)
+            self._clipboard = self._get_steps()[start:end]
             return
 
         # Paste
         if key == Qt.Key.Key_V and (mods & Qt.KeyboardModifier.ControlModifier):
             if self._clipboard:
-                self._doc.paste_steps(self._channel_idx, self._cursor, self._clipboard)
+                if self._active_section is not None:
+                    import copy
+                    steps = self._get_steps()
+                    for offset, src in enumerate(self._clipboard):
+                        idx = self._cursor + offset
+                        if idx < len(steps):
+                            steps[idx] = copy.copy(src)
+                    self._doc.set_section_steps(self._active_section, self._channel_idx, steps)
+                else:
+                    self._doc.paste_steps(self._channel_idx, self._cursor, self._clipboard)
                 self.channelChanged.emit(self._channel_idx)
             return
 
         # Delete / clear
         if key in (Qt.Key.Key_Delete, Qt.Key.Key_Backspace):
-            if self._sel_start is not None and self._sel_end is not None:
-                for i in range(self._sel_start, self._sel_end):
-                    self._doc.set_step(self._channel_idx, i, "on", False)
+            if self._active_section is not None:
+                steps = self._get_steps()
+                if self._sel_start is not None and self._sel_end is not None:
+                    for i in range(self._sel_start, self._sel_end):
+                        steps[i].on = False
+                else:
+                    steps[self._cursor].on = False
+                self._doc.set_section_steps(self._active_section, self._channel_idx, steps)
             else:
-                self._doc.set_step(self._channel_idx, self._cursor, "on", False)
+                if self._sel_start is not None and self._sel_end is not None:
+                    for i in range(self._sel_start, self._sel_end):
+                        self._doc.set_step(self._channel_idx, i, "on", False)
+                else:
+                    self._doc.set_step(self._channel_idx, self._cursor, "on", False)
             self.channelChanged.emit(self._channel_idx)
             return
 
@@ -732,6 +793,19 @@ class TrackerEditor(QWidget):
     # ---------------------------------------------------------------- doc sync
 
     def _on_doc_changed(self, txn) -> None:
+        # Guard: our channel may have been removed
+        if self._channel_idx >= self._doc.channel_count():
+            return
+        for change in txn.changes:
+            k = change.path[0]
+            if k == "ab_restore":
+                self._refresh_all()
+                return
+            if (k == "section_steps"
+                    and change.path[1] == self._active_section
+                    and change.path[2] == self._channel_idx):
+                self._refresh_all()
+                return
         affected = txn.affected_channel_indices()
         if self._channel_idx in affected:
             self._refresh_all()

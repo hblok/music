@@ -459,6 +459,9 @@ class WorkshopPanel(QGroupBox):
     # ---------------------------------------------------------------- doc change (undo/redo sync)
 
     def _on_doc_changed(self, txn) -> None:
+        # Guard: our channel may have been removed
+        if self._channel_idx >= self._doc.channel_count():
+            return
         affected = txn.affected_channel_indices()
         if self._channel_idx not in affected and ("global" not in str(txn.description)):
             return

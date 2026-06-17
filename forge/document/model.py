@@ -474,6 +474,51 @@ class ProjectDoc:
         self._history.push(txn)
         self._notify(txn)
 
+    # ---------------------------------------------------------------- per-section step overrides
+
+    def get_section_steps(self, section_idx: int, channel_idx: int) -> list:
+        """Return steps for a channel in a section (override if set, else channel default)."""
+        import copy
+        self._ensure_sections()
+        sec = self._sections[section_idx]
+        cs = sec.get("channel_steps", {})
+        key = str(channel_idx)
+        if key in cs:
+            return [StepData.from_step_value(s) for s in cs[key]]
+        ch = self._channels[channel_idx]
+        if isinstance(ch, PatternChannel):
+            return [copy.copy(s) for s in ch.steps]
+        return []
+
+    def set_section_steps(self, section_idx: int, channel_idx: int, steps: list) -> None:
+        """Replace the step override for one channel in a section (bulk replace)."""
+        self._ensure_sections()
+        sec = self._sections[section_idx]
+        key = str(channel_idx)
+        old = sec.get("channel_steps", {}).get(key)
+        new_val = [s.to_dict() if hasattr(s, "to_dict") else s for s in steps]
+        txn = Transaction(f"set section {section_idx} steps ch {channel_idx}")
+        txn.add_change(("section_steps", section_idx, channel_idx), old, new_val)
+        if "channel_steps" not in sec:
+            sec["channel_steps"] = {}
+        sec["channel_steps"][key] = new_val
+        self._history.push(txn)
+        self._notify(txn)
+
+    def toggle_section_step(self, section_idx: int, channel_idx: int, step_idx: int) -> None:
+        """Toggle one step on/off in a section's pattern."""
+        steps = self.get_section_steps(section_idx, channel_idx)
+        steps[step_idx].on = not steps[step_idx].on
+        self.set_section_steps(section_idx, channel_idx, steps)
+
+    def set_section_step(
+        self, section_idx: int, channel_idx: int, step_idx: int, field: str, value
+    ) -> None:
+        """Set one field of one step in a section's pattern."""
+        steps = self.get_section_steps(section_idx, channel_idx)
+        setattr(steps[step_idx], field, value)
+        self.set_section_steps(section_idx, channel_idx, steps)
+
     def move_section(self, from_idx: int, to_idx: int) -> None:
         """Move section from *from_idx* to *to_idx* (reorder)."""
         self._ensure_sections()
@@ -650,6 +695,18 @@ class ProjectDoc:
             self._ensure_sections()
             idx, field = path[1], path[2]
             self._sections[idx][field] = value
+
+        elif kind == "section_steps":
+            self._ensure_sections()
+            section_idx = path[1]
+            channel_idx = path[2]
+            sec = self._sections[section_idx]
+            if "channel_steps" not in sec:
+                sec["channel_steps"] = {}
+            if value is None:
+                sec["channel_steps"].pop(str(channel_idx), None)
+            else:
+                sec["channel_steps"][str(channel_idx)] = value
 
         elif kind == "section_move":
             self._ensure_sections()

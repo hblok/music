@@ -2,7 +2,8 @@
 
 The window shows the full tracker interface:
   - Transport bar at the top
-  - Horizontal splitter: ArrangementView | TrackerEditor rows | MixerWidget
+  - Step-pattern timeline (bird's-eye arrangement view)
+  - Horizontal splitter: Sections panel | TrackerEditor rows | MixerWidget
   - Bottom panel: WorkshopPanel (for selected channel) + ABCompareWidget
 
 The engine is accessed only through forge.control — this module never imports
@@ -14,6 +15,7 @@ from __future__ import annotations
 from pathlib import Path
 
 from PySide6.QtCore import Qt, QThread, Signal, QObject, QTimer
+from PySide6.QtGui import QKeySequence, QShortcut
 from PySide6.QtWidgets import (
     QApplication,
     QFileDialog,
@@ -21,6 +23,7 @@ from PySide6.QtWidgets import (
     QLabel,
     QMainWindow,
     QProgressBar,
+    QPushButton,
     QScrollArea,
     QSplitter,
     QStatusBar,
@@ -66,13 +69,14 @@ class MainWindow(QMainWindow):
         super().__init__(parent)
         self._service = service
         self._render_thread: QThread | None = None
-        self._current_project: dict | None = None
         self._selected_channel: int = 0
+        self._active_section: int | None = None
+        self._tracker_editors: list = []
         self._workshop: QWidget | None = None
         self._autosave = None
 
         self.setWindowTitle("Forge — Tracker")
-        self.resize(1200, 700)
+        self.resize(1200, 750)
 
         # --- document + render backend ---
         from forge.playback.cache import ContentAddressedCache
@@ -81,6 +85,7 @@ class MainWindow(QMainWindow):
         self._scheduler = RenderScheduler(self._cache)
 
         self._doc = _make_default_doc()
+        self._doc.subscribe(self._on_doc_channel_changed)
 
         # --- menu ---
         self._build_menu(service)
@@ -98,10 +103,17 @@ class MainWindow(QMainWindow):
         self._transport.set_scheduler(self._scheduler)
         root.addWidget(self._transport)
 
+        # Timeline (bird's-eye step pattern view)
+        from forge.ui.timeline import TimelineWidget
+        self._timeline = TimelineWidget(self._doc)
+        self._timeline.sectionClicked.connect(self._on_timeline_section_clicked)
+        root.addWidget(self._timeline)
+
         # Main horizontal splitter
         splitter = QSplitter(Qt.Orientation.Horizontal)
+        self._splitter = splitter
 
-        # Left: arrangement view
+        # Left: arrangement / sections view
         from forge.ui.arrangement import ArrangementView
         self._arrangement = ArrangementView(self._doc)
         self._arrangement.sectionSelected.connect(self._on_section_selected)
@@ -109,7 +121,26 @@ class MainWindow(QMainWindow):
         splitter.addWidget(self._arrangement)
         splitter.setStretchFactor(0, 0)
 
-        # Centre: scrollable tracker rows
+        # Centre: channel toolbar + scrollable tracker rows
+        tracker_panel = QWidget()
+        tracker_vbox = QVBoxLayout(tracker_panel)
+        tracker_vbox.setContentsMargins(0, 0, 0, 0)
+        tracker_vbox.setSpacing(2)
+
+        # Channel management toolbar
+        ch_bar = QHBoxLayout()
+        ch_bar.setContentsMargins(2, 2, 2, 2)
+        add_ch_btn = QPushButton("+ Channel")
+        add_ch_btn.setFixedHeight(24)
+        add_ch_btn.clicked.connect(self._on_add_channel)
+        rem_ch_btn = QPushButton("− Channel")
+        rem_ch_btn.setFixedHeight(24)
+        rem_ch_btn.clicked.connect(self._on_remove_channel)
+        ch_bar.addWidget(add_ch_btn)
+        ch_bar.addWidget(rem_ch_btn)
+        ch_bar.addStretch()
+        tracker_vbox.addLayout(ch_bar)
+
         self._tracker_scroll = QScrollArea()
         self._tracker_scroll.setWidgetResizable(True)
         self._tracker_container = QWidget()
@@ -118,7 +149,9 @@ class MainWindow(QMainWindow):
         self._tracker_layout.setContentsMargins(2, 2, 2, 2)
         self._tracker_layout.addStretch()
         self._tracker_scroll.setWidget(self._tracker_container)
-        splitter.addWidget(self._tracker_scroll)
+        tracker_vbox.addWidget(self._tracker_scroll, stretch=1)
+
+        splitter.addWidget(tracker_panel)
         splitter.setStretchFactor(1, 1)
 
         # Right: mixer
@@ -157,6 +190,11 @@ class MainWindow(QMainWindow):
         self._status.addWidget(self._status_label)
         self.setStatusBar(self._status)
 
+        # --- global keyboard shortcuts ---
+        QShortcut(QKeySequence("Ctrl+Z"), self).activated.connect(self._doc.undo)
+        QShortcut(QKeySequence("Ctrl+Y"), self).activated.connect(self._doc.redo)
+        QShortcut(QKeySequence("Ctrl+Shift+Z"), self).activated.connect(self._doc.redo)
+
         # --- initial populate ---
         self._rebuild_tracker_rows()
         self._rebuild_mixer_strips()
@@ -172,9 +210,6 @@ class MainWindow(QMainWindow):
         file_menu.addAction("&Open Tracker project…", self._on_open_doc)
         file_menu.addAction("&Save Tracker project…", self._on_save_doc)
         file_menu.addSeparator()
-        file_menu.addAction("Open &Engine project…", self._on_open)
-        file_menu.addAction("Save Engine project…", self._on_save)
-        file_menu.addSeparator()
         file_menu.addAction("&Export WAV…", self._on_export_wav)
         file_menu.addSeparator()
         file_menu.addAction("&Quit", QApplication.quit)
@@ -189,22 +224,25 @@ class MainWindow(QMainWindow):
         from forge.document.channels import PatternChannel
         from forge.ui.pattern_editor import TrackerEditor
 
-        # Remove old editors (all items except the trailing stretch)
+        # Unsubscribe old editors from doc before deleting them
         while self._tracker_layout.count() > 1:
             item = self._tracker_layout.takeAt(0)
             if item.widget():
                 item.widget().deleteLater()
 
+        self._tracker_editors = []
         for idx, ch in enumerate(self._doc.channels):
             if not isinstance(ch, PatternChannel):
                 continue
             editor = TrackerEditor(idx, self._doc, parent=self._tracker_container)
             editor.channelChanged.connect(self._on_channel_changed)
-            # clicking inside an editor selects that channel for the workshop
             editor.cursorMoved.connect(lambda _step, i=idx: self._select_channel(i))
+            if self._active_section is not None:
+                editor.set_section(self._active_section)
             self._tracker_layout.insertWidget(
                 self._tracker_layout.count() - 1, editor
             )
+            self._tracker_editors.append(editor)
 
     def _rebuild_mixer_strips(self) -> None:
         """Sync MixerWidget strips with current doc PatternChannels."""
@@ -219,7 +257,6 @@ class MainWindow(QMainWindow):
         """Replace the WorkshopPanel with one for the selected channel."""
         from forge.document.channels import PatternChannel
 
-        # Clear the workshop area
         while self._workshop_area_layout.count():
             item = self._workshop_area_layout.takeAt(0)
             if item.widget():
@@ -252,33 +289,56 @@ class MainWindow(QMainWindow):
             self._selected_channel = idx
             self._update_workshop()
 
+    def _set_active_section(self, section_idx: int | None) -> None:
+        """Switch all TrackerEditors to show/edit a specific section's pattern."""
+        self._active_section = section_idx
+        for editor in self._tracker_editors:
+            editor.set_section(section_idx)
+        self._timeline.set_active_section(section_idx)
+
     def _set_doc(self, doc) -> None:
         """Swap in a new ProjectDoc and rebuild all dependent widgets."""
         self._stop_autosave()
+        # Unsubscribe from old doc
+        self._doc.unsubscribe(self._on_doc_channel_changed)
+
         self._selected_channel = 0
+        self._active_section = None
+        self._tracker_editors = []
         self._doc = doc
+        doc.subscribe(self._on_doc_channel_changed)
+
+        # Update global Ctrl+Z / Ctrl+Y shortcuts to the new doc
+        # (shortcuts are already bound to lambda; replace with new doc reference)
+        for sc in self.findChildren(QShortcut):
+            sc.deleteLater()
+        QShortcut(QKeySequence("Ctrl+Z"), self).activated.connect(doc.undo)
+        QShortcut(QKeySequence("Ctrl+Y"), self).activated.connect(doc.redo)
+        QShortcut(QKeySequence("Ctrl+Shift+Z"), self).activated.connect(doc.redo)
 
         # Rebuild arrangement (it holds a doc reference)
         from forge.ui.arrangement import ArrangementView
-        old = self._arrangement
+        old_arr = self._arrangement
         new_arr = ArrangementView(doc)
         new_arr.sectionSelected.connect(self._on_section_selected)
         new_arr.setMinimumWidth(160)
-        splitter = old.parent()
-        idx = splitter.indexOf(old)
-        splitter.replaceWidget(idx, new_arr)
-        old.deleteLater()
+        idx = self._splitter.indexOf(old_arr)
+        self._splitter.replaceWidget(idx, new_arr)
+        old_arr.deleteLater()
         self._arrangement = new_arr
 
         # Rebuild A/B compare
         from forge.ui.ab_compare import ABCompareWidget
         old_ab = self._ab_compare
         new_ab = ABCompareWidget(doc)
-        bottom_layout = old_ab.parent().layout() if old_ab.parent() else None
-        if bottom_layout:
-            bottom_layout.replaceWidget(old_ab, new_ab)
+        layout = old_ab.parent().layout() if old_ab.parent() else None
+        if layout:
+            layout.replaceWidget(old_ab, new_ab)
         old_ab.deleteLater()
         self._ab_compare = new_ab
+
+        # Swap timeline doc
+        self._timeline.set_doc(doc)
 
         self._rebuild_tracker_rows()
         self._rebuild_mixer_strips()
@@ -297,6 +357,43 @@ class MainWindow(QMainWindow):
             self._autosave = None
 
     # ------------------------------------------------------------------
+    # Doc change observer (channel add/remove)
+
+    def _on_doc_channel_changed(self, txn) -> None:
+        """Rebuild channel rows and mixer when channels are added or removed."""
+        if any(c.path[0] == "channels" for c in txn.changes):
+            self._rebuild_tracker_rows()
+            self._rebuild_mixer_strips()
+            self._update_workshop()
+
+    # ------------------------------------------------------------------
+    # Channel management
+
+    def _on_add_channel(self) -> None:
+        from PySide6.QtWidgets import QInputDialog
+        from forge import control
+        instruments = [e["id"] for e in control.list_instruments()]
+        iid, ok = QInputDialog.getItem(
+            self, "Add Channel", "Choose instrument:", instruments, 0, False
+        )
+        if ok and iid:
+            from forge.document.channels import PatternChannel
+            self._doc.add_channel(PatternChannel(iid))
+
+    def _on_remove_channel(self) -> None:
+        from forge.document.channels import PatternChannel
+        pat_channels = [
+            (i, ch) for i, ch in enumerate(self._doc.channels)
+            if isinstance(ch, PatternChannel)
+        ]
+        if not pat_channels:
+            return
+        sel = min(self._selected_channel, len(pat_channels) - 1)
+        real_idx = pat_channels[sel][0]
+        self._doc.remove_channel(real_idx)
+        self._selected_channel = max(0, sel - 1)
+
+    # ------------------------------------------------------------------
     # Slots
 
     def _on_position(self, pos_bars: float) -> None:
@@ -304,6 +401,15 @@ class MainWindow(QMainWindow):
 
     def _on_section_selected(self, start_bar: int, length_bars: int) -> None:
         self._transport.set_loop_range(start_bar, start_bar + length_bars)
+        # Derive section index from the arrangement view's current row
+        sec_idx = self._arrangement.selected_row
+        if sec_idx >= 0:
+            self._set_active_section(sec_idx)
+
+    def _on_timeline_section_clicked(self, section_idx: int) -> None:
+        """Timeline click: select section in both editors and arrangement list."""
+        self._set_active_section(section_idx)
+        self._arrangement._list.setCurrentRow(section_idx)
 
     def _on_channel_changed(self, channel_idx: int) -> None:
         """Schedule a background re-render when a channel is edited."""
@@ -317,7 +423,6 @@ class MainWindow(QMainWindow):
             return control.render_channel(ch, bpm, 4)
 
         def on_done(k, buf):
-            arr = buf.data.astype("float32")
             QTimer.singleShot(0, lambda: self._status_label.setText("Render ready"))
 
         self._scheduler.get_or_schedule(key, render_fn, on_done)
@@ -328,7 +433,6 @@ class MainWindow(QMainWindow):
         if isinstance(buf, AudioBuffer):
             self._service.load(buf)
         else:
-            # numpy array from WorkshopPanel
             ab = AudioBuffer(len(buf), self._service.sr if hasattr(self._service, "sr") else 44100)
             ab._data = buf
             self._service.load(ab)
@@ -398,36 +502,6 @@ class MainWindow(QMainWindow):
         self._status_label.setText(f"Error: {msg}")
         if self._render_thread:
             self._render_thread.quit()
-
-    # --- Legacy engine project support ---
-    def _on_open(self) -> None:
-        path, _ = QFileDialog.getOpenFileName(
-            self, "Open Engine Project", "", "Forge Projects (*.json)"
-        )
-        if not path:
-            return
-        try:
-            from forge import control
-            self._current_project = control.load_project(path)
-            self._status_label.setText(f"Opened engine project: {path}")
-        except Exception as e:  # noqa: BLE001
-            self._status_label.setText(f"Open error: {e}")
-
-    def _on_save(self) -> None:
-        if self._current_project is None:
-            self._status_label.setText("No engine project loaded")
-            return
-        path, _ = QFileDialog.getSaveFileName(
-            self, "Save Engine Project", "", "Forge Projects (*.json)"
-        )
-        if not path:
-            return
-        try:
-            from forge import control
-            control.save_project(self._current_project, path)
-            self._status_label.setText(f"Saved: {path}")
-        except Exception as e:  # noqa: BLE001
-            self._status_label.setText(f"Save error: {e}")
 
 
 def _make_default_doc():

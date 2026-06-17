@@ -1,0 +1,130 @@
+{
+  "schema_version": "3.0",
+  "title": "Example — Four-four with build",
+  "bpm": 138.0,
+  "sr": 44100,
+  "seed": 42,
+  "normalize": true,
+  "target": 0.85,
+  "fade_out_s": 2.0,
+  "channels": [
+    {
+      "kind": "pattern",
+      "instrument_id": "kick",
+      "n_steps": 16,
+      "steps": [
+        {"on": true},  {"on": false}, {"on": false}, {"on": false},
+        {"on": true},  {"on": false}, {"on": false}, {"on": false},
+        {"on": true},  {"on": false}, {"on": false}, {"on": false},
+        {"on": true},  {"on": false}, {"on": false}, {"on": false}
+      ],
+      "params": {},
+      "seed": 0
+    },
+    {
+      "kind": "pattern",
+      "instrument_id": "hat",
+      "n_steps": 16,
+      "steps": [
+        {"on": true},  {"on": false}, {"on": true},  {"on": false},
+        {"on": true},  {"on": false}, {"on": true},  {"on": false},
+        {"on": true},  {"on": false}, {"on": true},  {"on": false},
+        {"on": true},  {"on": false}, {"on": true},  {"on": false}
+      ],
+      "params": {},
+      "seed": 0
+    },
+    {
+      "kind": "pattern",
+      "instrument_id": "snare",
+      "n_steps": 16,
+      "steps": [
+        {"on": false}, {"on": false}, {"on": false}, {"on": false},
+        {"on": true},  {"on": false}, {"on": false}, {"on": false},
+        {"on": false}, {"on": false}, {"on": false}, {"on": false},
+        {"on": true},  {"on": false}, {"on": false}, {"on": false}
+      ],
+      "params": {},
+      "seed": 0
+    },
+    {
+      "kind": "pattern",
+      "instrument_id": "bass",
+      "n_steps": 16,
+      "steps": [
+        {"on": true},  {"on": false}, {"on": false}, {"on": true},
+        {"on": false}, {"on": false}, {"on": false}, {"on": true},
+        {"on": true},  {"on": false}, {"on": false}, {"on": false},
+        {"on": true},  {"on": false}, {"on": false}, {"on": false}
+      ],
+      "params": {},
+      "seed": 7
+    }
+  ],
+  "sections": [
+    {
+      "name": "intro",
+      "length_bars": 8,
+      "channel_steps": {
+        "0": [
+          {"on": true},  {"on": false}, {"on": false}, {"on": false},
+          {"on": false}, {"on": false}, {"on": false}, {"on": false},
+          {"on": true},  {"on": false}, {"on": false}, {"on": false},
+          {"on": false}, {"on": false}, {"on": false}, {"on": false}
+        ],
+        "1": [
+          {"on": true},  {"on": false}, {"on": false}, {"on": false},
+          {"on": true},  {"on": false}, {"on": false}, {"on": false},
+          {"on": true},  {"on": false}, {"on": false}, {"on": false},
+          {"on": true},  {"on": false}, {"on": false}, {"on": false}
+        ],
+        "2": [
+          {"on": false}, {"on": false}, {"on": false}, {"on": false},
+          {"on": false}, {"on": false}, {"on": false}, {"on": false},
+          {"on": false}, {"on": false}, {"on": false}, {"on": false},
+          {"on": false}, {"on": false}, {"on": false}, {"on": false}
+        ],
+        "3": [
+          {"on": true},  {"on": false}, {"on": false}, {"on": false},
+          {"on": false}, {"on": false}, {"on": false}, {"on": false},
+          {"on": true},  {"on": false}, {"on": false}, {"on": false},
+          {"on": false}, {"on": false}, {"on": false}, {"on": false}
+        ]
+      }
+    },
+    {
+      "name": "build",
+      "length_bars": 8,
+      "channel_steps": {
+        "0": [
+          {"on": true},  {"on": false}, {"on": false}, {"on": false},
+          {"on": true},  {"on": false}, {"on": false}, {"on": false},
+          {"on": true},  {"on": false}, {"on": false}, {"on": false},
+          {"on": true},  {"on": false}, {"on": false}, {"on": false}
+        ],
+        "1": [
+          {"on": true},  {"on": false}, {"on": true},  {"on": false},
+          {"on": true},  {"on": false}, {"on": true},  {"on": false},
+          {"on": true},  {"on": false}, {"on": true},  {"on": false},
+          {"on": true},  {"on": false}, {"on": true},  {"on": false}
+        ],
+        "2": [
+          {"on": false}, {"on": false}, {"on": false}, {"on": false},
+          {"on": true},  {"on": false}, {"on": false}, {"on": false},
+          {"on": false}, {"on": false}, {"on": false}, {"on": false},
+          {"on": true},  {"on": false}, {"on": false}, {"on": false}
+        ],
+        "3": [
+          {"on": true},  {"on": false}, {"on": false}, {"on": false},
+          {"on": false}, {"on": false}, {"on": true},  {"on": false},
+          {"on": true},  {"on": false}, {"on": false}, {"on": false},
+          {"on": false}, {"on": false}, {"on": true},  {"on": false}
+        ]
+      }
+    },
+    {
+      "name": "drop",
+      "length_bars": 16
+    }
+  ]
+}
