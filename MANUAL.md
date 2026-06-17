@@ -57,7 +57,7 @@ Hovering over the position label shows a tooltip like "Rendering: 2 channel(s)" 
 
 A bird's-eye view of the whole arrangement. Each section occupies a horizontal slice proportional to its bar count. Within each slice, one row per channel shows which steps are active.
 
-- **Each channel has its own colour** — kick is blue, hat green, snare orange, bass purple, etc. Step dots use the channel colour; accent steps show a lighter shade of the same hue. The same colour is used for the channel label on the left.
+- **Each channel has its own colour** — kick is blue, hat green, snare orange, bass purple, etc. Step dots use the channel colour; *accented* steps show a lighter, brighter shade of that colour. The same colour is used for the channel label on the left.
 - **Click a section** to select it — the tracker grid switches to that section's pattern and the section header highlights in blue.
 - **Red vertical line** — the playhead shows the current playback position in real time, moving as the track plays and snapping back to bar 1 on Stop.
 
@@ -96,7 +96,23 @@ Each channel row has a compact left panel:
 
 The **×** button on the right end of each row removes that channel (undoable with Ctrl+Z).
 
-### Step editing
+### Step cells (the numbered row)
+
+Each numbered cell represents one 16th-note step. Clicking it toggles the step **on or off** — this is the only control that determines whether the instrument fires at all on that beat. An active step shows in the channel's colour; an inactive step is plain grey.
+
+### Accent, ghost, and probability rows
+
+Below the step cells are three rows of per-step modifier buttons. These only affect steps that are already **on**; toggling them on a silent step has no audible effect.
+
+| Row | Button | Colour when active | What it does |
+|-----|--------|--------------------|--------------|
+| **A** | Accent | Orange | Marks the step as an *emphasized* hit. In the timeline the dot appears lighter/brighter. **No automatic audio effect** — to hear a difference you must also set a matching instrument param via the per-step override (e.g. set `accent = 1` on an `acid` synth step with `P`). |
+| **g** | Ghost | Green | Marks the step as a *quiet, secondary* hit (e.g. a ghost snare). Same as accent: visual annotation only — wire the audio effect via per-step param override. |
+| **p** | Probability | Purple | **Does affect audio.** Sets the chance (0.0–1.0) that the step fires on each render pass. At 1.0 the step always fires; at 0.5 it fires roughly half the time. The button label changes from `p` to the set percentage (e.g. `75%`). |
+
+In short: the numbered cell asks *"does this step exist?"* while A/g ask *"what kind of hit is it?"* (annotation) and p asks *"how often does it happen?"* (randomness).
+
+### Step editing keyboard shortcuts
 
 | Action | Result |
 |--------|--------|
@@ -106,7 +122,7 @@ The **×** button on the right end of each row removes that channel (undoable wi
 | `G` | Toggle ghost on cursor step |
 | `← →` | Move cursor left/right |
 | `Ctrl+C / Ctrl+V` | Copy/paste step block |
-| Right-click or `P` | Per-step param override popover |
+| `P` | Per-step param override popover (pitch, accent level, etc.) |
 | `Delete` | Clear cursor step |
 
 ### Per-section patterns
@@ -211,5 +227,6 @@ A background autosave writes to `{tmpdir}/forge_autosave.json` every 10 seconds.
 
 - **Real-time step rendering** — edits are not heard live during playback; press ▶ again after editing to re-render with the changes.
 - **MIDI input / export**
-- **Per-step pitch / note values** — steps are on/off (with accent/ghost/probability); pitched sequencing is not yet implemented.
+- **Per-step pitch / note values** — steps are on/off; pitched sequencing is not yet implemented.
+- **Accent / ghost audio wiring** — the A and g buttons are annotation-only; the engine does not yet automatically translate them into louder or quieter hits. Use per-step param overrides (`P` key) to manually wire the effect for now.
 - **Waveform view** — a scrolling waveform display showing rendered audio across the arrangement.
