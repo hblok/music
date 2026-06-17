@@ -238,6 +238,18 @@ _CELL_W = 36
 _CELL_H = 32
 _COL_W_SMALL = 22  # accent / ghost / prob columns
 
+# Per-channel colour palette (mirrors timeline.py _CHANNEL_COLORS)
+_CHANNEL_COLORS_HEX = [
+    "#3a8ee8",   # blue
+    "#3ab96e",   # green
+    "#e8783a",   # orange
+    "#9b3ae8",   # purple
+    "#e83a82",   # pink
+    "#28bebe",   # teal
+    "#c8aa28",   # gold
+    "#dc3c3c",   # red
+]
+
 
 class _StepCell(QWidget):
     """One step cell in the tracker grid.
@@ -249,18 +261,23 @@ class _StepCell(QWidget):
 
     clicked = Signal(int)  # step index
 
-    # Colours
-    _C_ON = "#3a8ee8"
-    _C_OFF = "#e0e0e0"
+    # Fixed semantic colours (shared across all channels)
+    _C_OFF = "#c8c8c8"
     _C_ON_ACCENT = "#e8a03a"
     _C_ON_GHOST = "#3aae6e"
     _C_ON_PROB = "#9855d4"
     _C_CURSOR = "#e83a6e"
     _C_SELECTED = "#8090cc"
 
-    def __init__(self, step_idx: int, parent: QWidget | None = None) -> None:
+    def __init__(
+        self,
+        step_idx: int,
+        channel_color: str = _CHANNEL_COLORS_HEX[0],
+        parent: QWidget | None = None,
+    ) -> None:
         super().__init__(parent)
         self.step_idx = step_idx
+        self._channel_color = channel_color
         self._on = False
         self._accent = False
         self._ghost = False
@@ -312,12 +329,12 @@ class _StepCell(QWidget):
             elif self._probability < 1.0:
                 bg = self._C_ON_PROB
             else:
-                bg = self._C_ON
+                bg = self._channel_color
         else:
             bg = self._C_OFF
         is_light_bg = bg == self._C_OFF
         text_color = "#444" if is_light_bg else "#fff"
-        border_color = "#666" if self._cursor else "#bbb" if is_light_bg else "#0006"
+        border_color = "#666" if self._cursor else "#999" if is_light_bg else "#0006"
         self.setStyleSheet(
             f"background-color: {bg}; border: 1px solid {border_color};"
         )
@@ -395,6 +412,7 @@ class TrackerRow(QWidget):
         self,
         instrument_id: str,
         n_steps: int = 16,
+        channel_color: str = _CHANNEL_COLORS_HEX[0],
         parent: QWidget | None = None,
     ) -> None:
         super().__init__(parent)
@@ -415,7 +433,7 @@ class TrackerRow(QWidget):
 
         # Step cells
         for i in range(n_steps):
-            cell = _StepCell(i, self)
+            cell = _StepCell(i, channel_color, self)
             cell.clicked.connect(self.stepToggled)
             self._cells.append(cell)
             layout.addWidget(cell)
@@ -533,6 +551,17 @@ class TrackerEditor(QWidget):
         self._clipboard: list | None = None
         self._active_section: int | None = None
 
+        channel_color = _CHANNEL_COLORS_HEX[channel_idx % len(_CHANNEL_COLORS_HEX)]
+
+        # Faint channel-colour tint on the row background
+        r = int(channel_color[1:3], 16)
+        g = int(channel_color[3:5], 16)
+        b = int(channel_color[5:7], 16)
+        self.setAutoFillBackground(True)
+        self.setStyleSheet(
+            f"TrackerEditor {{ background-color: rgba({r}, {g}, {b}, 20); }}"
+        )
+
         self.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
 
         outer = QHBoxLayout(self)
@@ -592,7 +621,7 @@ class TrackerEditor(QWidget):
         outer.addWidget(ctrl)
 
         # ── Step grid ───────────────────────────────────────────────────────
-        self._row = TrackerRow(ch.instrument_id, ch.n_steps, self)
+        self._row = TrackerRow(ch.instrument_id, ch.n_steps, channel_color, self)
         self._row.stepToggled.connect(self._on_step_toggled)
         self._row.accentToggled.connect(self._on_accent_toggled)
         self._row.ghostToggled.connect(self._on_ghost_toggled)
