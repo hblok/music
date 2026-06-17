@@ -11,29 +11,30 @@ python3 -m forge.ui.main
 ## Window layout
 
 ```
-┌──────────────────────────────────────────────────────────────────┐
-│  ▶  ⏸  ⏹   1:1  [═══════════════════ seek ═════════════════════]│  ← Transport
-├──────────────────────────────────────────────────────────────────┤
-│  kick  [●···][····][●···][····]  intro (8)  build (8)  drop (16) │  ← Timeline
-│  hat   [●·●·][●·●·][●·●·][●·●·]                                  │
-│  bass  [·····················]                                   │
-├────────────┬─────────────────────────────────────────────────────┤
-│  Sections  │  + Channel  − Channel                               │
-│  intro ●   │  kick  [ on  ][  A ][  g ][ p ] [ on  ][ A ]...    │
-│  build     │  hat   [ on  ][  A ][  g ][ p ] [ on  ][ A ]...    │
-│  drop      │  bass  [    ][    ][    ][   ] ...                  │
-│  [+] [✕]  │                                                     │
-├────────────┴─────────────────────────────────────────────────────┤
-│  Workshop (kick)                       │  A/B Compare            │
-│  Instrument: [kick ▾]                  │  [Snap A] [Snap B]      │
-│  Tuning ─────●──────── 0.5             │  [Toggle A/B]           │
-│  Decay  ────────●───── 0.3             │                         │
-│  Seed: [0] [Reroll]   [▶ Audition] cached                        │
-└────────────────────────────────────────┴────────────────────────-┘
+┌──────────────────────────────────────────────────────────────────────┐
+│  ▶/⏸  ⏹   1:1  [═══════════════════ seek ══════════════════════════]│  ← Transport
+├──────────────────────────────────────────────────────────────────────┤
+│  kick ████░░░░  intro (8)   build (8)   drop (16)       ┆           │  ← Timeline
+│  hat  ░██░██░░                                          ┆           │    (coloured rows,
+│  bass ░░░░░░░░                                          ┆           │     playhead line)
+├────────────┬─────────────────────────────────────────────────────────┤
+│  Sections  │  │▌ kick  [ on  ][ A ][ g ][ p ] ... [ on  ][ A ] ...  ×│
+│  intro ●   │  │▌ hat   [ on  ][ A ][ g ][ p ] ...                   ×│
+│  build     │  │▌ bass  [    ][   ][   ][   ] ...                    ×│
+│  drop      │                                                         │
+│  [+] [✕]  │                                                         │
+├────────────┴─────────────────────────────────────────────────────────┤
+│  Workshop (kick)                          │  A/B Compare             │
+│  Instrument: [kick ▾] [+]                 │  [Snap A] [Snap B]       │
+│  Tuning ─────●──────── 0.5               │  [Toggle A/B]            │
+│  Seed: [0] [Reroll]   [▶ Audition] cached │                          │
+└───────────────────────────────────────────┴──────────────────────────┘
   Status bar: Ready
 ```
 
-The **Mixer** is a floating dock panel (right side by default). Drag its title bar to float it as an independent window or dock it to any edge.
+The **│▌** symbol above represents the vertical volume fader on the left of each channel row. The **×** on the right removes that channel.
+
+The **Mixer** is a floating dock panel (right side by default). Drag its title bar to float it as a separate window or dock it to another edge.
 
 ---
 
@@ -41,13 +42,12 @@ The **Mixer** is a floating dock panel (right side by default). Drag its title b
 
 | Control | Action |
 |---------|--------|
-| `▶` | Render the project then start playback |
-| `⏸` | Pause at current position |
-| `⏹` | Stop and rewind to the start |
+| `▶` / `⏸` | **Toggle play/pause.** First press renders the project then starts playback; while playing the button shows ⏸ — click again to pause. |
+| `⏹` | Stop and rewind to bar 1 |
 | Seek slider | Scrub to any position |
 | `1:1` label | Current position as bar:beat |
 
-**Pressing Play triggers a background render.** The status bar shows "Rendering for playback…" for a few seconds, then playback starts automatically. Any edit (toggling a step, changing a param, adding a channel) marks the buffer stale so the next Play re-renders with the latest changes. A second Play press while the project is unchanged reuses the cached buffer and starts immediately.
+**First press renders the project.** The status bar shows "Rendering for playback…" for a few seconds, then playback starts automatically. Any edit (toggling a step, changing a param, adding or removing a channel) marks the buffer stale, so the next ▶ press re-renders with the latest changes. If nothing has changed since the last render, play resumes instantly.
 
 Hovering over the position label shows a tooltip like "Rendering: 2 channel(s)" when background channel renders are in progress.
 
@@ -55,10 +55,11 @@ Hovering over the position label shows a tooltip like "Rendering: 2 channel(s)" 
 
 ## Timeline strip (below transport)
 
-A bird's-eye view of the whole arrangement. Each section occupies a horizontal slice proportional to its bar count. Within each slice, one row per channel shows which steps are active (blue = on, orange = accented).
+A bird's-eye view of the whole arrangement. Each section occupies a horizontal slice proportional to its bar count. Within each slice, one row per channel shows which steps are active.
 
-- **Click a section** in the timeline to select it — the tracker grid switches to show and edit that section's pattern.
-- The active section header is highlighted in blue.
+- **Each channel has its own colour** — kick is blue, hat green, snare orange, bass purple, etc. Step dots use the channel colour; accent steps show a lighter shade of the same hue. The same colour is used for the channel label on the left.
+- **Click a section** to select it — the tracker grid switches to that section's pattern and the section header highlights in blue.
+- **Red vertical line** — the playhead shows the current playback position in real time, moving as the track plays and snapping back to bar 1 on Stop.
 
 ---
 
@@ -75,13 +76,27 @@ Lists the named sections of your track in playback order.
 | `⎘` | Duplicate the selected section |
 | `bars: N` spinner | Change the length of the selected section in bars |
 
-Clicking a section selects it: the transport loop range is set to that section's bar range, and the tracker grid switches to show that section's step pattern.
+Clicking a section selects it: the transport loop range updates and the tracker grid switches to that section's pattern.
 
 ---
 
 ## Tracker grid (centre)
 
 One row per channel. Each cell is a 16th-note step.
+
+### Per-channel controls (left of each row)
+
+Each channel row has a compact left panel:
+
+| Control | Purpose |
+|---------|---------|
+| **Vertical fader** | Output volume for this channel (0–100%). Muted channels are skipped during the next render. |
+| **M** | Mute — silences this channel on the next render. |
+| **S** | Solo — mutes all other channels. Click S again (or unmute manually) to restore. |
+
+The **×** button on the right end of each row removes that channel (undoable with Ctrl+Z).
+
+### Step editing
 
 | Action | Result |
 |--------|--------|
@@ -96,18 +111,11 @@ One row per channel. Each cell is a 16th-note step.
 
 ### Per-section patterns
 
-Each section can have its own independent step pattern per channel. Select a section (via the sections list or the timeline) — the tracker shows that section's pattern. Editing steps writes to the section override, leaving other sections' patterns unchanged. If a section has no override, it inherits the channel's default pattern.
+Each section can have its own independent step pattern per channel. Select a section (via the sections list or the timeline) — the tracker shows that section's pattern. Editing steps writes to the section override; other sections are unaffected. If a section has no override it inherits the channel's default pattern.
 
-The **drop** section in the example project has no overrides and shows the channel defaults.
+### Adding channels
 
-### Adding / removing channels
-
-The **`+ Channel`** and **`− Channel`** buttons above the tracker grid manage channels:
-
-- **`+ Channel`** opens a picker listing all 27 instruments; the new channel is appended with a default empty pattern.
-- **`− Channel`** removes the currently selected channel (the one whose row you last clicked).
-
-Both operations are undoable (Ctrl+Z).
+Click the **`+`** button next to the instrument dropdown in the Workshop panel. A new channel is appended using whichever instrument is currently shown in the dropdown.
 
 ---
 
@@ -119,13 +127,15 @@ Shows the synthesis controls for the **currently selected channel**. Click any s
 
 The **Instrument** drop-down lists all 27 registered synthesis engines. Changing the selection rewires the channel to a different synthesiser — the step pattern is preserved, the sound changes. The param sliders below update immediately to reflect the new instrument's parameters.
 
+The **`+`** button next to the dropdown adds a new channel using the currently selected instrument.
+
 ### Parameters
 
 Each instrument exposes its own synthesis parameters as sliders (floats), spinboxes (ints), or checkboxes (bools). Every slider move records an undoable transaction.
 
 ### Seed / Reroll
 
-Many instruments use a random seed for subtle variations. The **Seed** spinbox pins an exact value. **Reroll** picks a new random seed for browsing.
+Many instruments use a random seed for subtle variations. The **Seed** spinbox pins an exact value. **Reroll** picks a new random seed for browsing variations.
 
 ### Audition / cached
 
@@ -135,24 +145,24 @@ Many instruments use a random seed for subtle variations. The **Seed** spinbox p
 
 ## Mixer panel (floating dock)
 
-One fader strip per channel, labelled with the instrument name.
+One strip per channel, labelled with the instrument name.
 
-- **Fader** — output gain (0–100%).
-- **M button** — mute/unmute the channel.
+- **Fader** — output gain.
+- **M button** — mute/unmute.
 
-The mixer is a floating dock widget. Drag its title bar to undock it as a standalone window, move it to another edge, or close it entirely. Reopen it from the View menu if closed (or restart the app).
+The mixer is a floating dock widget. Drag its title bar to undock it as a standalone window, move it to another edge, or close and reopen it as needed. Note: the per-channel faders in the tracker rows and the mixer dock are independent UI controls — the tracker row faders are the ones applied during playback rendering.
 
 ---
 
 ## A/B Compare (bottom right)
 
-Compare two parameter states without losing either:
+A tool for comparing two parameter states side by side without losing either:
 
-1. Dial in a sound. Click **Snap A** — the current state of all channels is frozen as snapshot A.
-2. Tweak further. Click **Snap B** — current state frozen as B.
-3. **Toggle A/B** — instantly swaps between the two states. The tracker grid and Workshop update to reflect the active snapshot.
+1. Dial in a sound you like. Click **Snap A** — the current state of all channels is frozen as snapshot A.
+2. Tweak further. Click **Snap B** — the new state is frozen as B.
+3. **Toggle A/B** — instantly swaps between the two frozen states so you can hear the difference.
 
-Snapshots are session-only; they are not saved to disk.
+Useful when you want to decide between two kick sounds, two bass lines, or two overall mixes before committing. Snapshots are session-only and not saved to disk.
 
 ---
 
@@ -199,7 +209,7 @@ A background autosave writes to `{tmpdir}/forge_autosave.json` every 10 seconds.
 
 ## What is not yet built
 
-- **Real-time step rendering** — edits are not heard live during looped playback; press Play again after editing to re-render.
+- **Real-time step rendering** — edits are not heard live during playback; press ▶ again after editing to re-render with the changes.
 - **MIDI input / export**
 - **Per-step pitch / note values** — steps are on/off (with accent/ghost/probability); pitched sequencing is not yet implemented.
 - **Waveform view** — a scrolling waveform display showing rendered audio across the arrangement.
