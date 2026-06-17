@@ -71,8 +71,9 @@ def render_groove(
                     cache=cache,
                 )
 
+                gain = 1.5 if step.accent else (0.4 if step.ghost else 1.0)
                 t = grid.bar_t(bar_idx) + step_idx * step_t
-                buf.add_at(hit_buf.data, t)
+                buf.add_at(hit_buf.data, t, gain=gain)
 
     return buf
 
@@ -134,8 +135,9 @@ def render_loop(
                     cache=cache,
                 )
 
+                gain = 1.5 if step.accent else (0.4 if step.ghost else 1.0)
                 t = t_bar + step_idx * step_t
-                buf.add_at(hit_buf.data, t)
+                buf.add_at(hit_buf.data, t, gain=gain)
 
     return loop_fold(buf, schedule.length_bars, xf_bars, grid)
 

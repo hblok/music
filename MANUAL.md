@@ -98,7 +98,9 @@ The **×** button on the right end of each row removes that channel (undoable wi
 
 ### Step cells (the numbered row)
 
-Each numbered cell represents one 16th-note step. Clicking it toggles the step **on or off** — this is the only control that determines whether the instrument fires at all on that beat. An active step shows in the channel's colour; an inactive step is plain grey.
+Each numbered cell represents one 16th-note step. Clicking it toggles the step **on or off** — this is the only control that determines whether the instrument fires at all on that beat. Active steps show in the channel's colour; inactive steps alternate between two grey shades to mark beats in groups of four.
+
+If the step has a MIDI note override set (via `P`), the cell shows the note name (e.g. **C3**, **A#2**) instead of the step number.
 
 ### Accent, ghost, and probability rows
 
@@ -106,11 +108,15 @@ Below the step cells are three rows of per-step modifier buttons. These only aff
 
 | Row | Button | Colour when active | What it does |
 |-----|--------|--------------------|--------------|
-| **A** | Accent | Orange | Marks the step as an *emphasized* hit. In the timeline the dot appears lighter/brighter. **No automatic audio effect** — to hear a difference you must also set a matching instrument param via the per-step override (e.g. set `accent = 1` on an `acid` synth step with `P`). |
-| **g** | Ghost | Green | Marks the step as a *quiet, secondary* hit (e.g. a ghost snare). Same as accent: visual annotation only — wire the audio effect via per-step param override. |
-| **p** | Probability | Purple | **Does affect audio.** Sets the chance (0.0–1.0) that the step fires on each render pass. At 1.0 the step always fires; at 0.5 it fires roughly half the time. The button label changes from `p` to the set percentage (e.g. `75%`). |
+| **A** | Accent | Orange | Louder, emphasized hit — rendered at **×1.5 gain** (~+3.5 dB). Also shows a brighter dot in the timeline. |
+| **g** | Ghost | Green | Quiet, secondary hit — rendered at **×0.4 gain** (~−8 dB). Useful for ghost snares and subtle variation. |
+| **p** | Probability | Purple | Sets the chance (0.0–1.0) that the step fires on each render pass. At 1.0 the step always fires; at 0.5 it fires roughly half the time. The button label changes from `p` to the set percentage (e.g. `75%`). |
 
-In short: the numbered cell asks *"does this step exist?"* while A/g ask *"what kind of hit is it?"* (annotation) and p asks *"how often does it happen?"* (randomness).
+In short: the numbered cell asks *"does this step exist?"*, A/g ask *"how loud?"*, and p asks *"how often?"*
+
+### Per-step pitch / note values
+
+Use the `P` key (or right-click) to open the per-step param override dialog for the cursor step. Set the **`midi`** param to a MIDI note number (e.g. `48` = C3, `60` = C4). The step cell immediately updates to show the note name. This works for any instrument that has a `midi` parameter (bass, acid, psy-bass, etc.).
 
 ### Step editing keyboard shortcuts
 
@@ -227,6 +233,5 @@ A background autosave writes to `{tmpdir}/forge_autosave.json` every 10 seconds.
 
 - **Real-time step rendering** — edits are not heard live during playback; press ▶ again after editing to re-render with the changes.
 - **MIDI input / export**
-- **Per-step pitch / note values** — steps are on/off; pitched sequencing is not yet implemented.
-- **Accent / ghost audio wiring** — the A and g buttons are annotation-only; the engine does not yet automatically translate them into louder or quieter hits. Use per-step param overrides (`P` key) to manually wire the effect for now.
+- **Pitched sequencing UI** — per-step MIDI notes are supported via the `P` param override popover, but there is no inline piano-roll or note-entry row in the tracker grid yet.
 - **Waveform view** — a scrolling waveform display showing rendered audio across the arrangement.

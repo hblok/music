@@ -250,6 +250,13 @@ _CHANNEL_COLORS_HEX = [
     "#dc3c3c",   # red
 ]
 
+_NOTE_NAMES = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"]
+
+
+def _midi_to_name(midi: int) -> str:
+    """Return note name for a MIDI number, e.g. 60 → 'C4'."""
+    return f"{_NOTE_NAMES[midi % 12]}{midi // 12 - 1}"
+
 
 class _StepCell(QWidget):
     """One step cell in the tracker grid.
@@ -262,7 +269,9 @@ class _StepCell(QWidget):
     clicked = Signal(int)  # step index
 
     # Fixed semantic colours (shared across all channels)
-    _C_OFF = "#c8c8c8"
+    # Off-state alternates between two shades to mark beat groups of 4
+    _C_OFF_EVEN = "#c8c8c8"   # groups 0, 2  (steps 1-4, 9-12)
+    _C_OFF_ODD  = "#b0b0b0"   # groups 1, 3  (steps 5-8, 13-16)
     _C_ON_ACCENT = "#e8a03a"
     _C_ON_GHOST = "#3aae6e"
     _C_ON_PROB = "#9855d4"
@@ -282,6 +291,7 @@ class _StepCell(QWidget):
         self._accent = False
         self._ghost = False
         self._probability = 1.0
+        self._params: dict = {}
         self._cursor = False
         self._selected = False
 
@@ -301,11 +311,13 @@ class _StepCell(QWidget):
         accent: bool = False,
         ghost: bool = False,
         probability: float = 1.0,
+        params: dict | None = None,
     ) -> None:
         self._on = on
         self._accent = accent
         self._ghost = ghost
         self._probability = probability
+        self._params = params or {}
         self._refresh()
 
     def set_cursor(self, active: bool) -> None:
@@ -317,6 +329,7 @@ class _StepCell(QWidget):
         self._refresh()
 
     def _refresh(self) -> None:
+        off_color = self._C_OFF_ODD if (self.step_idx // 4) % 2 else self._C_OFF_EVEN
         if self._cursor:
             bg = self._C_CURSOR
         elif self._selected:
@@ -331,14 +344,19 @@ class _StepCell(QWidget):
             else:
                 bg = self._channel_color
         else:
-            bg = self._C_OFF
-        is_light_bg = bg == self._C_OFF
-        text_color = "#444" if is_light_bg else "#fff"
-        border_color = "#666" if self._cursor else "#999" if is_light_bg else "#0006"
+            bg = off_color
+        is_active = self._on or self._cursor or self._selected
+        text_color = "#444" if not is_active else "#fff"
+        border_color = "#666" if self._cursor else "#999" if not is_active else "#0006"
         self.setStyleSheet(
             f"background-color: {bg}; border: 1px solid {border_color};"
         )
         self._label.setStyleSheet(f"color: {text_color}; background: transparent; border: none;")
+        # Show MIDI note name when a pitch override is set, otherwise show step number
+        if "midi" in self._params:
+            self._label.setText(_midi_to_name(int(self._params["midi"])))
+        else:
+            self._label.setText(str(self.step_idx + 1))
 
     def mousePressEvent(self, event) -> None:
         self.clicked.emit(self.step_idx)
@@ -506,6 +524,7 @@ class TrackerRow(QWidget):
             accent=step_data.accent,
             ghost=step_data.ghost,
             probability=step_data.probability,
+            params=step_data.params,
         )
         self._accent_btns[step_idx].setChecked(step_data.accent)
         self._ghost_btns[step_idx].setChecked(step_data.ghost)
