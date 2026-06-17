@@ -236,7 +236,7 @@ class PatternEditor(QWidget):
 
 _CELL_W = 36
 _CELL_H = 32
-_COL_W_SMALL = 22  # accent / ghost / prob columns
+_MOD_H = 22        # height of accent / ghost / prob rows
 
 # Per-channel colour palette (mirrors timeline.py _CHANNEL_COLORS)
 _CHANNEL_COLORS_HEX = [
@@ -423,22 +423,22 @@ class TrackerRow(QWidget):
         self._ghost_btns: list[QToolButton] = []
         self._prob_btns: list[QToolButton] = []
 
-        layout = QHBoxLayout(self)
-        layout.setContentsMargins(2, 1, 2, 1)
-        layout.setSpacing(2)
+        # Grid: col 0 = label (spans all 4 rows); cols 1..n_steps = steps/mods
+        grid = QGridLayout(self)
+        grid.setContentsMargins(2, 1, 2, 1)
+        grid.setSpacing(2)
 
         lbl = QLabel(instrument_id[:8])
         lbl.setFixedWidth(64)
-        layout.addWidget(lbl)
+        lbl.setAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter)
+        grid.addWidget(lbl, 0, 0, 4, 1)   # span all 4 rows
 
-        # Step cells
+        # Row 0: step cells
         for i in range(n_steps):
             cell = _StepCell(i, channel_color, self)
             cell.clicked.connect(self.stepToggled)
             self._cells.append(cell)
-            layout.addWidget(cell)
-
-        layout.addSpacing(4)
+            grid.addWidget(cell, 0, i + 1)
 
         _btn_base = (
             "QToolButton { background: #c8c8c8; border: 1px solid #999;"
@@ -461,38 +461,40 @@ class TrackerRow(QWidget):
             " color: #fff; }"
         )
 
-        # Accent column header is on the row; per-step buttons
+        # Row 1: accent buttons
         for i in range(n_steps):
             btn = QToolButton()
             btn.setText("A")
-            btn.setFixedSize(_COL_W_SMALL, _CELL_H)
+            btn.setFixedSize(_CELL_W, _MOD_H)
             btn.setCheckable(True)
             btn.setToolTip(f"Step {i+1} accent")
             btn.setStyleSheet(_accent_style)
             btn.clicked.connect(lambda checked, idx=i: self.accentToggled.emit(idx))
             self._accent_btns.append(btn)
-            layout.addWidget(btn)
+            grid.addWidget(btn, 1, i + 1)
 
+        # Row 2: ghost buttons
         for i in range(n_steps):
             btn = QToolButton()
             btn.setText("g")
-            btn.setFixedSize(_COL_W_SMALL, _CELL_H)
+            btn.setFixedSize(_CELL_W, _MOD_H)
             btn.setCheckable(True)
             btn.setToolTip(f"Step {i+1} ghost")
             btn.setStyleSheet(_ghost_style)
             btn.clicked.connect(lambda checked, idx=i: self.ghostToggled.emit(idx))
             self._ghost_btns.append(btn)
-            layout.addWidget(btn)
+            grid.addWidget(btn, 2, i + 1)
 
+        # Row 3: probability buttons
         for i in range(n_steps):
             btn = QToolButton()
             btn.setText("p")
-            btn.setFixedSize(_COL_W_SMALL, _CELL_H)
+            btn.setFixedSize(_CELL_W, _MOD_H)
             btn.setToolTip(f"Step {i+1} probability")
             btn.setStyleSheet(_prob_style)
             btn.clicked.connect(lambda checked, idx=i: self.probClicked.emit(idx))
             self._prob_btns.append(btn)
-            layout.addWidget(btn)
+            grid.addWidget(btn, 3, i + 1)
 
     # ---- state sync
 
