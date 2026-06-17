@@ -440,6 +440,27 @@ class TrackerRow(QWidget):
 
         layout.addSpacing(4)
 
+        _btn_base = (
+            "QToolButton { background: #c8c8c8; border: 1px solid #999;"
+            " color: #444; font-weight: bold; }"
+            " QToolButton:hover { background: #b8b8b8; }"
+        )
+        _accent_style = (
+            _btn_base
+            + " QToolButton:checked { background: #e8a03a; border-color: #b87020;"
+            " color: #fff; }"
+        )
+        _ghost_style = (
+            _btn_base
+            + " QToolButton:checked { background: #3aae6e; border-color: #1e7a48;"
+            " color: #fff; }"
+        )
+        _prob_style = (
+            _btn_base
+            + " QToolButton:checked { background: #9855d4; border-color: #6a2ea0;"
+            " color: #fff; }"
+        )
+
         # Accent column header is on the row; per-step buttons
         for i in range(n_steps):
             btn = QToolButton()
@@ -447,6 +468,7 @@ class TrackerRow(QWidget):
             btn.setFixedSize(_COL_W_SMALL, _CELL_H)
             btn.setCheckable(True)
             btn.setToolTip(f"Step {i+1} accent")
+            btn.setStyleSheet(_accent_style)
             btn.clicked.connect(lambda checked, idx=i: self.accentToggled.emit(idx))
             self._accent_btns.append(btn)
             layout.addWidget(btn)
@@ -457,6 +479,7 @@ class TrackerRow(QWidget):
             btn.setFixedSize(_COL_W_SMALL, _CELL_H)
             btn.setCheckable(True)
             btn.setToolTip(f"Step {i+1} ghost")
+            btn.setStyleSheet(_ghost_style)
             btn.clicked.connect(lambda checked, idx=i: self.ghostToggled.emit(idx))
             self._ghost_btns.append(btn)
             layout.addWidget(btn)
@@ -466,6 +489,7 @@ class TrackerRow(QWidget):
             btn.setText("p")
             btn.setFixedSize(_COL_W_SMALL, _CELL_H)
             btn.setToolTip(f"Step {i+1} probability")
+            btn.setStyleSheet(_prob_style)
             btn.clicked.connect(lambda checked, idx=i: self.probClicked.emit(idx))
             self._prob_btns.append(btn)
             layout.addWidget(btn)
