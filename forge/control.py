@@ -281,7 +281,7 @@ def _render_doc_sections(
             pattern_dict = {
                 "bpm": doc.bpm,
                 "length_bars": total_bars,
-                "n_steps": 16,
+                "n_steps": ch.n_steps,
                 "tracks": [ch.to_track_dict()],
             }
             seed = doc.seed + ci * 1009
@@ -329,7 +329,7 @@ def _render_doc_sections(
             pattern_dict = {
                 "bpm": doc.bpm,
                 "length_bars": sec_bars,
-                "n_steps": 16,
+                "n_steps": ch.n_steps,
                 "tracks": [{
                     "instrument": ch.instrument_id,
                     "steps": step_values,

@@ -72,6 +72,7 @@ def render_groove(
                 )
 
                 gain = 1.5 if step.accent else (0.4 if step.ghost else 1.0)
+                gain *= step.velocity
                 t = grid.bar_t(bar_idx) + step_idx * step_t
                 buf.add_at(hit_buf.data, t, gain=gain)
 
@@ -136,6 +137,7 @@ def render_loop(
                 )
 
                 gain = 1.5 if step.accent else (0.4 if step.ghost else 1.0)
+                gain *= step.velocity
                 t = t_bar + step_idx * step_t
                 buf.add_at(hit_buf.data, t, gain=gain)
 

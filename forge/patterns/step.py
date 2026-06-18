@@ -42,6 +42,7 @@ class Step:
     probability: float = 1.0
     accent: bool = False
     ghost: bool = False
+    velocity: float = 1.0
 
 
 class StepPattern:
@@ -75,11 +76,12 @@ class StepPattern:
         probability: float | None = None,
         accent: bool = False,
         ghost: bool = False,
+        velocity: float = 1.0,
     ) -> "StepPattern":
         """Set step *idx* to fire.  Returns self for chaining."""
         merged = {**self.default_params, **(params or {})}
         p = probability if probability is not None else self.default_probability
-        self._steps[idx] = Step(self.instrument_id, merged, p, accent, ghost)
+        self._steps[idx] = Step(self.instrument_id, merged, p, accent, ghost, velocity)
         return self
 
     def clear(self, idx: int) -> "StepPattern":
@@ -126,5 +128,6 @@ class StepPattern:
                         params=step_params,
                         probability=p,
                         accent=bool(raw.get("accent", False)),
-                        ghost=bool(raw.get("ghost", False)))
+                        ghost=bool(raw.get("ghost", False)),
+                        velocity=float(raw.get("velocity", 1.0)))
         return pat

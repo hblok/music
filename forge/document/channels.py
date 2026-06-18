@@ -33,6 +33,18 @@ class StepData:
     ghost: bool = False
     probability: float = 1.0
     params: dict = field(default_factory=dict)
+    velocity: float = 1.0
+
+    def _is_plain(self) -> bool:
+        """Return True iff the step is plain-on (no non-default fields)."""
+        return (
+            self.on
+            and not self.accent
+            and not self.ghost
+            and self.probability == 1.0
+            and not self.params
+            and self.velocity == 1.0
+        )
 
     def to_dict(self) -> dict:
         """Return a PatternSpec-compatible step value (int or dict)."""
@@ -45,15 +57,22 @@ class StepData:
             d["ghost"] = True
         if self.probability != 1.0:
             d["probability"] = self.probability
+        if self.velocity != 1.0:
+            d["velocity"] = self.velocity
         if self.params:
             d["params"] = dict(self.params)
         return d
 
     def to_step_value(self):
-        """Return the compact form used in TrackSpec.steps (0, 1, or dict)."""
+        """Return the compact form used in TrackSpec.steps (0, 1, or dict).
+
+        A plain on-step (no accent, ghost, probability != 1.0, params, or
+        velocity != 1.0) is returned as the integer ``1``.  Any non-default
+        field causes the full dict form to be returned.
+        """
         if not self.on:
             return 0
-        if not self.accent and not self.ghost and self.probability == 1.0 and not self.params:
+        if self._is_plain():
             return 1
         return self.to_dict()
 
@@ -70,6 +89,7 @@ class StepData:
                 ghost=bool(v.get("ghost", False)),
                 probability=float(v.get("probability", 1.0)),
                 params=dict(v.get("params", {})),
+                velocity=float(v.get("velocity", 1.0)),
             )
         return cls(on=bool(v))
 

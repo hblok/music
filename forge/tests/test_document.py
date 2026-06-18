@@ -65,6 +65,41 @@ class TestStepData(unittest.TestCase):
         self.assertAlmostEqual(s.probability, s2.probability)
         self.assertEqual(s.params, s2.params)
 
+    # --- Phase 4: velocity round-trip tests ---
+
+    def test_velocity_default_returns_compact_1(self):
+        """A plain on-step with velocity=1.0 must still return compact int 1."""
+        s = StepData(on=True, velocity=1.0)
+        self.assertEqual(s.to_step_value(), 1)
+
+    def test_velocity_non_default_returns_dict(self):
+        """A step with velocity != 1.0 must return a dict carrying 'velocity'."""
+        s = StepData(on=True, velocity=0.7)
+        v = s.to_step_value()
+        self.assertIsInstance(v, dict)
+        self.assertIn("velocity", v)
+        self.assertAlmostEqual(v["velocity"], 0.7)
+
+    def test_velocity_round_trip(self):
+        """StepData(on=True, velocity=0.7) survives to_step_value / from_step_value."""
+        s = StepData(on=True, velocity=0.7)
+        v = s.to_step_value()
+        s2 = StepData.from_step_value(v)
+        self.assertTrue(s2.on)
+        self.assertAlmostEqual(s2.velocity, 0.7)
+
+    def test_velocity_1_not_in_to_dict(self):
+        """to_dict for velocity=1.0 must NOT include a 'velocity' key."""
+        s = StepData(on=True, velocity=1.0)
+        d = s.to_dict()
+        self.assertNotIn("velocity", d)
+
+    def test_velocity_non_default_in_to_dict(self):
+        """to_dict for velocity != 1.0 must include 'velocity'."""
+        s = StepData(on=True, velocity=0.5)
+        d = s.to_dict()
+        self.assertAlmostEqual(d["velocity"], 0.5)
+
 
 # ---------------------------------------------------------------------------
 # PatternChannel

@@ -378,5 +378,157 @@ class TestControlPhase4(unittest.TestCase):
             control.render_pattern(spec, seed=0)
 
 
+# ---------------------------------------------------------------------------
+# Phase 4 additions: per-step velocity and per-channel n_steps
+
+class TestVelocity(unittest.TestCase):
+    """Acceptance tests for per-step velocity (Part A)."""
+
+    def _one_step_spec(self, velocity=1.0, accent=False):
+        """PatternSpec: 1 bar, one kick on step 0, all others silent."""
+        step: dict | int
+        if velocity != 1.0 or accent:
+            step = {"on": True, "velocity": velocity}
+            if accent:
+                step["accent"] = True
+        else:
+            step = 1
+        return {
+            "bpm": 138.0,
+            "length_bars": 1,
+            "tracks": [
+                {"instrument": "kick",
+                 "steps": [step] + [0] * 15},
+            ],
+        }
+
+    def test_velocity_half_approx_6dB_down(self):
+        """A step at velocity=0.5 should be ~half the peak of velocity=1.0."""
+        buf_full = render_pattern_spec(self._one_step_spec(velocity=1.0), seed=0)
+        buf_half = render_pattern_spec(self._one_step_spec(velocity=0.5), seed=0)
+        ratio = buf_half.peak() / buf_full.peak()
+        # 0.5 exactly, within floating-point tolerance
+        self.assertAlmostEqual(ratio, 0.5, delta=1e-6)
+
+    def test_velocity_1_unchanged(self):
+        """velocity=1.0 must be a no-op: buffers identical."""
+        buf1 = render_pattern_spec(self._one_step_spec(velocity=1.0), seed=0)
+        buf2 = render_pattern_spec(self._one_step_spec(velocity=1.0), seed=0)
+        np.testing.assert_array_equal(buf1.data, buf2.data)
+
+    def test_accent_times_velocity_stacks(self):
+        """accent (×1.5) × velocity 0.5 should give ×0.75 vs a plain step."""
+        buf_plain = render_pattern_spec(self._one_step_spec(velocity=1.0), seed=0)
+        buf_accent_half = render_pattern_spec(
+            self._one_step_spec(velocity=0.5, accent=True), seed=0
+        )
+        ratio = buf_accent_half.peak() / buf_plain.peak()
+        # Expected: 1.5 * 0.5 = 0.75
+        self.assertAlmostEqual(ratio, 0.75, delta=1e-6)
+
+    def test_velocity_from_dict_step_parses(self):
+        """from_track_dict with a dict step carrying velocity threads correctly."""
+        from forge.patterns.step import StepPattern
+        track = {
+            "instrument": "kick",
+            "steps": [{"on": True, "velocity": 0.8}] + [0] * 15,
+        }
+        pat = StepPattern.from_track_dict(track)
+        hits = dict(pat.hits())
+        self.assertAlmostEqual(hits[0].velocity, 0.8)
+
+    def test_velocity_zero_silences(self):
+        """velocity=0.0 yields a silent buffer."""
+        spec = {
+            "bpm": 138.0,
+            "length_bars": 1,
+            "tracks": [
+                {"instrument": "kick",
+                 "steps": [{"on": True, "velocity": 0.0}] + [0] * 15},
+            ],
+        }
+        buf = render_pattern_spec(spec, seed=0)
+        self.assertAlmostEqual(buf.peak(), 0.0, delta=1e-9)
+
+
+class TestNSteps(unittest.TestCase):
+    """Acceptance tests for per-channel n_steps (Part B)."""
+
+    def test_12_step_pattern_has_12_hits(self):
+        """A 12-step all-on pattern reports 12 hits per bar."""
+        from forge.patterns.step import StepPattern
+        track = {"instrument": "hat", "steps": [1] * 12, "params": {"open_": False}}
+        pat = StepPattern.from_track_dict(track, n_steps=12)
+        self.assertEqual(len(pat.hits()), 12)
+
+    def test_12_vs_16_renders_differ(self):
+        """A 12-step pattern renders differently from a 16-step pattern."""
+        spec12 = {
+            "bpm": 138.0,
+            "length_bars": 1,
+            "n_steps": 12,
+            "tracks": [
+                {"instrument": "hat",
+                 "steps": [1] * 12,
+                 "params": {"open_": False}},
+            ],
+        }
+        spec16 = {
+            "bpm": 138.0,
+            "length_bars": 1,
+            "n_steps": 16,
+            "tracks": [
+                {"instrument": "hat",
+                 "steps": [1] * 16,
+                 "params": {"open_": False}},
+            ],
+        }
+        buf12 = render_pattern_spec(spec12, seed=0)
+        buf16 = render_pattern_spec(spec16, seed=0)
+        # Buffers must differ (different onset positions)
+        self.assertFalse(np.array_equal(buf12.data, buf16.data))
+
+    def test_doc_12_step_channel_honours_n_steps(self):
+        """A PatternChannel with n_steps=12 rendered via render_doc_for_playback
+        produces a different buffer than an identical 16-step channel."""
+        from forge import control
+        from forge.document.channels import PatternChannel, StepData
+        from forge.document.model import ProjectDoc
+
+        def make_doc(n_steps):
+            doc = ProjectDoc(bpm=138.0, seed=0)
+            steps = [StepData(on=True)] * n_steps
+            ch = PatternChannel("hat", n_steps=n_steps, steps=steps,
+                                params={"open_": False})
+            doc.add_channel(ch)
+            return doc
+
+        buf12 = control.render_doc_for_playback(make_doc(12))
+        buf16 = control.render_doc_for_playback(make_doc(16))
+        # Different n_steps → different onset positions → different audio
+        self.assertFalse(np.array_equal(buf12.data, buf16.data))
+
+    def test_12_step_step_spacing(self):
+        """Verify a 12-step pattern places hits at bar/12 intervals, not bar/16."""
+        from forge.core.grid import Grid
+        from forge.patterns.schedule import Schedule
+
+        spec = {
+            "bpm": 138.0,
+            "length_bars": 1,
+            "n_steps": 12,
+            "tracks": [
+                {"instrument": "hat",
+                 "steps": [1] * 12,
+                 "params": {"open_": False}},
+            ],
+        }
+        sched = Schedule.from_pattern_spec(spec)
+        # n_steps of the first pattern must be 12
+        patterns = sched.get_patterns(0)
+        self.assertEqual(len(patterns), 1)
+        self.assertEqual(patterns[0].n_steps, 12)
+
+
 if __name__ == "__main__":
     unittest.main()

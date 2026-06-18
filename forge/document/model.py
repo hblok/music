@@ -249,7 +249,7 @@ class ProjectDoc:
     ) -> None:
         """Set one field of one step in a PatternChannel.
 
-        field ∈ {on, accent, ghost, probability}
+        field ∈ {on, accent, ghost, probability, velocity}
         """
         ch = self._channels[channel_idx]
         if not isinstance(ch, PatternChannel):
@@ -301,7 +301,7 @@ class ProjectDoc:
             raise TypeError("clear_steps only applies to PatternChannel")
         txn = Transaction("clear steps")
         for i, step in enumerate(ch.steps):
-            if step.on or step.accent or step.ghost or step.probability != 1.0 or step.params:
+            if step.on or step.accent or step.ghost or step.probability != 1.0 or step.params or step.velocity != 1.0:
                 txn.add_change(
                     ("channel", channel_idx, "step", i, "on"),
                     step.on, False,
@@ -311,6 +311,7 @@ class ProjectDoc:
                 step.ghost = False
                 step.probability = 1.0
                 step.params = {}
+                step.velocity = 1.0
         if not txn.is_empty():
             self._history.push(txn)
             self._notify(txn)
