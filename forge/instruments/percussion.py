@@ -324,3 +324,249 @@ def frame_roll(params: dict, rng: np.random.Generator, **ctx) -> AudioBuffer:
         t += interval * rng.uniform(0.85, 1.15)
 
     return buf
+
+
+# ---------------------------------------------------------------- tick (clock tick)
+
+TICK_PARAMS = [
+    ParamSchema("bp_lo", "float", 1700.0, lo=500.0, hi=5000.0, unit="Hz",
+                label="BP low"),
+    ParamSchema("bp_hi", "float", 2600.0, lo=1000.0, hi=10000.0, unit="Hz",
+                label="BP high"),
+    ParamSchema("f_ping", "float", 1250.0, lo=300.0, hi=4000.0, unit="Hz",
+                label="Ping freq"),
+    ParamSchema("gain", "float", 0.85, lo=0.1, hi=2.0),
+]
+
+
+def make_tick(params: dict, rng: np.random.Generator, **ctx) -> AudioBuffer:
+    """Bandpassed noise click + short damped sine ping (~30 ms).
+
+    Based on the ``click()`` helper in generate_stillsuit.py (the clock tick
+    that marks every 8th note).  Default params produce a high "tick"; use
+    lower bp_lo/f_ping for a softer "tock".
+    """
+    sr = ctx.get("sr", SR)
+    bp_lo = float(params.get("bp_lo", 1700.0))
+    bp_hi = float(params.get("bp_hi", 2600.0))
+    f_ping = float(params.get("f_ping", 1250.0))
+    gain = float(params.get("gain", 0.85))
+
+    # cap bp_hi to sr/2 - small margin
+    bp_hi = min(bp_hi, sr * 0.499)
+    bp_lo = min(bp_lo, bp_hi * 0.9)
+
+    n = int(0.030 * sr)
+    tt = np.arange(n, dtype=np.float64) / sr
+
+    from scipy import signal as _sig
+    sos_c = _sig.butter(2, [bp_lo, bp_hi], "bandpass", fs=sr, output="sos")
+    burst = _sig.sosfilt(sos_c, rng.standard_normal(n)) * np.exp(-tt * 160.0)
+    burst /= np.max(np.abs(burst)) + 1e-12
+
+    ping = np.sin(2.0 * np.pi * f_ping * tt) * np.exp(-tt * 120.0)
+    x = burst + 0.8 * ping
+    peak = np.max(np.abs(x)) + 1e-12
+    return AudioBuffer.from_mono(x / peak * gain, sr=sr)
+
+
+# ---------------------------------------------------------------- clock (tick/tock stereo)
+
+CLOCK_PARAMS = [
+    ParamSchema("tock", "bool", False, label="Tock (low side)"),
+    ParamSchema("bp_lo_tick", "float", 1700.0, lo=500.0, hi=5000.0, unit="Hz"),
+    ParamSchema("bp_hi_tick", "float", 2600.0, lo=1000.0, hi=10000.0, unit="Hz"),
+    ParamSchema("f_ping_tick", "float", 1250.0, lo=300.0, hi=4000.0, unit="Hz"),
+    ParamSchema("bp_lo_tock", "float", 1200.0, lo=400.0, hi=4000.0, unit="Hz"),
+    ParamSchema("bp_hi_tock", "float", 1900.0, lo=800.0, hi=8000.0, unit="Hz"),
+    ParamSchema("f_ping_tock", "float", 880.0, lo=200.0, hi=2000.0, unit="Hz"),
+    ParamSchema("gain", "float", 0.85, lo=0.1, hi=2.0),
+]
+
+
+def make_clock(params: dict, rng: np.random.Generator, **ctx) -> AudioBuffer:
+    """Clock tick/tock with L/R stereo placement.
+
+    ``tock=False`` → tick (high pitch, biased left); ``tock=True`` → tock
+    (lower pitch, biased right).  Directly from the stillsuit clock pattern.
+    """
+    sr = ctx.get("sr", SR)
+    is_tock = bool(params.get("tock", False))
+    gain = float(params.get("gain", 0.85))
+
+    if is_tock:
+        bp_lo = float(params.get("bp_lo_tock", 1200.0))
+        bp_hi = float(params.get("bp_hi_tock", 1900.0))
+        f_ping = float(params.get("f_ping_tock", 880.0))
+        pan = 0.75  # biased right
+    else:
+        bp_lo = float(params.get("bp_lo_tick", 1700.0))
+        bp_hi = float(params.get("bp_hi_tick", 2600.0))
+        f_ping = float(params.get("f_ping_tick", 1250.0))
+        pan = 0.25  # biased left
+
+    bp_hi = min(bp_hi, sr * 0.499)
+    bp_lo = min(bp_lo, bp_hi * 0.9)
+
+    n = int(0.030 * sr)
+    tt = np.arange(n, dtype=np.float64) / sr
+
+    from scipy import signal as _sig
+    sos_c = _sig.butter(2, [bp_lo, bp_hi], "bandpass", fs=sr, output="sos")
+    burst = _sig.sosfilt(sos_c, rng.standard_normal(n)) * np.exp(-tt * 160.0)
+    burst /= np.max(np.abs(burst)) + 1e-12
+    ping = np.sin(2.0 * np.pi * f_ping * tt) * np.exp(-tt * 120.0)
+    x = burst + 0.8 * ping
+    peak = np.max(np.abs(x)) + 1e-12
+    x = x / peak * gain
+
+    # constant-power pan
+    buf = AudioBuffer(n, sr=sr)
+    buf.data[:, 0] = x * np.cos(pan * np.pi / 2.0)  # L
+    buf.data[:, 1] = x * np.sin(pan * np.pi / 2.0)  # R
+    return buf
+
+
+# ---------------------------------------------------------------- anvil (metallic clang)
+
+ANVIL_PARAMS = [
+    ParamSchema("f0", "float", 410.0, lo=150.0, hi=1200.0, unit="Hz",
+                label="Fundamental"),
+    ParamSchema("duration", "float", 1.2, lo=0.2, hi=4.0, unit="s"),
+    ParamSchema("noise_level", "float", 0.7, lo=0.0, hi=2.0),
+    ParamSchema("gain", "float", 1.0, lo=0.1, hi=2.0),
+]
+
+
+def make_anvil(params: dict, rng: np.random.Generator, **ctx) -> AudioBuffer:
+    """Metallic clang — inharmonic partial stack + fast noise transient.
+
+    Adapted from ``make_anvil()`` in trance/generate_tech_noir.py.
+    """
+    sr = ctx.get("sr", SR)
+    f0 = float(params.get("f0", 410.0))
+    dur = float(params.get("duration", 1.2))
+    noise_level = float(params.get("noise_level", 0.7))
+    gain = float(params.get("gain", 1.0))
+
+    n = int(dur * sr)
+    td = np.arange(n, dtype=np.float64) / sr
+
+    # inharmonic partial stack (detuned pairs for beating shimmer)
+    x = np.zeros(n)
+    for i, (ratio, g) in enumerate(zip(
+            [1.0, 2.71, 4.07, 5.43, 7.39, 9.21],
+            [1.0, 0.78, 0.55, 0.40, 0.26, 0.16])):
+        dec = 1.1 + 0.55 * i
+        for det in (0.9991, 1.0009):
+            x += g * np.sin(2.0 * np.pi * f0 * ratio * det * td
+                            + rng.uniform(0, 2.0 * np.pi)) * np.exp(-td * dec)
+
+    from scipy import signal as _sig
+    # high-band noise transient ("strike" sound)
+    bp_lo = min(2500.0, sr * 0.499)
+    bp_hi = min(9000.0, sr * 0.499)
+    if bp_lo < bp_hi:
+        sos_s = _sig.butter(2, [bp_lo, bp_hi], "bandpass", fs=sr, output="sos")
+        strike = _sig.sosfilt(sos_s, rng.standard_normal(n)) * np.exp(-td * 280.0)
+        strike /= np.max(np.abs(strike)) + 1e-12
+    else:
+        strike = np.zeros(n)
+
+    x = x / (np.max(np.abs(x)) + 1e-12) + noise_level * strike
+    # soft attack transient shaping
+    x *= 1.0 - np.exp(-td / 0.0006)
+    peak = np.max(np.abs(x)) + 1e-12
+    return AudioBuffer.from_mono(x / peak * gain, sr=sr)
+
+
+# ---------------------------------------------------------------- slam (heavy impact)
+
+SLAM_PARAMS = [
+    ParamSchema("f0", "float", 52.0, lo=20.0, hi=120.0, unit="Hz",
+                label="Sub start freq"),
+    ParamSchema("f1", "float", 150.0, lo=50.0, hi=300.0, unit="Hz",
+                label="Sub peak freq"),
+    ParamSchema("duration", "float", 0.55, lo=0.1, hi=1.2, unit="s"),
+    ParamSchema("noise_level", "float", 0.55, lo=0.0, hi=1.5),
+    ParamSchema("gain", "float", 1.0, lo=0.1, hi=2.0),
+]
+
+
+def make_slam(params: dict, rng: np.random.Generator, **ctx) -> AudioBuffer:
+    """Heavy impact — falling pitch thud + gated filtered-noise body.
+
+    Adapted from ``make_slam()`` in trance/generate_tech_noir.py.
+    The 80s-style hard gate is baked in (reverb sustain cut at ~140 ms).
+    """
+    sr = ctx.get("sr", SR)
+    f0 = float(params.get("f0", 52.0))
+    f1 = float(params.get("f1", 150.0))
+    dur = float(params.get("duration", 0.55))
+    noise_level = float(params.get("noise_level", 0.55))
+    gain = float(params.get("gain", 1.0))
+
+    n = int(dur * sr)
+    td = np.arange(n, dtype=np.float64) / sr
+
+    # pitch-falling sub body
+    f_curve = f0 + (f1 - f0) * np.exp(-td * 26.0)
+    body = np.sin(2.0 * np.pi * np.cumsum(f_curve) / sr) * np.exp(-td * 9.0)
+
+    from scipy import signal as _sig
+    bp_hi = min(2400.0, sr * 0.499)
+    sos_n = _sig.butter(2, [180.0, bp_hi], "bandpass", fs=sr, output="sos")
+    burst = _sig.sosfilt(sos_n, rng.standard_normal(n))
+    burst /= np.max(np.abs(burst)) + 1e-12
+
+    # gated reverb body: fast + slow decay, then hard gate at ~140 ms
+    x = body + noise_level * burst * np.exp(-td * 16.0) + 0.3 * noise_level * burst * np.exp(-td * 3.0)
+    gate = np.clip((0.140 - td) / 0.025, 0.0, 1.0)
+    x *= (1.0 - np.exp(-td / 0.0015)) * np.maximum(gate, np.exp(-td * 28.0) * 0.0)
+    peak = np.max(np.abs(x)) + 1e-12
+    return AudioBuffer.from_mono(x / peak * gain, sr=sr)
+
+
+# ---------------------------------------------------------------- tap (light tap)
+
+TAP_PARAMS = [
+    ParamSchema("f0", "float", 1280.0, lo=400.0, hi=4000.0, unit="Hz",
+                label="Tap fundamental"),
+    ParamSchema("duration", "float", 0.35, lo=0.05, hi=0.8, unit="s"),
+    ParamSchema("gain", "float", 1.0, lo=0.1, hi=2.0),
+]
+
+
+def make_tap(params: dict, rng: np.random.Generator, **ctx) -> AudioBuffer:
+    """Light tap — inharmonic partials + bright noise transient.
+
+    Adapted from ``make_tap()`` in trance/generate_tech_noir.py.
+    Quieter and brighter than ``make_slam``; suitable for light percussion accents.
+    """
+    sr = ctx.get("sr", SR)
+    f0 = float(params.get("f0", 1280.0))
+    dur = float(params.get("duration", 0.35))
+    gain = float(params.get("gain", 1.0))
+
+    n = int(dur * sr)
+    td = np.arange(n, dtype=np.float64) / sr
+
+    x = np.zeros(n)
+    for ratio, g in zip([1.0, 2.89, 5.12], [1.0, 0.5, 0.25]):
+        x += g * np.sin(2.0 * np.pi * f0 * ratio * td
+                        + rng.uniform(0, 2.0 * np.pi)) * np.exp(-td * 14.0)
+
+    from scipy import signal as _sig
+    bp_lo = min(4000.0, sr * 0.499)
+    bp_hi = min(10000.0, sr * 0.499)
+    if bp_lo < bp_hi:
+        sos_s = _sig.butter(2, [bp_lo, bp_hi], "bandpass", fs=sr, output="sos")
+        strike = _sig.sosfilt(sos_s, rng.standard_normal(n)) * np.exp(-td * 220.0)
+        strike /= np.max(np.abs(strike)) + 1e-12
+    else:
+        strike = np.zeros(n)
+
+    x = x / (np.max(np.abs(x)) + 1e-12) + 0.5 * strike
+    x *= 1.0 - np.exp(-td / 0.0006)
+    peak = np.max(np.abs(x)) + 1e-12
+    return AudioBuffer.from_mono(x / peak * gain, sr=sr)

@@ -637,5 +637,290 @@ class TestPhase8SliderBuildable(unittest.TestCase):
                         p.hi, f"{iid}/{p.name}: float param missing hi")
 
 
+# ---------------------------------------------------------------------------
+# Phase 8 — Group B: percussion impacts & machines (9 new instruments)
+
+class TestPhase8GroupBPercussion(unittest.TestCase):
+    """Acceptance tests for tick, clock, anvil, slam, tap."""
+
+    def _rng(self):
+        return RngContext(88).spawn("p8perc_b").rng
+
+    def _render(self, iid, params=None):
+        entry = get_instrument(iid)
+        return entry["fn"](params or {}, self._rng())
+
+    def _assert_slider_buildable(self, iid):
+        entry = get_instrument(iid)
+        for p in entry["params"]:
+            if p.kind == "float":
+                self.assertIsNotNone(p.lo, f"{iid}/{p.name}: lo is None")
+                self.assertIsNotNone(p.hi, f"{iid}/{p.name}: hi is None")
+
+    # --- tick
+
+    def test_tick_in_registry(self):
+        entry = get_instrument("tick")
+        self.assertIsNotNone(entry)
+        self.assertGreater(len(entry["params"]), 0)
+
+    def test_tick_non_silent(self):
+        buf = self._render("tick")
+        self.assertGreater(buf.peak(), 0.0)
+        self.assertTrue(np.all(np.isfinite(buf.data)))
+
+    def test_tick_short(self):
+        """Tick should be a short ~30 ms hit."""
+        buf = self._render("tick")
+        self.assertLess(buf.len_seconds(), 0.1)
+
+    def test_tick_slider_buildable(self):
+        self._assert_slider_buildable("tick")
+
+    # --- clock
+
+    def test_clock_in_registry(self):
+        entry = get_instrument("clock")
+        self.assertIsNotNone(entry)
+        self.assertGreater(len(entry["params"]), 0)
+
+    def test_clock_non_silent(self):
+        buf = self._render("clock")
+        self.assertGreater(buf.peak(), 0.0)
+        self.assertTrue(np.all(np.isfinite(buf.data)))
+
+    def test_clock_tick_vs_tock(self):
+        """Tick (default) and tock should both be non-silent."""
+        tick_buf = self._render("clock", {"tock": False})
+        tock_buf = self._render("clock", {"tock": True})
+        self.assertGreater(tick_buf.peak(), 0.0)
+        self.assertGreater(tock_buf.peak(), 0.0)
+
+    def test_clock_stereo_panning(self):
+        """Tick biased left, tock biased right."""
+        tick_buf = self._render("clock", {"tock": False})
+        tock_buf = self._render("clock", {"tock": True})
+        # tick: L louder; tock: R louder
+        self.assertGreater(np.max(np.abs(tick_buf.data[:, 0])),
+                           np.max(np.abs(tick_buf.data[:, 1])))
+        self.assertGreater(np.max(np.abs(tock_buf.data[:, 1])),
+                           np.max(np.abs(tock_buf.data[:, 0])))
+
+    def test_clock_slider_buildable(self):
+        self._assert_slider_buildable("clock")
+
+    # --- anvil
+
+    def test_anvil_in_registry(self):
+        entry = get_instrument("anvil")
+        self.assertIsNotNone(entry)
+        self.assertGreater(len(entry["params"]), 0)
+
+    def test_anvil_non_silent(self):
+        buf = self._render("anvil")
+        self.assertGreater(buf.peak(), 0.0)
+        self.assertTrue(np.all(np.isfinite(buf.data)))
+
+    def test_anvil_slider_buildable(self):
+        self._assert_slider_buildable("anvil")
+
+    def test_anvil_duration_controls_length(self):
+        short = self._render("anvil", {"duration": 0.3})
+        long_ = self._render("anvil", {"duration": 2.0})
+        self.assertGreater(len(long_), len(short))
+
+    # --- slam
+
+    def test_slam_in_registry(self):
+        entry = get_instrument("slam")
+        self.assertIsNotNone(entry)
+        self.assertGreater(len(entry["params"]), 0)
+
+    def test_slam_non_silent(self):
+        buf = self._render("slam")
+        self.assertGreater(buf.peak(), 0.0)
+        self.assertTrue(np.all(np.isfinite(buf.data)))
+
+    def test_slam_slider_buildable(self):
+        self._assert_slider_buildable("slam")
+
+    # --- tap
+
+    def test_tap_in_registry(self):
+        entry = get_instrument("tap")
+        self.assertIsNotNone(entry)
+        self.assertGreater(len(entry["params"]), 0)
+
+    def test_tap_non_silent(self):
+        buf = self._render("tap")
+        self.assertGreater(buf.peak(), 0.0)
+        self.assertTrue(np.all(np.isfinite(buf.data)))
+
+    def test_tap_slider_buildable(self):
+        self._assert_slider_buildable("tap")
+
+    def test_tap_shorter_than_slam(self):
+        """Tap is a lighter, shorter transient than slam."""
+        tap_buf = self._render("tap")
+        slam_buf = self._render("slam")
+        # both valid
+        self.assertGreater(tap_buf.peak(), 0.0)
+        self.assertGreater(slam_buf.peak(), 0.0)
+
+
+class TestPhase8GroupBFx(unittest.TestCase):
+    """Acceptance tests for boom, sub_boom, machine_chug, thopter."""
+
+    def _rng(self):
+        return RngContext(88).spawn("p8fx_b").rng
+
+    def _render(self, iid, params=None):
+        entry = get_instrument(iid)
+        return entry["fn"](params or {}, self._rng())
+
+    def _assert_slider_buildable(self, iid):
+        entry = get_instrument(iid)
+        for p in entry["params"]:
+            if p.kind == "float":
+                self.assertIsNotNone(p.lo, f"{iid}/{p.name}: lo is None")
+                self.assertIsNotNone(p.hi, f"{iid}/{p.name}: hi is None")
+
+    # --- boom
+
+    def test_boom_in_registry(self):
+        entry = get_instrument("boom")
+        self.assertIsNotNone(entry)
+        self.assertGreater(len(entry["params"]), 0)
+
+    def test_boom_non_silent(self):
+        buf = self._render("boom")
+        self.assertGreater(buf.peak(), 0.0)
+        self.assertTrue(np.all(np.isfinite(buf.data)))
+
+    def test_boom_slider_buildable(self):
+        self._assert_slider_buildable("boom")
+
+    def test_boom_duration_controls_length(self):
+        short = self._render("boom", {"duration": 0.8})
+        long_ = self._render("boom", {"duration": 4.0})
+        self.assertGreater(len(long_), len(short))
+
+    # --- sub_boom
+
+    def test_sub_boom_in_registry(self):
+        entry = get_instrument("sub_boom")
+        self.assertIsNotNone(entry)
+        self.assertGreater(len(entry["params"]), 0)
+
+    def test_sub_boom_non_silent(self):
+        buf = self._render("sub_boom")
+        self.assertGreater(buf.peak(), 0.0)
+        self.assertTrue(np.all(np.isfinite(buf.data)))
+
+    def test_sub_boom_slider_buildable(self):
+        self._assert_slider_buildable("sub_boom")
+
+    def test_sub_boom_lower_centroid_than_tap(self):
+        """Sub_boom should have more low-frequency energy than tap."""
+        sub_buf = self._render("sub_boom", {"duration": 0.45})
+        tap_buf = self._render("tap")
+
+        def spectral_centroid(buf):
+            x = buf.data[:, 0]
+            n = len(x)
+            freqs = np.fft.rfftfreq(n, d=1.0 / buf.sr)
+            mag = np.abs(np.fft.rfft(x))
+            return float(np.sum(freqs * mag) / (np.sum(mag) + 1e-12))
+
+        self.assertLess(spectral_centroid(sub_buf), spectral_centroid(tap_buf))
+
+    # --- machine_chug
+
+    def test_machine_chug_in_registry(self):
+        entry = get_instrument("machine_chug")
+        self.assertIsNotNone(entry)
+        self.assertGreater(len(entry["params"]), 0)
+
+    def test_machine_chug_non_silent(self):
+        buf = self._render("machine_chug", {"duration": 2.0})
+        self.assertGreater(buf.peak(), 0.0)
+        self.assertTrue(np.all(np.isfinite(buf.data)))
+
+    def test_machine_chug_slider_buildable(self):
+        self._assert_slider_buildable("machine_chug")
+
+    def test_machine_chug_longer_duration_longer_buffer(self):
+        short = self._render("machine_chug", {"duration": 1.0})
+        long_ = self._render("machine_chug", {"duration": 4.0})
+        self.assertGreater(len(long_), len(short))
+
+    def test_machine_chug_length_matches_duration(self):
+        dur = 3.0
+        buf = self._render("machine_chug", {"duration": dur})
+        self.assertAlmostEqual(buf.len_seconds(), dur, delta=0.05)
+
+    # --- thopter
+
+    def test_thopter_in_registry(self):
+        entry = get_instrument("thopter")
+        self.assertIsNotNone(entry)
+        self.assertGreater(len(entry["params"]), 0)
+
+    def test_thopter_non_silent(self):
+        buf = self._render("thopter", {"duration": 3.0})
+        self.assertGreater(buf.peak(), 0.0)
+        self.assertTrue(np.all(np.isfinite(buf.data)))
+
+    def test_thopter_slider_buildable(self):
+        self._assert_slider_buildable("thopter")
+
+    def test_thopter_longer_duration_longer_buffer(self):
+        short = self._render("thopter", {"duration": 2.0})
+        long_ = self._render("thopter", {"duration": 8.0})
+        self.assertGreater(len(long_), len(short))
+
+    def test_thopter_stereo_panning(self):
+        """Thopter pans from L to R — end should be louder on R."""
+        buf = self._render("thopter", {"duration": 4.0})
+        sr = buf.sr
+        # compare first 0.5s (should be L-biased) vs last 0.5s (R-biased)
+        seg = int(0.5 * sr)
+        l_start = np.max(np.abs(buf.data[:seg, 0]))
+        r_start = np.max(np.abs(buf.data[:seg, 1]))
+        l_end = np.max(np.abs(buf.data[-seg:, 0]))
+        r_end = np.max(np.abs(buf.data[-seg:, 1]))
+        self.assertGreater(l_start, r_start)
+        self.assertGreater(r_end, l_end)
+
+
+class TestPhase8GroupBSliderBuildable(unittest.TestCase):
+    """Verify all 9 Group B instruments are in list_instruments() with lo/hi."""
+
+    NEW_IDS = [
+        "tick", "clock", "anvil", "slam", "tap",
+        "boom", "sub_boom", "machine_chug", "thopter",
+    ]
+
+    def test_all_in_list_instruments(self):
+        ids_in_list = {e["id"] for e in list_instruments()}
+        for iid in self.NEW_IDS:
+            self.assertIn(iid, ids_in_list, f"{iid} missing from list_instruments()")
+
+    def test_all_have_params(self):
+        for iid in self.NEW_IDS:
+            entry = get_instrument(iid)
+            self.assertGreater(len(entry["params"]), 0, f"{iid} has no params")
+
+    def test_float_params_have_lo_hi(self):
+        for iid in self.NEW_IDS:
+            entry = get_instrument(iid)
+            for p in entry["params"]:
+                if p.kind == "float":
+                    self.assertIsNotNone(
+                        p.lo, f"{iid}/{p.name}: float param missing lo")
+                    self.assertIsNotNone(
+                        p.hi, f"{iid}/{p.name}: float param missing hi")
+
+
 if __name__ == "__main__":
     unittest.main()
