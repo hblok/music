@@ -1,0 +1,483 @@
+{
+  "schema_version": "3.0",
+  "title": "Water of Life — Drop 1 (the agony)",
+  "bpm": 140.0,
+  "sr": 44100,
+  "seed": 140,
+  "normalize": true,
+  "target": 0.85,
+  "fade_out_s": 2.0,
+  "channels": [
+    {
+      "kind": "pattern",
+      "instrument_id": "kick",
+      "n_steps": 16,
+      "steps": [
+        {
+          "on": true
+        },
+        {
+          "on": false
+        },
+        {
+          "on": false
+        },
+        {
+          "on": false
+        },
+        {
+          "on": true
+        },
+        {
+          "on": false
+        },
+        {
+          "on": false
+        },
+        {
+          "on": false
+        },
+        {
+          "on": true
+        },
+        {
+          "on": false
+        },
+        {
+          "on": false
+        },
+        {
+          "on": false
+        },
+        {
+          "on": true
+        },
+        {
+          "on": false
+        },
+        {
+          "on": false
+        },
+        {
+          "on": false
+        }
+      ],
+      "params": {
+        "f0": 150.0,
+        "f1": 45.0,
+        "duration": 0.3,
+        "drive": 1.2,
+        "sub_level": 0.3,
+        "attack": 0.001
+      },
+      "seed": 0
+    },
+    {
+      "kind": "pattern",
+      "instrument_id": "psy_bass",
+      "n_steps": 16,
+      "steps": [
+        {
+          "on": false
+        },
+        {
+          "on": true
+        },
+        {
+          "on": true
+        },
+        {
+          "on": true
+        },
+        {
+          "on": false
+        },
+        {
+          "on": true
+        },
+        {
+          "on": true
+        },
+        {
+          "on": true
+        },
+        {
+          "on": false
+        },
+        {
+          "on": true
+        },
+        {
+          "on": true
+        },
+        {
+          "on": true
+        },
+        {
+          "on": false
+        },
+        {
+          "on": true
+        },
+        {
+          "on": true
+        },
+        {
+          "on": true
+        }
+      ],
+      "params": {
+        "midi": 38,
+        "duration": 0.1
+      },
+      "seed": 0
+    },
+    {
+      "kind": "pattern",
+      "instrument_id": "acid",
+      "n_steps": 16,
+      "steps": [
+        {
+          "on": true,
+          "params": {
+            "midi": 50,
+            "accent": true
+          }
+        },
+        {
+          "on": false
+        },
+        {
+          "on": true,
+          "params": {
+            "midi": 50
+          }
+        },
+        {
+          "on": false
+        },
+        {
+          "on": true,
+          "params": {
+            "midi": 50
+          }
+        },
+        {
+          "on": true,
+          "params": {
+            "midi": 62,
+            "accent": true
+          }
+        },
+        {
+          "on": false
+        },
+        {
+          "on": true,
+          "params": {
+            "midi": 50
+          }
+        },
+        {
+          "on": true,
+          "params": {
+            "midi": 51
+          }
+        },
+        {
+          "on": false
+        },
+        {
+          "on": true,
+          "params": {
+            "midi": 50
+          }
+        },
+        {
+          "on": false
+        },
+        {
+          "on": true,
+          "params": {
+            "midi": 54,
+            "accent": true
+          }
+        },
+        {
+          "on": false
+        },
+        {
+          "on": true,
+          "params": {
+            "midi": 48
+          }
+        },
+        {
+          "on": true,
+          "params": {
+            "midi": 50
+          }
+        }
+      ],
+      "params": {
+        "cutoff": 900.0,
+        "duration": 0.12,
+        "resonance_q": 1.4,
+        "drive": 2.0
+      },
+      "seed": 0
+    },
+    {
+      "kind": "pattern",
+      "instrument_id": "hat",
+      "n_steps": 16,
+      "steps": [
+        {
+          "on": false
+        },
+        {
+          "on": false
+        },
+        {
+          "on": true
+        },
+        {
+          "on": false
+        },
+        {
+          "on": false
+        },
+        {
+          "on": false
+        },
+        {
+          "on": true
+        },
+        {
+          "on": false
+        },
+        {
+          "on": false
+        },
+        {
+          "on": false
+        },
+        {
+          "on": true
+        },
+        {
+          "on": false
+        },
+        {
+          "on": false
+        },
+        {
+          "on": false
+        },
+        {
+          "on": true
+        },
+        {
+          "on": false
+        }
+      ],
+      "params": {
+        "open_": true
+      },
+      "seed": 0
+    },
+    {
+      "kind": "pattern",
+      "instrument_id": "hat",
+      "n_steps": 16,
+      "steps": [
+        {
+          "on": false
+        },
+        {
+          "on": true,
+          "ghost": true
+        },
+        {
+          "on": false
+        },
+        {
+          "on": true,
+          "ghost": true
+        },
+        {
+          "on": false
+        },
+        {
+          "on": true,
+          "ghost": true
+        },
+        {
+          "on": false
+        },
+        {
+          "on": true,
+          "ghost": true
+        },
+        {
+          "on": false
+        },
+        {
+          "on": true,
+          "ghost": true
+        },
+        {
+          "on": false
+        },
+        {
+          "on": true,
+          "ghost": true
+        },
+        {
+          "on": false
+        },
+        {
+          "on": true,
+          "ghost": true
+        },
+        {
+          "on": false
+        },
+        {
+          "on": true,
+          "ghost": true
+        }
+      ],
+      "params": {
+        "open_": false
+      },
+      "seed": 0
+    },
+    {
+      "kind": "pattern",
+      "instrument_id": "doum",
+      "n_steps": 16,
+      "steps": [
+        {
+          "on": true
+        },
+        {
+          "on": false
+        },
+        {
+          "on": false
+        },
+        {
+          "on": false
+        },
+        {
+          "on": false
+        },
+        {
+          "on": false
+        },
+        {
+          "on": false
+        },
+        {
+          "on": false
+        },
+        {
+          "on": true
+        },
+        {
+          "on": false
+        },
+        {
+          "on": false
+        },
+        {
+          "on": false
+        },
+        {
+          "on": false
+        },
+        {
+          "on": false
+        },
+        {
+          "on": false
+        },
+        {
+          "on": false
+        }
+      ],
+      "params": {
+        "f0": 90.0,
+        "f1": 55.0,
+        "duration": 0.3
+      },
+      "seed": 0
+    },
+    {
+      "kind": "pattern",
+      "instrument_id": "tek",
+      "n_steps": 16,
+      "steps": [
+        {
+          "on": false
+        },
+        {
+          "on": false
+        },
+        {
+          "on": true
+        },
+        {
+          "on": false
+        },
+        {
+          "on": false
+        },
+        {
+          "on": false
+        },
+        {
+          "on": true
+        },
+        {
+          "on": false
+        },
+        {
+          "on": false
+        },
+        {
+          "on": false
+        },
+        {
+          "on": false
+        },
+        {
+          "on": false
+        },
+        {
+          "on": true
+        },
+        {
+          "on": false
+        },
+        {
+          "on": false
+        },
+        {
+          "on": false
+        }
+      ],
+      "params": {
+        "duration": 0.12
+      },
+      "seed": 0
+    }
+  ],
+  "sections": [
+    {
+      "name": "drop — the agony",
+      "length_bars": 16
+    }
+  ]
+}
