@@ -74,6 +74,9 @@ class ProjectDoc:
         self._target = 0.85
         self._fade_out_s = 2.0
 
+        self._seamless_loop: bool = False
+        self._loop_xf_bars: float = 2.0
+
         self._channels: list[AnyChannel] = []
         self._sections: list[dict] = []
         self._history = History()
@@ -109,6 +112,14 @@ class ProjectDoc:
     @property
     def seed(self) -> int:
         return self._seed
+
+    @property
+    def seamless_loop(self) -> bool:
+        return self._seamless_loop
+
+    @property
+    def loop_xf_bars(self) -> float:
+        return self._loop_xf_bars
 
     @property
     def channels(self) -> list[AnyChannel]:
@@ -595,6 +606,8 @@ class ProjectDoc:
             "normalize": self._normalize,
             "target": self._target,
             "fade_out_s": self._fade_out_s,
+            "seamless_loop": self._seamless_loop,
+            "loop_xf_bars": self._loop_xf_bars,
             "channels": [ch.to_dict() for ch in self._channels],
             "sections": list(self._sections),
         }
@@ -610,6 +623,8 @@ class ProjectDoc:
         doc._normalize = bool(d.get("normalize", True))
         doc._target = float(d.get("target", 0.85))
         doc._fade_out_s = float(d.get("fade_out_s", 2.0))
+        doc._seamless_loop = bool(d.get("seamless_loop", False))
+        doc._loop_xf_bars = float(d.get("loop_xf_bars", 2.0))
         for ch_dict in d.get("channels", []):
             doc._channels.append(channel_from_dict(ch_dict))
         doc._ensure_sections()

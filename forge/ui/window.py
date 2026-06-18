@@ -15,7 +15,7 @@ from __future__ import annotations
 from pathlib import Path
 
 from PySide6.QtCore import Qt, QThread, Signal, QObject, QTimer
-from PySide6.QtGui import QKeySequence, QShortcut
+from PySide6.QtGui import QAction, QKeySequence, QShortcut
 from PySide6.QtWidgets import (
     QApplication,
     QDockWidget,
@@ -219,6 +219,13 @@ class MainWindow(QMainWindow):
         transport_menu.addAction("P&ause", service.pause)
         transport_menu.addAction("&Stop", service.stop)
 
+        project_menu = self.menuBar().addMenu("&Project")
+        self._seamless_loop_action = QAction("&Seamless loop", self)
+        self._seamless_loop_action.setCheckable(True)
+        self._seamless_loop_action.setChecked(False)
+        self._seamless_loop_action.toggled.connect(self._on_seamless_loop_toggled)
+        project_menu.addAction(self._seamless_loop_action)
+
     def _rebuild_tracker_rows(self) -> None:
         """Recreate TrackerEditor widgets to match current doc PatternChannels."""
         from forge.document.channels import PatternChannel
@@ -382,6 +389,10 @@ class MainWindow(QMainWindow):
         self._rebuild_mixer_strips()
         self._update_workshop()
         self._start_autosave()
+        # Sync seamless loop toggle to new doc state
+        action = getattr(self, "_seamless_loop_action", None)
+        if action is not None:
+            action.setChecked(doc.seamless_loop)
 
     def _start_autosave(self) -> None:
         import tempfile
@@ -434,7 +445,10 @@ class MainWindow(QMainWindow):
         )
         self._transport.set_total_bars(float(length_bars))
         self._service.play()
-        self._status_label.setText("Playing")
+        if self._doc.seamless_loop:
+            self._show_seam_report(buf)
+        else:
+            self._status_label.setText("Playing")
         if self._play_thread:
             self._play_thread.quit()
             self._play_thread = None
@@ -548,6 +562,29 @@ class MainWindow(QMainWindow):
             self._service.load(ab)
         self._transport.set_total_bars(4.0)
 
+    def _on_seamless_loop_toggled(self, checked: bool) -> None:
+        """Toggle doc.seamless_loop and invalidate the play buffer."""
+        try:
+            self._doc.set_global("seamless_loop", checked)
+        except Exception:  # noqa: BLE001
+            pass
+        self._buf_valid = False
+        state = "on" if checked else "off"
+        self._status_label.setText(f"Seamless loop: {state}")
+
+    def _show_seam_report(self, buf) -> None:
+        """Show a short loop-seam summary in the status line (never raises)."""
+        try:
+            from forge import control
+            report = control.seam_report(buf)
+            disc = report["discontinuity"]
+            ok_str = "ok" if report["ok"] else "seam!"
+            self._status_label.setText(
+                f"Loop seam: {disc:.4f} ({ok_str})"
+            )
+        except Exception:  # noqa: BLE001
+            pass
+
     def _on_new(self) -> None:
         self._set_doc(_make_default_doc())
         self._status_label.setText("New project")
@@ -597,9 +634,27 @@ class MainWindow(QMainWindow):
         self._worker = _RenderWorker(do_export)
         self._worker.moveToThread(self._render_thread)
         self._render_thread.started.connect(self._worker.run)
-        self._worker.finished.connect(lambda _: self._on_export_done(path))
+        self._worker.finished.connect(self._on_export_done_with_buf)
         self._worker.error.connect(self._on_render_error)
         self._render_thread.start()
+        self._export_path = path
+
+    def _on_export_done_with_buf(self, buf) -> None:
+        path = getattr(self, "_export_path", "")
+        self._progress.setVisible(False)
+        if self._render_thread:
+            self._render_thread.quit()
+            self._render_thread = None
+        if self._doc.seamless_loop:
+            try:
+                self._show_seam_report(buf)
+                self._status_label.setText(
+                    self._status_label.text() + f"  |  Exported: {path}"
+                )
+            except Exception:  # noqa: BLE001
+                self._status_label.setText(f"Exported: {path}")
+        else:
+            self._status_label.setText(f"Exported: {path}")
 
     def _on_export_done(self, path: str) -> None:
         self._progress.setVisible(False)
