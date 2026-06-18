@@ -272,7 +272,6 @@ class _StepCell(QWidget):
     _C_ON_ACCENT = "#e8a03a"
     _C_ON_GHOST = "#3aae6e"
     _C_ON_PROB = "#9855d4"
-    _C_CURSOR = "#e83a6e"
     _C_SELECTED = "#8090cc"
 
     def __init__(
@@ -486,6 +485,7 @@ class TrackerRow(QWidget):
         lbl = QLabel(instrument_id[:8])
         lbl.setFixedWidth(64)
         lbl.setAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter)
+        lbl.setStyleSheet(f"color: {QColor(channel_color).darker(140).name()};")
         grid.addWidget(lbl, 0, 0, 4, 1)   # span all 4 rows
 
         # Row 0: step cells
@@ -634,15 +634,16 @@ class TrackerEditor(QWidget):
         self._active_section: int | None = None
 
         channel_color = _CHANNEL_COLORS_HEX[channel_idx % len(_CHANNEL_COLORS_HEX)]
+        self._channel_color = channel_color
 
         # Faint channel-colour tint on the row background
         r = int(channel_color[1:3], 16)
         g = int(channel_color[3:5], 16)
         b = int(channel_color[5:7], 16)
+        self._row_tint_rgb = (r, g, b)
+        self._channel_selected = False
         self.setAutoFillBackground(True)
-        self.setStyleSheet(
-            f"TrackerEditor {{ background-color: rgba({r}, {g}, {b}, 20); }}"
-        )
+        self._apply_row_style()
 
         self.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
 
@@ -679,6 +680,9 @@ class TrackerEditor(QWidget):
         font.setBold(True)
         font.setPointSize(8)
         self._inst_label.setFont(font)
+        self._inst_label.setStyleSheet(
+            f"color: {QColor(channel_color).darker(140).name()};"
+        )
         right_v.addWidget(self._inst_label)
 
         btn_row = QHBoxLayout()
@@ -734,6 +738,29 @@ class TrackerEditor(QWidget):
         """Set mute state without triggering extra signals if already set."""
         if self._mute_btn.isChecked() != muted:
             self._mute_btn.setChecked(muted)
+
+    def _apply_row_style(self) -> None:
+        """Apply the faint channel tint + (optional) selection border via QSS.
+
+        A 2px border is always reserved — transparent when unselected — so
+        toggling the selection highlight never shifts the row's contents.
+        """
+        r, g, b = self._row_tint_rgb
+        border_color = self._channel_color if self._channel_selected else "transparent"
+        self.setStyleSheet(
+            f"TrackerEditor {{ background-color: rgba({r}, {g}, {b}, 20);"
+            f" border: 2px solid {border_color}; }}"
+        )
+
+    def set_channel_selected(self, selected: bool) -> None:
+        """Highlight this row as the channel the Workshop panel is editing.
+
+        Shown as a 2px channel-colour border, visually distinct from the
+        slate-blue step-range (copy/paste) selection that fills individual cells.
+        """
+        if self._channel_selected != selected:
+            self._channel_selected = selected
+            self._apply_row_style()
 
     # ---------------------------------------------------------------- section support
 
@@ -984,3 +1011,7 @@ class TrackerEditor(QWidget):
     @property
     def cursor(self) -> int:
         return self._cursor
+
+    @property
+    def channel_idx(self) -> int:
+        return self._channel_idx

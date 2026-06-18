@@ -295,10 +295,18 @@ class MainWindow(QMainWindow):
         self._workshop_area_layout.addWidget(workshop)
         self._workshop = workshop
 
+        # Highlight the tracker row for the channel the Workshop is now editing
+        self._highlight_channel(real_idx)
+
     def _select_channel(self, idx: int) -> None:
         if idx != self._selected_channel:
             self._selected_channel = idx
             self._update_workshop()
+
+    def _highlight_channel(self, real_idx: int) -> None:
+        """Mark the TrackerEditor for *real_idx* as the Workshop-edited channel."""
+        for ed in self._tracker_editors:
+            ed.set_channel_selected(ed.channel_idx == real_idx)
 
     def _set_active_section(self, section_idx: int | None) -> None:
         """Switch all TrackerEditors to show/edit a specific section's pattern."""

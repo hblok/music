@@ -34,7 +34,7 @@ Each step cell can be in one of several mutually exclusive visual states. The hi
 
 | State | Background color | Intent |
 |-------|-----------------|--------|
-| **Selected** (click-selected channel) | `#8090cc` (slate blue) | Shows which channel the Workshop panel is currently editing |
+| **Range-selected** (copy/paste) | `#8090cc` (slate blue) | Steps in the current Ctrl+A / copy-paste selection — overrides display while active |
 | **On + Accent** | `#e8a03a` (amber/orange) | Loud, emphasized hit — universally warm/hot color |
 | **On + Ghost** | `#3aae6e` (green) | Quiet, secondary hit — soft/subtle color |
 | **On + Probability < 1.0** | `#9855d4` (purple) | Probabilistic step — distinct color signals non-determinism |
@@ -50,6 +50,10 @@ Each step cell can be in one of several mutually exclusive visual states. The hi
 
 The cursor (moved with ← →, used for Space/A/G keyboard editing) is shown as a **2px white inner ring + 1px dark outer border** overlaid on the cell. It does not change the cell's background color — the step's on/off/accent/ghost state remains fully readable through the cursor. This was a deliberate choice: filling the cursor with a distinct color (e.g. hot pink was tried) was confusing because it looked like a step state rather than a navigation indicator.
 
+### Selected channel (Workshop highlight)
+
+The channel currently being edited in the Workshop panel is marked with a **2px border in the channel color** drawn around its whole tracker row (`TrackerEditor.set_channel_selected`). A transparent 2px border is reserved in the unselected state so toggling the highlight never shifts the row's contents. This is a *row-level* indicator, deliberately kept distinct from the slate-blue *step-range* selection (which fills individual cells): one answers "which instrument am I editing?", the other "which steps are in my copy/paste selection?".
+
 ### Text color
 
 - **Active step** (on, selected, or accented): white text
@@ -63,9 +67,9 @@ Below each row of step cells are three rows of per-step modifier buttons, aligne
 
 | Row | Label | Active color | Inactive color | Meaning |
 |-----|-------|-------------|----------------|---------|
-| A   | Accent | Orange `#e88c28` | Gray `#c8c8c8` | Step fires at ×1.5 gain (~+3.5 dB) |
-| g   | Ghost  | Green `#3ab96e`  | Gray `#c8c8c8` | Step fires at ×0.4 gain (~−8 dB) |
-| p   | Probability | Purple `#9b3ae8` | Gray `#c8c8c8` | Step fires with probability 0.0–1.0 |
+| A   | Accent | Amber `#e8a03a` | Gray `#c8c8c8` | Step fires at ×1.5 gain (~+3.5 dB) |
+| g   | Ghost  | Green `#3aae6e`  | Gray `#c8c8c8` | Step fires at ×0.4 gain (~−8 dB) |
+| p   | Probability | Purple `#9855d4` | Gray `#c8c8c8` | Step fires with probability 0.0–1.0 |
 
 The active state colors intentionally match the corresponding step cell state colors (A → amber, g → green, p → purple) so the connection between the button and its effect on the step cell is visually immediate.
 
@@ -111,7 +115,8 @@ The active state colors intentionally match the corresponding step cell state co
 | Amber / orange | **Accent** — this hit is louder than normal |
 | Green | **Ghost** — this hit is quieter than normal |
 | Purple | **Probability** — this hit is non-deterministic |
-| Slate blue | **Selected channel** — the Workshop panel is editing this channel |
+| Slate blue (cell fill) | **Step-range selection** — these steps are in the current copy/paste selection |
+| Channel-color border (row) | **Selected channel** — the Workshop panel is editing this channel |
 | White border ring | **Keyboard cursor** — this is where Space/A/G keyboard commands act |
 
 The guiding principle is that color answers two questions at a glance:

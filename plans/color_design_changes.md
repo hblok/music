@@ -181,3 +181,28 @@ uses the channel color" is not literally true for the tracker grid.
 | 2 | 🟡 | Doc | Fix Modifier Rows table to `#e8a03a` / `#3aae6e` / `#9855d4` (code already correct). |
 | 3 | 🟢 | Code | Remove unused `_C_CURSOR` constant. |
 | 4 | 🟢 | Doc or Code | Either color the tracker label text with the channel color, or soften the "channel label uses the channel color" claim for the tracker. |
+
+---
+
+## Resolution — applied 2026-06-18
+
+All four findings fixed; full suite green (`671 passed`).
+
+- **#1 — chose "Implement channel highlight."** Added `TrackerEditor.set_channel_selected()`
+  + a `channel_idx` property (`pattern_editor.py`); the Workshop-edited channel now gets
+  a **2px channel-color border** around its row (a transparent 2px border is reserved when
+  unselected, so toggling causes no layout shift). Wired via `MainWindow._highlight_channel()`,
+  called from `_update_workshop()` so the highlight always tracks the exact `real_idx` the
+  Workshop edits. Slate-blue `#8090cc` is **retained for the step-range copy/paste selection**
+  (a separate, cell-fill treatment). The plan's state table + "what each color conveys" table
+  were updated, and a new "Selected channel (Workshop highlight)" subsection was added.
+  - *Not changed:* the sticky select-all behavior (a Ctrl+A range stays highlighted until the
+    row is rebuilt) — that was option A's scope, and the border highlight is independent of it.
+    Flag if you want range-selection to auto-clear on cursor move / step click.
+- **#2 — done (doc).** Modifier Rows table corrected to `#e8a03a` / `#3aae6e` / `#9855d4`
+  (and "Orange" → "Amber" for accent), matching the code and the table's own "intentionally
+  match the step cell state colors" note.
+- **#3 — done (code).** Removed the unused `_C_CURSOR` constant from `_StepCell`.
+- **#4 — done (code).** Tracker labels (`TrackerRow` label + `TrackerEditor._inst_label`) now
+  render in the channel color via `QColor(channel_color).darker(140)`, matching the timeline
+  label treatment.
