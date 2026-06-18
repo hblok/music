@@ -212,14 +212,20 @@ def _render_doc_sections(
     When ``doc.sections`` is empty, the function falls back to the legacy
     single-pattern approach (all channel defaults, ``fallback_length_bars`` bars).
 
-    Only ``PatternChannel`` entries contribute audio (textures / automation come
-    in Phase 2).  Channels whose index is in *muted_channels* are skipped.
+    ``PatternChannel`` entries are placed section-by-section.  ``TextureChannel``
+    entries are rendered over the full song length and mixed in at t=0.
+    ``AutomationChannel`` entries whose ``target_param == "master_gain"`` are
+    applied as a piecewise-linear gain multiplier over the whole buffer.
+
+    Channels whose index is in *muted_channels* are skipped for all channel kinds.
 
     Returns the UN-mastered concatenated ``AudioBuffer``.
     """
+    import numpy as np
+    from forge.arrange.curves import Curve
     from forge.core.buffer import AudioBuffer
     from forge.core.grid import Grid
-    from forge.document.channels import PatternChannel
+    from forge.document.channels import AutomationChannel, PatternChannel, TextureChannel
 
     if muted_channels is None:
         muted_channels = set()
@@ -229,58 +235,108 @@ def _render_doc_sections(
         i for i, ch in enumerate(channels)
         if isinstance(ch, PatternChannel) and i not in muted_channels
     ]
+    tex_channels = [
+        (i, ch) for i, ch in enumerate(channels)
+        if isinstance(ch, TextureChannel) and i not in muted_channels
+    ]
+    auto_master_gain = [
+        (i, ch) for i, ch in enumerate(channels)
+        if isinstance(ch, AutomationChannel)
+        and ch.target_param == "master_gain"
+        and i not in muted_channels
+    ]
+
+    grid = Grid(doc.bpm, doc.sr)
 
     # ---- fallback: no sections → legacy single-pattern behaviour ----
     if not doc.sections:
-        if not pat_indices:
-            return AudioBuffer(fallback_length_bars * Grid(doc.bpm, doc.sr).n_samples(1), doc.sr)
-        tracks = [channels[i].to_track_dict() for i in pat_indices]
-        pattern_dict = {
-            "bpm": doc.bpm,
-            "length_bars": fallback_length_bars,
-            "n_steps": 16,
-            "tracks": tracks,
-        }
-        return render_pattern(pattern_dict, seed=doc.seed)
+        total_bars = fallback_length_bars
+        total_samples = grid.n_samples(total_bars)
+        master_buf = AudioBuffer(total_samples, doc.sr)
+
+        if pat_indices:
+            tracks = [channels[i].to_track_dict() for i in pat_indices]
+            pattern_dict = {
+                "bpm": doc.bpm,
+                "length_bars": total_bars,
+                "n_steps": 16,
+                "tracks": tracks,
+            }
+            pat_buf = render_pattern(pattern_dict, seed=doc.seed)
+            master_buf.add_at(pat_buf.data, 0.0)
+
+        # Mix textures into the fallback buffer.
+        for _ci, tex_ch in tex_channels:
+            tex_buf = render_texture_channel(
+                tex_ch, total_bars, doc.bpm, seed=doc.seed, sr=doc.sr
+            )
+            master_buf.add_at(tex_buf.data, 0.0)
+
+        # Apply master-gain automation to the fallback buffer.
+        n = master_buf.data.shape[0]
+        for _ci, auto_ch in auto_master_gain:
+            bps = auto_ch.breakpoints
+            if len(bps) < 2:
+                continue
+            curve = Curve([(b.bar, b.value) for b in bps])
+            gain_samples = curve.sample(n, doc.bpm, sr=doc.sr)
+            master_buf.data *= gain_samples[:, np.newaxis]
+
+        return master_buf
 
     # ---- section-aware render ----
-    grid = Grid(doc.bpm, doc.sr)
     total_bars = sum(s["length_bars"] for s in doc.sections)
     total_samples = grid.n_samples(total_bars)
     master_buf = AudioBuffer(total_samples, doc.sr)
 
-    if not pat_indices:
-        return master_buf  # all muted / no pattern channels
+    # Render and place each section's pattern channels.
+    if pat_indices:
+        start_bar = 0
+        for si, sec in enumerate(doc.sections):
+            sec_bars = int(sec["length_bars"])
+            gain = float(sec.get("gain", 1.0))
 
-    start_bar = 0
-    for si, sec in enumerate(doc.sections):
-        sec_bars = int(sec["length_bars"])
-        gain = float(sec.get("gain", 1.0))
+            # Build per-section tracks using section step overrides where available.
+            tracks = []
+            for ci in pat_indices:
+                steps = doc.get_section_steps(si, ci)
+                step_values = [sd.to_step_value() for sd in steps]
+                ch = channels[ci]
+                tracks.append({
+                    "instrument": ch.instrument_id,
+                    "steps": step_values,
+                    "params": dict(ch.params),
+                })
 
-        # Build per-section tracks using section step overrides where available.
-        tracks = []
-        for ci in pat_indices:
-            steps = doc.get_section_steps(si, ci)
-            step_values = [sd.to_step_value() for sd in steps]
-            ch = channels[ci]
-            tracks.append({
-                "instrument": ch.instrument_id,
-                "steps": step_values,
-                "params": dict(ch.params),
-            })
+            pattern_dict = {
+                "bpm": doc.bpm,
+                "length_bars": sec_bars,
+                "n_steps": 16,
+                "tracks": tracks,
+            }
+            # Use a deterministic per-section seed derived from doc.seed + section index.
+            sec_buf = render_pattern(pattern_dict, seed=doc.seed + si)
 
-        pattern_dict = {
-            "bpm": doc.bpm,
-            "length_bars": sec_bars,
-            "n_steps": 16,
-            "tracks": tracks,
-        }
-        # Use a deterministic per-section seed derived from doc.seed + section index.
-        sec_buf = render_pattern(pattern_dict, seed=doc.seed + si)
+            # Place the section into the master buffer with gain applied.
+            master_buf.add_at(sec_buf.data, grid.bar_t(start_bar), gain=gain)
+            start_bar += sec_bars
 
-        # Place the section into the master buffer with gain applied.
-        master_buf.add_at(sec_buf.data, grid.bar_t(start_bar), gain=gain)
-        start_bar += sec_bars
+    # Mix each TextureChannel over the full song length at t=0.
+    for _ci, tex_ch in tex_channels:
+        tex_buf = render_texture_channel(
+            tex_ch, total_bars, doc.bpm, seed=doc.seed, sr=doc.sr
+        )
+        master_buf.add_at(tex_buf.data, 0.0)
+
+    # Apply master-gain automation curves (multiply together when >1 lane).
+    n = master_buf.data.shape[0]
+    for _ci, auto_ch in auto_master_gain:
+        bps = auto_ch.breakpoints
+        if len(bps) < 2:
+            continue
+        curve = Curve([(b.bar, b.value) for b in bps])
+        gain_samples = curve.sample(n, doc.bpm, sr=doc.sr)
+        master_buf.data *= gain_samples[:, np.newaxis]
 
     return master_buf
 
