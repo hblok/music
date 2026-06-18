@@ -142,7 +142,6 @@ class MainWindow(QMainWindow):
         self._tracker_layout = QVBoxLayout(self._tracker_container)
         self._tracker_layout.setSpacing(2)
         self._tracker_layout.setContentsMargins(2, 2, 2, 2)
-        self._tracker_layout.addStretch()
         self._tracker_scroll.setWidget(self._tracker_container)
         tracker_vbox.addWidget(self._tracker_scroll, stretch=1)
 
@@ -162,6 +161,7 @@ class MainWindow(QMainWindow):
             | Qt.DockWidgetArea.BottomDockWidgetArea
         )
         self.addDockWidget(Qt.DockWidgetArea.RightDockWidgetArea, self._mixer_dock)
+        self._mixer_dock.hide()
 
         # Bottom panel: workshop area + A/B compare
         bottom = QHBoxLayout()

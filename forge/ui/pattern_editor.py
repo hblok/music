@@ -653,28 +653,12 @@ class TrackerEditor(QWidget):
 
         # ── Left control panel ──────────────────────────────────────────────
         ctrl = QWidget()
-        ctrl.setFixedWidth(120)
-        ctrl_h = QHBoxLayout(ctrl)
-        ctrl_h.setContentsMargins(0, 2, 4, 2)
-        ctrl_h.setSpacing(4)
+        ctrl.setFixedWidth(90)
+        ctrl_v = QVBoxLayout(ctrl)
+        ctrl_v.setContentsMargins(2, 2, 4, 2)
+        ctrl_v.setSpacing(2)
 
-        # Vertical volume slider
-        self._vol_slider = QSlider(Qt.Orientation.Vertical)
-        self._vol_slider.setRange(0, 100)
-        self._vol_slider.setValue(80)
-        self._vol_slider.setFixedWidth(18)
-        self._vol_slider.setMinimumHeight(50)
-        self._vol_slider.setToolTip("Volume (0–100 %)")
-        self._vol_slider.valueChanged.connect(
-            lambda v: self.volumeChanged.emit(channel_idx, v / 100.0)
-        )
-        ctrl_h.addWidget(self._vol_slider)
-
-        # Label + buttons
-        right_v = QVBoxLayout()
-        right_v.setContentsMargins(0, 0, 0, 0)
-        right_v.setSpacing(3)
-
+        # Channel name (top)
         self._inst_label = QLabel(ch.instrument_id)
         font = QFont()
         font.setBold(True)
@@ -683,27 +667,41 @@ class TrackerEditor(QWidget):
         self._inst_label.setStyleSheet(
             f"color: {QColor(channel_color).darker(140).name()};"
         )
-        right_v.addWidget(self._inst_label)
+        ctrl_v.addWidget(self._inst_label)
 
+        # Horizontal volume slider (below name)
+        self._vol_slider = QSlider(Qt.Orientation.Horizontal)
+        self._vol_slider.setRange(0, 100)
+        self._vol_slider.setValue(80)
+        self._vol_slider.setToolTip("Volume (0–100 %)")
+        self._vol_slider.valueChanged.connect(
+            lambda v: self.volumeChanged.emit(channel_idx, v / 100.0)
+        )
+        ctrl_v.addWidget(self._vol_slider)
+
+        # M / S buttons (below slider)
         btn_row = QHBoxLayout()
         btn_row.setSpacing(2)
+        btn_row.setContentsMargins(0, 0, 0, 0)
         self._mute_btn = QPushButton("M")
         self._mute_btn.setCheckable(True)
-        self._mute_btn.setFixedSize(32, 22)
+        self._mute_btn.setFixedSize(24, 18)
         self._mute_btn.setToolTip("Mute this channel")
-        self._mute_btn.toggled.connect(
-            lambda checked: self.muteChanged.emit(channel_idx, checked)
+        self._mute_btn.setStyleSheet(
+            "QPushButton { font-size: 9px; padding: 0; }"
+            "QPushButton:checked { background-color: #e8783a; color: #fff;"
+            " border: 1px solid #c05020; }"
         )
+        self._mute_btn.toggled.connect(self._on_mute_toggled)
         self._solo_btn = QPushButton("S")
-        self._solo_btn.setFixedSize(32, 22)
+        self._solo_btn.setFixedSize(24, 18)
         self._solo_btn.setToolTip("Solo — mute all other channels")
+        self._solo_btn.setStyleSheet("QPushButton { font-size: 9px; padding: 0; }")
         self._solo_btn.clicked.connect(lambda: self.soloRequested.emit(channel_idx))
         btn_row.addWidget(self._mute_btn)
         btn_row.addWidget(self._solo_btn)
-        right_v.addLayout(btn_row)
-        right_v.addStretch()
-
-        ctrl_h.addLayout(right_v)
+        btn_row.addStretch()
+        ctrl_v.addLayout(btn_row)
         outer.addWidget(ctrl)
 
         # ── Step grid ───────────────────────────────────────────────────────
@@ -726,6 +724,8 @@ class TrackerEditor(QWidget):
         rem_btn.clicked.connect(lambda: self.removeRequested.emit(channel_idx))
         outer.addWidget(rem_btn)
 
+        self.setMinimumHeight(112)
+
         # Initial refresh
         self._refresh_all()
 
@@ -747,10 +747,16 @@ class TrackerEditor(QWidget):
         """
         r, g, b = self._row_tint_rgb
         border_color = self._channel_color if self._channel_selected else "transparent"
+        muted_btn = getattr(self, "_mute_btn", None)
+        bg_alpha = 8 if (muted_btn is not None and muted_btn.isChecked()) else 20
         self.setStyleSheet(
-            f"TrackerEditor {{ background-color: rgba({r}, {g}, {b}, 20);"
+            f"TrackerEditor {{ background-color: rgba({r}, {g}, {b}, {bg_alpha});"
             f" border: 2px solid {border_color}; }}"
         )
+
+    def _on_mute_toggled(self, checked: bool) -> None:
+        self._apply_row_style()
+        self.muteChanged.emit(self._channel_idx, checked)
 
     def set_channel_selected(self, selected: bool) -> None:
         """Highlight this row as the channel the Workshop panel is editing.
