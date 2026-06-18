@@ -86,6 +86,8 @@ class PatternChannel:
     steps: list[StepData] = field(default_factory=list)
     params: dict = field(default_factory=dict)  # track-level param overrides
     seed: int = 0
+    gain: float = 1.0
+    pan: float = 0.0   # −1.0 = hard L, 0.0 = centre, +1.0 = hard R
 
     kind: ChannelKind = field(default=ChannelKind.PATTERN, init=False, repr=False)
 
@@ -104,7 +106,7 @@ class PatternChannel:
         }
 
     def to_dict(self) -> dict:
-        return {
+        d: dict[str, Any] = {
             "kind": "pattern",
             "instrument_id": self.instrument_id,
             "n_steps": self.n_steps,
@@ -112,6 +114,11 @@ class PatternChannel:
             "params": dict(self.params),
             "seed": self.seed,
         }
+        if self.gain != 1.0:
+            d["gain"] = self.gain
+        if self.pan != 0.0:
+            d["pan"] = self.pan
+        return d
 
     @classmethod
     def from_dict(cls, d: dict) -> "PatternChannel":
@@ -123,6 +130,8 @@ class PatternChannel:
             steps=steps or [StepData() for _ in range(n)],
             params=dict(d.get("params", {})),
             seed=int(d.get("seed", 0)),
+            gain=float(d.get("gain", 1.0)),
+            pan=float(d.get("pan", 0.0)),
         )
 
     def copy(self) -> "PatternChannel":
@@ -133,6 +142,8 @@ class PatternChannel:
             steps=[copy.copy(s) for s in self.steps],
             params=dict(self.params),
             seed=self.seed,
+            gain=self.gain,
+            pan=self.pan,
         )
         return ch
 
@@ -161,17 +172,24 @@ class TextureChannel:
     params: dict = field(default_factory=dict)
     seed: int = 0
     envelope: list[Breakpoint] = field(default_factory=list)
+    gain: float = 1.0
+    pan: float = 0.0   # −1.0 = hard L, 0.0 = centre, +1.0 = hard R
 
     kind: ChannelKind = field(default=ChannelKind.TEXTURE, init=False, repr=False)
 
     def to_dict(self) -> dict:
-        return {
+        d: dict[str, Any] = {
             "kind": "texture",
             "instrument_id": self.instrument_id,
             "params": dict(self.params),
             "seed": self.seed,
             "envelope": [{"bar": b.bar, "value": b.value} for b in self.envelope],
         }
+        if self.gain != 1.0:
+            d["gain"] = self.gain
+        if self.pan != 0.0:
+            d["pan"] = self.pan
+        return d
 
     @classmethod
     def from_dict(cls, d: dict) -> "TextureChannel":
@@ -181,6 +199,8 @@ class TextureChannel:
             params=dict(d.get("params", {})),
             seed=int(d.get("seed", 0)),
             envelope=envelope,
+            gain=float(d.get("gain", 1.0)),
+            pan=float(d.get("pan", 0.0)),
         )
 
     def copy(self) -> "TextureChannel":
@@ -189,6 +209,8 @@ class TextureChannel:
             params=dict(self.params),
             seed=self.seed,
             envelope=[Breakpoint(b.bar, b.value) for b in self.envelope],
+            gain=self.gain,
+            pan=self.pan,
         )
 
 

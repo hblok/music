@@ -77,6 +77,7 @@ class MainWindow(QMainWindow):
         self._autosave = None
         self._channel_mutes: dict[int, bool] = {}
         self._channel_volumes: dict[int, float] = {}
+        self._mixer_channel_indices: list[int] = []
 
         self.setWindowTitle("Forge — Tracker")
         self.resize(1200, 750)
@@ -253,11 +254,27 @@ class MainWindow(QMainWindow):
     def _rebuild_mixer_strips(self) -> None:
         """Sync MixerWidget strips with current doc PatternChannels."""
         from forge.document.channels import PatternChannel
+
+        # Disconnect old pan signal before rebuilding (suppress warning if not yet connected).
+        import warnings
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore", RuntimeWarning)
+            try:
+                self._mixer.levelsChanged.disconnect(self._on_mixer_levels_changed)
+            except (RuntimeError, TypeError):
+                pass
+
         for name in list(self._mixer._strips.keys()):
             self._mixer.remove_strip(name)
-        for ch in self._doc.channels:
+
+        # Track which doc channel index corresponds to each strip (insertion order).
+        self._mixer_channel_indices: list[int] = []
+        for idx, ch in enumerate(self._doc.channels):
             if isinstance(ch, PatternChannel):
                 self._mixer.add_strip(ch.instrument_id)
+                self._mixer_channel_indices.append(idx)
+
+        self._mixer.levelsChanged.connect(self._on_mixer_levels_changed)
 
     def _update_workshop(self) -> None:
         """Replace the WorkshopPanel with one for the selected channel."""
@@ -449,6 +466,10 @@ class MainWindow(QMainWindow):
     def _on_channel_volume_changed(self, channel_idx: int, volume: float) -> None:
         self._channel_volumes[channel_idx] = volume
         self._buf_valid = False
+        try:
+            self._doc.set_channel_gain(channel_idx, volume, coalesce=True)
+        except (IndexError, TypeError):
+            pass
 
     def _on_channel_mute_changed(self, channel_idx: int, muted: bool) -> None:
         self._channel_mutes[channel_idx] = muted
@@ -466,6 +487,20 @@ class MainWindow(QMainWindow):
         else:
             for e in self._tracker_editors:
                 e.set_muted(e._channel_idx != channel_idx)
+
+    def _on_mixer_levels_changed(self, levels: dict) -> None:
+        """Route MixerWidget pan changes into the doc for each PatternChannel strip."""
+        indices = getattr(self, "_mixer_channel_indices", [])
+        for strip_pos, (name, vals) in enumerate(levels.items()):
+            if strip_pos >= len(indices):
+                break
+            channel_idx = indices[strip_pos]
+            pan = vals.get("pan", 0.0)
+            try:
+                self._doc.set_channel_pan(channel_idx, pan, coalesce=True)
+            except (IndexError, TypeError):
+                pass
+        self._buf_valid = False
 
     # ------------------------------------------------------------------
     # Slots

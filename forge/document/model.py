@@ -203,6 +203,36 @@ class ProjectDoc:
         self._history.push(txn)
         self._notify(txn)
 
+    def set_channel_gain(self, channel_idx: int, value: float, *, coalesce: bool = False) -> None:
+        """Set the gain (volume scale) of a PatternChannel or TextureChannel."""
+        ch = self._channels[channel_idx]
+        if not isinstance(ch, (PatternChannel, TextureChannel)):
+            raise TypeError("set_channel_gain only applies to pattern/texture channels")
+        old = ch.gain
+        value = float(value)
+        if old == value:
+            return
+        txn = Transaction("set channel gain")
+        txn.add_change(("channel", channel_idx, "gain"), old, value)
+        ch.gain = value
+        self._history.push(txn, coalesce=coalesce)
+        self._notify(txn)
+
+    def set_channel_pan(self, channel_idx: int, value: float, *, coalesce: bool = False) -> None:
+        """Set the pan position (−1.0..+1.0) of a PatternChannel or TextureChannel."""
+        ch = self._channels[channel_idx]
+        if not isinstance(ch, (PatternChannel, TextureChannel)):
+            raise TypeError("set_channel_pan only applies to pattern/texture channels")
+        old = ch.pan
+        value = float(value)
+        if old == value:
+            return
+        txn = Transaction("set channel pan")
+        txn.add_change(("channel", channel_idx, "pan"), old, value)
+        ch.pan = value
+        self._history.push(txn, coalesce=coalesce)
+        self._notify(txn)
+
     def reroll(self, channel_idx: int) -> None:
         """Generate a new random seed for channel *channel_idx*."""
         new_seed = random.randint(0, 2 ** 31 - 1)
@@ -620,6 +650,10 @@ class ProjectDoc:
                 ch.instrument_id = value  # type: ignore[union-attr]
             elif sub == "seed":
                 ch.seed = value  # type: ignore[union-attr]
+            elif sub == "gain":
+                ch.gain = value  # type: ignore[union-attr]
+            elif sub == "pan":
+                ch.pan = value  # type: ignore[union-attr]
             elif sub == "params":
                 if value is None:
                     ch.params.pop(path[3], None)

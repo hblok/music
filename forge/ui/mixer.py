@@ -26,7 +26,7 @@ from PySide6.QtWidgets import (
 
 
 class _Strip(QWidget):
-    """Single mixer strip: label + fader + mute."""
+    """Single mixer strip: label + fader + mute + pan."""
 
     changed = Signal()
 
@@ -43,6 +43,12 @@ class _Strip(QWidget):
         self._mute_btn.setCheckable(True)
         self._mute_btn.setFixedSize(24, 24)
 
+        # Pan slider: −100..+100 maps to −1.0..+1.0, default 0 (centre).
+        self._pan_slider = QSlider(Qt.Orientation.Horizontal)
+        self._pan_slider.setRange(-100, 100)
+        self._pan_slider.setValue(0)
+        self._pan_slider.setFixedWidth(60)
+
         label = QLabel(name[:6])
         label.setAlignment(Qt.AlignmentFlag.AlignHCenter)
 
@@ -50,10 +56,12 @@ class _Strip(QWidget):
         layout.setAlignment(Qt.AlignmentFlag.AlignHCenter)
         layout.addWidget(label)
         layout.addWidget(self._fader, alignment=Qt.AlignmentFlag.AlignHCenter)
+        layout.addWidget(self._pan_slider, alignment=Qt.AlignmentFlag.AlignHCenter)
         layout.addWidget(self._mute_btn, alignment=Qt.AlignmentFlag.AlignHCenter)
 
         self._fader.valueChanged.connect(lambda _: self.changed.emit())
         self._mute_btn.toggled.connect(lambda _: self.changed.emit())
+        self._pan_slider.valueChanged.connect(lambda _: self.changed.emit())
 
     @property
     def volume(self) -> float:
@@ -64,8 +72,17 @@ class _Strip(QWidget):
     def muted(self) -> bool:
         return self._mute_btn.isChecked()
 
+    @property
+    def pan(self) -> float:
+        """Pan position −1.0..+1.0 (slider −100..+100 mapped)."""
+        return self._pan_slider.value() / 100.0
+
     def set_volume(self, v: float) -> None:
         self._fader.setValue(int(v * 100))
+
+    def set_pan(self, p: float) -> None:
+        """Set pan from a float in the range −1.0..+1.0."""
+        self._pan_slider.setValue(int(p * 100))
 
 
 class MixerWidget(QWidget):
@@ -76,7 +93,7 @@ class MixerWidget(QWidget):
         parent:      Optional parent.
     """
 
-    levelsChanged = Signal(dict)   # {name: {"volume": float, "muted": bool}}
+    levelsChanged = Signal(dict)   # {name: {"volume": float, "muted": bool, "pan": float}}
 
     def __init__(
         self,
@@ -106,15 +123,20 @@ class MixerWidget(QWidget):
                     pass
 
     def levels(self) -> dict:
-        """Current levels: ``{name: {"volume": float, "muted": bool}}``."""
+        """Current levels: ``{name: {"volume": float, "muted": bool, "pan": float}}``."""
         return {
-            name: {"volume": strip.volume, "muted": strip.muted}
+            name: {"volume": strip.volume, "muted": strip.muted, "pan": strip.pan}
             for name, strip in self._strips.items()
         }
 
     def set_volume(self, name: str, v: float) -> None:
         if name in self._strips:
             self._strips[name].set_volume(v)
+
+    def set_pan(self, name: str, p: float) -> None:
+        """Set the pan of the strip for *name* (−1.0..+1.0; no-op if absent)."""
+        if name in self._strips:
+            self._strips[name].set_pan(p)
 
     def set_mixer(self, mixer: "forge.playback.mixer.CallbackMixer") -> None:  # type: ignore[name-defined]
         """Bind this widget's faders/mutes to a live ``CallbackMixer``.
