@@ -292,8 +292,9 @@ class _StepCell(QWidget):
         self._cursor = False
         self._selected = False
 
-        # Off-state tints: light (even beat groups) and medium (odd beat groups),
-        # both derived from the channel colour so inactive steps are clearly coloured.
+        # Off-state tints derived from the channel colour.
+        # Groups 0 and 2 (steps 1-4, 9-12) are the strong beats → darker tint.
+        # Groups 1 and 3 (steps 5-8, 13-16) are the weak beats → lighter tint.
         r = int(channel_color[1:3], 16)
         g = int(channel_color[3:5], 16)
         b = int(channel_color[5:7], 16)
@@ -303,9 +304,9 @@ class _StepCell(QWidget):
                 int(g * alpha + 255 * (1 - alpha)),
                 int(b * alpha + 255 * (1 - alpha)),
             )
-        self._c_off_even = _mix(0.22)   # light tint  — groups 0, 2
-        self._c_off_odd  = _mix(0.38)   # medium tint — groups 1, 3
-        # Dark channel-colour text for good contrast on the light tinted background
+        self._c_off_strong = _mix(0.38)  # strong-beat groups 0, 2
+        self._c_off_weak   = _mix(0.22)  # weak-beat  groups 1, 3
+        # Dark channel-colour text for contrast on the tinted background
         self._c_text_off = "#{:02x}{:02x}{:02x}".format(
             int(r * 0.45), int(g * 0.45), int(b * 0.45)
         )
@@ -321,7 +322,7 @@ class _StepCell(QWidget):
         font.setBold(True)
         self._label.setFont(font)
         # Initialise paint state before first _refresh
-        self._bg_color = QColor(self._c_off_even)
+        self._bg_color = QColor(self._c_off_strong)
         self._border_color = QColor(self._c_text_off)
         self._refresh()
 
@@ -349,10 +350,10 @@ class _StepCell(QWidget):
         self._refresh()
 
     def _refresh(self) -> None:
-        off_color = self._c_off_odd if (self.step_idx // 4) % 2 else self._c_off_even
-        if self._cursor:
-            bg = self._C_CURSOR
-        elif self._selected:
+        # Strong-beat groups (0, 2) are darker; weak-beat groups (1, 3) are lighter
+        off_color = self._c_off_strong if (self.step_idx // 4) % 2 == 0 else self._c_off_weak
+
+        if self._selected:
             bg = self._C_SELECTED
         elif self._on:
             if self._accent:
@@ -365,12 +366,11 @@ class _StepCell(QWidget):
                 bg = self._channel_color
         else:
             bg = off_color
-        is_active = self._on or self._cursor or self._selected
+
+        is_active = self._on or self._selected
         text_color = "#fff" if is_active else self._c_text_off
-        border_hex = "#444" if self._cursor else self._c_text_off
 
         self._bg_color = QColor(bg)
-        self._border_color = QColor(border_hex)
         self._label.setStyleSheet(
             f"color: {text_color}; background: transparent; border: none;"
         )
@@ -383,8 +383,16 @@ class _StepCell(QWidget):
     def paintEvent(self, _event) -> None:
         painter = QPainter(self)
         painter.fillRect(self.rect(), self._bg_color)
-        painter.setPen(QPen(self._border_color, 1))
-        painter.drawRect(self.rect().adjusted(0, 0, -1, -1))
+        # Cursor: draw a 2-px white focus ring so position is clear without
+        # overriding the step's on/off colour.
+        if self._cursor:
+            painter.setPen(QPen(QColor("#ffffff"), 2))
+            painter.drawRect(self.rect().adjusted(1, 1, -2, -2))
+            painter.setPen(QPen(QColor(self._c_text_off), 1))
+            painter.drawRect(self.rect().adjusted(0, 0, -1, -1))
+        else:
+            painter.setPen(QPen(QColor(self._c_text_off), 1))
+            painter.drawRect(self.rect().adjusted(0, 0, -1, -1))
         painter.end()
 
     def mousePressEvent(self, event) -> None:
