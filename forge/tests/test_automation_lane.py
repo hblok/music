@@ -217,6 +217,66 @@ class TestAutomationLane(unittest.TestCase):
         lane._on_clear()
         self.assertEqual(len(doc.channel(idx).breakpoints), 0)
 
+    # --- Phase 6: target selector tests ---
+
+    def test_param_field_shows_target_param(self):
+        """Param edit box is initialised from the channel's target_param."""
+        from forge.ui.automation_lane import AutomationLane
+        doc, idx = _make_auto_doc("cutoff")
+        lane = AutomationLane(idx, doc, bar_count=4)
+        self.assertEqual(lane._param_edit.text(), "cutoff")
+
+    def test_channel_spin_shows_global_for_none(self):
+        """Channel spinbox shows -1 when target_channel is None (global)."""
+        from forge.ui.automation_lane import AutomationLane
+        doc, idx = _make_auto_doc("master_gain")
+        lane = AutomationLane(idx, doc, bar_count=4)
+        self.assertEqual(lane._channel_spin.value(), -1)
+
+    def test_channel_spin_shows_target_channel(self):
+        """Channel spinbox reflects a non-None target_channel."""
+        from forge.document.channels import AutomationChannel
+        from forge.document.model import ProjectDoc
+        from forge.ui.automation_lane import AutomationLane
+        doc = ProjectDoc()
+        doc.add_channel(AutomationChannel(target_param="cutoff", target_channel=3))
+        lane = AutomationLane(0, doc, bar_count=4)
+        self.assertEqual(lane._channel_spin.value(), 3)
+
+    def test_target_changed_updates_doc(self):
+        """_on_target_changed writes back to the doc via set_automation_target."""
+        from forge.ui.automation_lane import AutomationLane
+        doc, idx = _make_auto_doc("master_gain")
+        lane = AutomationLane(idx, doc, bar_count=4)
+        lane._param_edit.setText("cutoff")
+        lane._channel_spin.setValue(2)
+        lane._on_target_changed()
+        ch = doc.channel(idx)
+        self.assertEqual(ch.target_param, "cutoff")
+        self.assertEqual(ch.target_channel, 2)
+
+    def test_target_changed_is_undoable(self):
+        """Target change via the UI selector is undo-able."""
+        from forge.ui.automation_lane import AutomationLane
+        doc, idx = _make_auto_doc("master_gain")
+        lane = AutomationLane(idx, doc, bar_count=4)
+        lane._param_edit.setText("cutoff")
+        lane._channel_spin.setValue(1)
+        lane._on_target_changed()
+        doc.undo()
+        ch = doc.channel(idx)
+        self.assertEqual(ch.target_param, "master_gain")
+        self.assertIsNone(ch.target_channel)
+
+    def test_doc_target_change_refreshes_lane(self):
+        """When the doc changes target, the lane's widgets update."""
+        from forge.ui.automation_lane import AutomationLane
+        doc, idx = _make_auto_doc("master_gain")
+        lane = AutomationLane(idx, doc, bar_count=4)
+        doc.set_automation_target(idx, "cutoff", target_channel=5)
+        self.assertEqual(lane._param_edit.text(), "cutoff")
+        self.assertEqual(lane._channel_spin.value(), 5)
+
 
 # ---------------------------------------------------------------------------
 # render_texture_channel (headless, no audio device)

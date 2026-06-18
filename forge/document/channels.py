@@ -238,30 +238,44 @@ class TextureChannel:
 class AutomationChannel:
     """An automation lane binding breakpoints to a named engine parameter.
 
-    Stub in Phase 1; fleshed out fully in Phase 6.
+    When ``target_channel`` is None (default) the lane targets a global/master
+    parameter (e.g. ``target_param == "master_gain"``).
+
+    When ``target_channel`` is an int it targets the instrument param named
+    ``target_param`` on that PatternChannel index (e.g. acid ``cutoff``).
     """
 
-    target_param: str  # e.g. "master_gain", "energy"
+    target_param: str  # e.g. "master_gain", "cutoff"
     breakpoints: list[Breakpoint] = field(default_factory=list)
+    target_channel: int | None = None  # None → global/master; int → per-channel param
 
     kind: ChannelKind = field(default=ChannelKind.AUTOMATION, init=False, repr=False)
 
     def to_dict(self) -> dict:
-        return {
+        d: dict[str, Any] = {
             "kind": "automation",
             "target_param": self.target_param,
             "breakpoints": [{"bar": b.bar, "value": b.value} for b in self.breakpoints],
         }
+        if self.target_channel is not None:
+            d["target_channel"] = self.target_channel
+        return d
 
     @classmethod
     def from_dict(cls, d: dict) -> "AutomationChannel":
         bps = [Breakpoint(float(b["bar"]), float(b["value"])) for b in d.get("breakpoints", [])]
-        return cls(target_param=str(d["target_param"]), breakpoints=bps)
+        tc = d.get("target_channel")
+        return cls(
+            target_param=str(d["target_param"]),
+            breakpoints=bps,
+            target_channel=int(tc) if tc is not None else None,
+        )
 
     def copy(self) -> "AutomationChannel":
         return AutomationChannel(
             target_param=self.target_param,
             breakpoints=[Breakpoint(b.bar, b.value) for b in self.breakpoints],
+            target_channel=self.target_channel,
         )
 
 

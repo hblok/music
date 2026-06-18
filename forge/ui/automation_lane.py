@@ -26,7 +26,9 @@ from PySide6.QtGui import QColor, QPainter, QPen
 from PySide6.QtWidgets import (
     QHBoxLayout,
     QLabel,
+    QLineEdit,
     QPushButton,
+    QSpinBox,
     QVBoxLayout,
     QWidget,
 )
@@ -308,6 +310,14 @@ class AutomationLane(QWidget):
     bars with a value range of [*lo*, *hi*].  Edits write back through
     ``doc.replace_automation_bps()``.
 
+    A target-selector row at the top lets the user change which parameter the
+    lane controls:
+
+    * **Param** field  — editable string (e.g. "master_gain", "cutoff").
+    * **Channel** spinbox — -1 = global/master target; 0+ = that PatternChannel.
+
+    Changes to the selectors call ``doc.set_automation_target()``.
+
     Args:
         channel_idx: Index of the AutomationChannel in *doc*.
         doc:         Live ProjectDoc.
@@ -332,8 +342,28 @@ class AutomationLane(QWidget):
         self._applying = False
 
         ch = doc.channel(channel_idx)
-        label_text = getattr(ch, "target_param", "automation")
 
+        # --- target-selector row ---
+        self._param_edit = QLineEdit(getattr(ch, "target_param", "master_gain"))
+        self._param_edit.setPlaceholderText("param name")
+        self._param_edit.setFixedWidth(100)
+        self._param_edit.editingFinished.connect(self._on_target_changed)
+
+        self._channel_spin = QSpinBox()
+        self._channel_spin.setRange(-1, 255)
+        self._channel_spin.setSpecialValueText("global")  # -1 displays as "global"
+        tc = getattr(ch, "target_channel", None)
+        self._channel_spin.setValue(tc if tc is not None else -1)
+        self._channel_spin.valueChanged.connect(self._on_target_changed)
+
+        target_row = QHBoxLayout()
+        target_row.addWidget(QLabel("param:"))
+        target_row.addWidget(self._param_edit)
+        target_row.addWidget(QLabel("ch:"))
+        target_row.addWidget(self._channel_spin)
+        target_row.addStretch()
+
+        # --- curve row ---
         self._curve = BreakpointCurveWidget(bar_count=bar_count, lo=lo, hi=hi)
         self._curve.curveChanged.connect(self._on_curve_changed)
 
@@ -342,23 +372,29 @@ class AutomationLane(QWidget):
         clear_btn.clicked.connect(self._on_clear)
 
         header = QHBoxLayout()
-        header.addWidget(QLabel(label_text))
         header.addStretch()
         header.addWidget(clear_btn)
 
         layout = QVBoxLayout(self)
         layout.setContentsMargins(4, 4, 4, 4)
         layout.setSpacing(2)
+        layout.addLayout(target_row)
         layout.addLayout(header)
         layout.addWidget(self._curve)
 
         self._refresh_from_doc()
         doc.subscribe(self._on_doc_changed)
 
+    # ---------------------------------------------------------------- internal
+
     def _refresh_from_doc(self) -> None:
         ch = self._doc.channel(self._channel_idx)
         pts = [(b.bar, b.value) for b in ch.breakpoints]
         self._curve.set_points(pts)
+        # Sync selectors (guard against re-entrancy via _applying).
+        self._param_edit.setText(getattr(ch, "target_param", "master_gain"))
+        tc = getattr(ch, "target_channel", None)
+        self._channel_spin.setValue(tc if tc is not None else -1)
 
     def _on_doc_changed(self, txn) -> None:
         if self._applying:
@@ -378,6 +414,19 @@ class AutomationLane(QWidget):
         self._applying = True
         try:
             self._doc.replace_automation_bps(self._channel_idx, points)
+        finally:
+            self._applying = False
+
+    def _on_target_changed(self) -> None:
+        """Called when the param field or channel spinbox is committed."""
+        if self._applying:
+            return
+        param = self._param_edit.text().strip() or "master_gain"
+        raw = self._channel_spin.value()
+        tc: int | None = None if raw < 0 else raw
+        self._applying = True
+        try:
+            self._doc.set_automation_target(self._channel_idx, param, tc)
         finally:
             self._applying = False
 

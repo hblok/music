@@ -264,9 +264,21 @@ def _render_doc_sections(
     auto_master_gain = [
         (i, ch) for i, ch in enumerate(channels)
         if isinstance(ch, AutomationChannel)
+        and ch.target_channel is None
         and ch.target_param == "master_gain"
         and i not in muted_channels
     ]
+    # Per-channel automation lanes: target a specific PatternChannel's instrument param.
+    # Key: target PatternChannel index → list of AutomationChannels.
+    from collections import defaultdict as _defaultdict
+    auto_per_channel: dict = _defaultdict(list)
+    for i, ch in enumerate(channels):
+        if (
+            isinstance(ch, AutomationChannel)
+            and ch.target_channel is not None
+            and i not in muted_channels
+        ):
+            auto_per_channel[ch.target_channel].append(ch)
 
     grid = Grid(doc.bpm, doc.sr)
 
@@ -285,7 +297,23 @@ def _render_doc_sections(
                 "tracks": [ch.to_track_dict()],
             }
             seed = doc.seed + ci * 1009
-            ch_buf = render_pattern(pattern_dict, seed=seed)
+            # Build per-step param override closure if this channel has automation lanes.
+            override_fn = None
+            if ci in auto_per_channel:
+                from forge.arrange.curves import Curve as _Curve
+                _curves = {
+                    auto_ch.target_param: _Curve(
+                        [(b.bar, b.value) for b in auto_ch.breakpoints]
+                    )
+                    for auto_ch in auto_per_channel[ci]
+                    if len(auto_ch.breakpoints) >= 2
+                }
+                if _curves:
+                    def override_fn(bar_idx, step_idx, n_steps, _c=_curves, _off=0):
+                        abs_bar = _off + bar_idx + (step_idx / n_steps)
+                        return {p: c.at(abs_bar) for p, c in _c.items()}
+            from forge.patterns.groove import render_pattern_spec as _rps
+            ch_buf = _rps(pattern_dict, seed=seed, param_override=override_fn)
             _apply_gain_pan(ch_buf, ch.gain, ch.pan)
             master_buf.data += ch_buf.data[:total_samples]
 
@@ -317,6 +345,16 @@ def _render_doc_sections(
     # Render each PatternChannel independently across all sections.
     for ci in pat_indices:
         ch = channels[ci]
+        # Pre-build automation curves for this channel (if any lanes target it).
+        ch_auto_curves = {}
+        if ci in auto_per_channel:
+            from forge.arrange.curves import Curve as _Curve
+            for auto_ch in auto_per_channel[ci]:
+                if len(auto_ch.breakpoints) >= 2:
+                    ch_auto_curves[auto_ch.target_param] = _Curve(
+                        [(b.bar, b.value) for b in auto_ch.breakpoints]
+                    )
+
         # Build a full-length per-channel buffer by placing each section at its offset.
         ch_full = AudioBuffer(total_samples, doc.sr)
         start_bar = 0
@@ -338,7 +376,17 @@ def _render_doc_sections(
             }
             # Deterministic, collision-free seed per channel/section pair.
             seed = doc.seed + si + ci * 1009
-            sec_buf = render_pattern(pattern_dict, seed=seed)
+
+            # Build per-step param override closure for this section if needed.
+            override_fn = None
+            if ch_auto_curves:
+                def override_fn(bar_idx, step_idx, n_steps,
+                                _curves=ch_auto_curves, _off=start_bar):
+                    abs_bar = _off + bar_idx + (step_idx / n_steps)
+                    return {p: c.at(abs_bar) for p, c in _curves.items()}
+
+            from forge.patterns.groove import render_pattern_spec as _rps
+            sec_buf = _rps(pattern_dict, seed=seed, param_override=override_fn)
             ch_full.add_at(sec_buf.data, grid.bar_t(start_bar), gain=sec_gain)
             start_bar += sec_bars
 

@@ -27,6 +27,7 @@ def render_groove(
     *,
     cache: RenderCache | None = None,
     sr: int = 44100,
+    param_override=None,
 ) -> AudioBuffer:
     """Render *schedule* to an AudioBuffer.
 
@@ -38,10 +39,14 @@ def render_groove(
       identified by its position in the pattern list for that bar)
 
     Args:
-        schedule:  populated Schedule to render.
-        rng_ctx:   seeded RngContext; call ``RngContext(seed)`` to create.
-        cache:     optional RenderCache to reuse identical hits.
-        sr:        sample rate (must match schedule intent).
+        schedule:       populated Schedule to render.
+        rng_ctx:        seeded RngContext; call ``RngContext(seed)`` to create.
+        cache:          optional RenderCache to reuse identical hits.
+        sr:             sample rate (must match schedule intent).
+        param_override: optional callable ``(bar_idx, step_idx, n_steps) -> dict``
+                        returning extra params to merge for that hit.  When None
+                        (default) the render is byte-identical to the previous
+                        behaviour.
     """
     grid = Grid(schedule.bpm, sr=sr)
     total_n = grid.n_samples(schedule.length_bars)
@@ -63,10 +68,17 @@ def render_groove(
                         continue
 
                 iid_rng = hit_ctx.spawn(step.instrument_id)
+
+                if param_override is not None:
+                    extra = param_override(bar_idx, step_idx, pattern.n_steps)
+                    params = {**step.params, **extra} if extra else step.params
+                else:
+                    params = step.params
+
                 hit_buf = render_cached(
                     step.instrument_id,
                     entry["fn"],
-                    step.params,
+                    params,
                     iid_rng.rng,
                     cache=cache,
                 )
@@ -86,6 +98,7 @@ def render_loop(
     xf_bars: float = 2.0,
     cache: RenderCache | None = None,
     sr: int = 44100,
+    param_override=None,
 ) -> AudioBuffer:
     """Render *schedule* and apply loop_fold for a seamless game loop.
 
@@ -93,11 +106,14 @@ def render_loop(
     then applies equal-power loop_fold so the seam is inaudible.
 
     Args:
-        schedule:  populated Schedule.
-        rng_ctx:   seeded RngContext.
-        xf_bars:   crossfade width in bars (default 2).
-        cache:     optional RenderCache.
-        sr:        sample rate.
+        schedule:       populated Schedule.
+        rng_ctx:        seeded RngContext.
+        xf_bars:        crossfade width in bars (default 2).
+        cache:          optional RenderCache.
+        sr:             sample rate.
+        param_override: optional callable ``(bar_idx, step_idx, n_steps) -> dict``.
+                        When None the render is byte-identical to the previous
+                        behaviour.
     """
     import math
 
@@ -128,10 +144,17 @@ def render_loop(
                         continue
 
                 iid_rng = hit_ctx.spawn(step.instrument_id)
+
+                if param_override is not None:
+                    extra = param_override(bar_sched, step_idx, pattern.n_steps)
+                    params = {**step.params, **extra} if extra else step.params
+                else:
+                    params = step.params
+
                 hit_buf = render_cached(
                     step.instrument_id,
                     entry["fn"],
-                    step.params,
+                    params,
                     iid_rng.rng,
                     cache=cache,
                 )
@@ -150,16 +173,19 @@ def render_pattern_spec(
     *,
     cache: RenderCache | None = None,
     sr: int = 44100,
+    param_override=None,
 ) -> AudioBuffer:
     """Top-level convenience: PatternSpec dict → AudioBuffer.
 
     This is what ``control.render_pattern`` delegates to.
 
     Args:
-        spec:  PatternSpec dict (see forge.patterns.step module docstring).
-        seed:  RNG seed.
-        cache: optional RenderCache.
-        sr:    sample rate.
+        spec:           PatternSpec dict (see forge.patterns.step module docstring).
+        seed:           RNG seed.
+        cache:          optional RenderCache.
+        sr:             sample rate.
+        param_override: optional callable ``(bar_idx, step_idx, n_steps) -> dict``.
+                        Forwarded to ``render_groove``/``render_loop``.
     """
     from forge.patterns.schedule import Schedule
 
@@ -169,5 +195,6 @@ def render_pattern_spec(
 
     if loop:
         xf_bars = float(spec.get("xf_bars", 2.0))
-        return render_loop(sched, rng_ctx, xf_bars=xf_bars, cache=cache, sr=sr)
-    return render_groove(sched, rng_ctx, cache=cache, sr=sr)
+        return render_loop(sched, rng_ctx, xf_bars=xf_bars, cache=cache, sr=sr,
+                           param_override=param_override)
+    return render_groove(sched, rng_ctx, cache=cache, sr=sr, param_override=param_override)

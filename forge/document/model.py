@@ -415,6 +415,45 @@ class ProjectDoc:
             self._history.push(txn)
             self._notify(txn)
 
+    # ---------------------------------------------------------------- automation target edits (AutomationChannel)
+
+    def set_automation_target(
+        self,
+        channel_idx: int,
+        target_param: str,
+        target_channel: int | None = None,
+    ) -> None:
+        """Set the target of an AutomationChannel (target_param + target_channel).
+
+        ``target_channel=None`` → global/master target (e.g. "master_gain").
+        ``target_channel=<int>`` → per-PatternChannel instrument param named *target_param*.
+
+        The change is transactional and undo/redo-safe.
+        """
+        ch = self._channels[channel_idx]
+        if not isinstance(ch, AutomationChannel):
+            raise TypeError("set_automation_target only applies to AutomationChannel")
+        old_param = ch.target_param
+        old_tc = ch.target_channel
+        if old_param == target_param and old_tc == target_channel:
+            return
+        txn = Transaction("set automation target")
+        if old_param != target_param:
+            txn.add_change(
+                ("channel", channel_idx, "auto_target_param"),
+                old_param, target_param,
+            )
+            ch.target_param = target_param
+        if old_tc != target_channel:
+            txn.add_change(
+                ("channel", channel_idx, "auto_target_channel"),
+                old_tc, target_channel,
+            )
+            ch.target_channel = target_channel
+        if not txn.is_empty():
+            self._history.push(txn)
+            self._notify(txn)
+
     # ---------------------------------------------------------------- automation bp edits (AutomationChannel)
 
     def add_automation_bp(self, channel_idx: int, bar: float, value: float) -> int:
@@ -710,6 +749,14 @@ class ProjectDoc:
             elif sub == "envelope_replace":
                 if isinstance(ch, TextureChannel):
                     ch.envelope = [Breakpoint(bar, val) for bar, val in value]
+
+            elif sub == "auto_target_param":
+                if isinstance(ch, AutomationChannel):
+                    ch.target_param = value
+
+            elif sub == "auto_target_channel":
+                if isinstance(ch, AutomationChannel):
+                    ch.target_channel = value
 
             elif sub == "auto_bp_add":
                 bp_idx = path[3]

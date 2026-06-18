@@ -74,6 +74,28 @@ def peak_headroom_db(buf: AudioBuffer) -> float:
     return -20.0 * math.log10(peak)
 
 
+def spectral_centroid(buf: AudioBuffer, *, sr: int = 44100) -> float:
+    """Magnitude-weighted mean frequency (Hz) of *buf* summed to mono.
+
+    Uses a real FFT over the entire buffer.  Both channels are summed before
+    analysis so stereo content is treated equally.
+
+    Args:
+        buf: AudioBuffer to analyse (any length).
+        sr:  Sample rate in Hz (default 44100).
+
+    Returns:
+        Spectral centroid in Hz (scalar float).
+    """
+    mono = buf.data[:, 0] + buf.data[:, 1]  # sum to mono
+    magnitude = np.abs(np.fft.rfft(mono))
+    freqs = np.fft.rfftfreq(len(mono), d=1.0 / sr)
+    total = magnitude.sum()
+    if total < 1e-12:
+        return 0.0
+    return float(np.dot(freqs, magnitude) / total)
+
+
 def intro_vs_aftermath(
     buf: AudioBuffer,
     bpm: float,
