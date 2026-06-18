@@ -8,7 +8,7 @@ from __future__ import annotations
 import numpy as np
 
 from forge.core.buffer import AudioBuffer
-from forge.core.dsp import glide_curve, lowpass, midi_to_hz, raised_cosine_attack
+from forge.core.dsp import bandpass, glide_curve, lowpass, midi_to_hz, raised_cosine_attack
 from forge.instruments.base import ParamSchema
 
 SR = 44100
@@ -224,3 +224,223 @@ def pad_chord(params: dict, rng: np.random.Generator, **ctx) -> AudioBuffer:
     sig_R = lowpass(sig_R, lp_cutoff, order=2, sr=sr)
 
     return AudioBuffer.from_stereo(sig * env, sig_R * env, sr=sr)
+
+
+# ---------------------------------------------------------------- Tremolo strings
+
+TREMOLO_STRINGS_PARAMS = [
+    ParamSchema("midi_notes", "choice", [57, 62, 63],
+                label="Chord MIDI notes"),
+    ParamSchema("duration", "float", 4.0, lo=0.5, hi=30.0, unit="s"),
+    ParamSchema("tremolo_hz", "float", 11.0, lo=4.0, hi=20.0, unit="Hz",
+                label="Tremolo rate"),
+    ParamSchema("tremolo_depth", "float", 0.95, lo=0.2, hi=1.0,
+                label="Tremolo depth (1=silence→peak)"),
+    ParamSchema("attack", "float", 1.0, lo=0.1, hi=6.0, unit="s"),
+    ParamSchema("detune", "float", 0.0045, lo=0.0, hi=0.015,
+                label="Detuning (fraction)"),
+    ParamSchema("lp_cutoff", "float", 2600.0, lo=400.0, hi=8000.0, unit="Hz"),
+    ParamSchema("n_harmonics", "int", 6, lo=1, hi=12),
+]
+
+
+def tremolo_strings(params: dict, rng: np.random.Generator, **ctx) -> AudioBuffer:
+    """Tremolo string section — detuned saw stack with rapid gain oscillation.
+
+    Recipe from ``generate_stillsuit.py``: detuned saw voices (3 detuning
+    offsets per note) through a bandpass filter; separate 10–11 Hz tremolo
+    LFOs on L and R (slightly different rates for 'wobble') that touch near-
+    silence each cycle; slow attack.
+
+    DISTINCT from ``pad_chord``: the tremolo reaches near-zero gain on each
+    cycle, giving a flickering string quality rather than a sustained wash.
+    """
+    sr = ctx.get("sr", SR)
+    notes = params.get("midi_notes", [57, 62, 63])
+    dur = float(params.get("duration", 4.0))
+    tremolo_hz = float(params.get("tremolo_hz", 11.0))
+    tremolo_depth = float(params.get("tremolo_depth", 0.95))
+    attack = float(params.get("attack", 1.0))
+    detune = float(params.get("detune", 0.0045))
+    lp_cutoff = float(params.get("lp_cutoff", 2600.0))
+    n_harmonics = int(params.get("n_harmonics", 6))
+
+    n = int(dur * sr)
+    tt = np.arange(n, dtype=np.float64) / sr
+
+    sig_L = np.zeros(n)
+    sig_R = np.zeros(n)
+
+    for i, midi in enumerate(notes):
+        f = midi_to_hz(midi)
+        g_note = 1.0 - 0.1 * i / max(len(notes) - 1, 1)
+        for j, det in enumerate((-detune, 0.0, detune)):
+            # initial random phase for each voice
+            ph_offset = rng.uniform(0.0, 2.0 * np.pi)
+            ph = 2.0 * np.pi * f * (1.0 + det) * tt + ph_offset
+            saw = sum(np.sin(k * ph) / k for k in range(1, n_harmonics + 1))
+            # pan voices: inner notes centre, detuned voices spread
+            pan = 0.5 + 0.35 * det / (detune + 1e-12)
+            pan = float(np.clip(pan, 0.0, 1.0))
+            sig_L += g_note * saw * np.cos(pan * np.pi / 2.0)
+            sig_R += g_note * saw * np.sin(pan * np.pi / 2.0)
+
+    # bandpass to remove extreme lows and harsh highs
+    sig_L = bandpass(sig_L, 180.0, lp_cutoff, order=2, sr=sr)
+    sig_R = bandpass(sig_R, 180.0, lp_cutoff, order=2, sr=sr)
+
+    # Haas width: small time offset on R for stereo breadth
+    haas = int(0.011 * sr)
+    sig_R = np.roll(sig_R, haas)
+
+    # tremolo: separate rates L/R, depth parameter, touches near-silence
+    lo_gain = 1.0 - tremolo_depth
+    trem_L = (lo_gain + (1.0 - lo_gain) * np.sin(np.pi * tremolo_hz * tt) ** 2)
+    # slightly different rate for R (the stillsuit recipe uses 10.4 and 10.9)
+    trem_R = (lo_gain + (1.0 - lo_gain) * np.sin(np.pi * (tremolo_hz + 0.5) * tt + 1.3) ** 2)
+    sig_L *= trem_L
+    sig_R *= trem_R
+
+    # slow attack
+    n_att = min(int(attack * sr), n)
+    env = np.ones(n)
+    env[:n_att] = raised_cosine_attack(n_att)
+
+    sig_L *= env
+    sig_R *= env
+
+    # normalise peak to ~1 (before external gain staging)
+    peak = max(np.max(np.abs(sig_L)), np.max(np.abs(sig_R))) + 1e-12
+    sig_L /= peak
+    sig_R /= peak
+
+    return AudioBuffer.from_stereo(sig_L, sig_R, sr=sr)
+
+
+# ---------------------------------------------------------------- Santur (hammered dulcimer)
+
+SANTUR_PARAMS = [
+    ParamSchema("midi", "int", 62, lo=36, hi=96, label="MIDI note"),
+    ParamSchema("duration", "float", 2.0, lo=0.1, hi=8.0, unit="s"),
+    ParamSchema("detune", "float", 0.0015, lo=0.0, hi=0.01,
+                label="String pair detune (fraction)"),
+    ParamSchema("damp", "float", 0.997, lo=0.98, hi=0.9999,
+                label="KS damping"),
+    ParamSchema("decay_rate", "float", 1.6, lo=0.2, hi=8.0, unit="1/s",
+                label="Exponential decay rate"),
+]
+
+
+def santur(params: dict, rng: np.random.Generator, **ctx) -> AudioBuffer:
+    """Hammered santur (dulcimer) — two-course Karplus-Strong struck strings.
+
+    Recipe from ``santur_note`` in spice_must_flow.py:
+    Two strings per course at ±*detune* fraction; the excitation is a 2-tap
+    smoothed noise burst (hammer blow, not a pick) rather than a single-tap
+    lowpassed noise; fast exponential decay envelope simulates the struck
+    character.
+    """
+    sr = ctx.get("sr", SR)
+    midi = int(params.get("midi", 62))
+    dur = float(params.get("duration", 2.0))
+    detune = float(params.get("detune", 0.0015))
+    damp = float(params.get("damp", 0.997))
+    decay_rate = float(params.get("decay_rate", 1.6))
+
+    freq = midi_to_hz(midi)
+    n = int(dur * sr)
+    tt = np.arange(n, dtype=np.float64) / sr
+    out = np.zeros(n)
+
+    for det, g in [(1.0 - detune, 1.0), (1.0 + detune, 0.85)]:
+        period = max(2, int(round(sr / (freq * det))))
+        # hammer excitation: short normal noise, 2-tap smoothed (not pick-LP)
+        buf = rng.standard_normal(period)
+        buf = np.convolve(buf, np.ones(2) / 2.0, mode="same")
+
+        # run KS loop for the full duration
+        ks_out = np.zeros(n)
+        ks_out[:period] = buf[:min(period, n)]
+        for i in range(period, n):
+            prev = ks_out[i - period]
+            nxt_idx = i - period + 1
+            nxt = ks_out[nxt_idx] if nxt_idx < i else 0.0
+            ks_out[i] = damp * 0.5 * (prev + nxt)
+
+        out += g * ks_out
+
+    # exponential decay envelope (struck character, not plucked sustain)
+    decay_env = np.exp(-decay_rate * tt) * np.clip((dur - tt) / 0.1, 0.0, 1.0)
+    out *= decay_env
+
+    peak = np.max(np.abs(out)) + 1e-12
+    out /= peak
+    return AudioBuffer.from_mono(out, sr=sr)
+
+
+# ---------------------------------------------------------------- Oud (plucked lute)
+
+OUD_PARAMS = [
+    ParamSchema("midi", "int", 62, lo=36, hi=84, label="MIDI note"),
+    ParamSchema("duration", "float", 0.55, lo=0.1, hi=4.0, unit="s"),
+    ParamSchema("detune", "float", 0.004, lo=0.0, hi=0.01,
+                label="Double-course detune (fraction)"),
+    ParamSchema("damp", "float", 0.4985, lo=0.48, hi=0.5,
+                label="KS damping coefficient"),
+    ParamSchema("bp_lo", "float", 200.0, lo=50.0, hi=800.0, unit="Hz",
+                label="Body bandpass lo"),
+    ParamSchema("bp_hi", "float", 4200.0, lo=1000.0, hi=8000.0, unit="Hz",
+                label="Body bandpass hi"),
+]
+
+
+def oud(params: dict, rng: np.random.Generator, **ctx) -> AudioBuffer:
+    """Plucked oud — Karplus-Strong double-course with oud body bandpass.
+
+    Recipe from ``oud_note`` in fall_of_arrakeen.py:
+    Two strings per course (double-course instrument); uniform noise excitation
+    (not lowpassed pick — gives the characteristic thin-then-bloomy oud attack);
+    a 200–4200 Hz bandpass models the pear-shaped resonant body; fast tail
+    release clips.
+    """
+    sr = ctx.get("sr", SR)
+    midi = int(params.get("midi", 62))
+    dur = float(params.get("duration", 0.55))
+    detune = float(params.get("detune", 0.004))
+    damp = float(params.get("damp", 0.4985))
+    bp_lo = float(params.get("bp_lo", 200.0))
+    bp_hi = float(params.get("bp_hi", 4200.0))
+
+    freq = midi_to_hz(midi)
+    n = int(dur * sr)
+    tt = np.arange(n, dtype=np.float64) / sr
+    out = np.zeros(n)
+
+    for det in (1.0, 1.0 + detune):
+        f_det = freq * det
+        period = max(2, int(sr / f_det))
+        # uniform noise excitation — characteristic oud pick (no LP)
+        buf = rng.uniform(-1.0, 1.0, period)
+
+        idx = 0
+        ks = np.zeros(n)
+        for i in range(n):
+            ks[i] = buf[idx]
+            nxt = (idx + 1) % period
+            buf[idx] = damp * (buf[idx] + buf[nxt])
+            idx = nxt
+
+        out += ks
+
+    # body resonance: pear-shaped cavity bandpass
+    out = bandpass(out, bp_lo, bp_hi, order=2, sr=sr)
+
+    # fast tail release (the oud's plucked decay)
+    release_n = min(int(0.04 * sr), n)
+    release_env = np.ones(n)
+    release_env[-release_n:] = np.linspace(1.0, 0.0, release_n)
+    out *= release_env
+
+    peak = np.max(np.abs(out)) + 1e-12
+    out /= peak
+    return AudioBuffer.from_mono(out, sr=sr)

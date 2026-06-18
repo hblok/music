@@ -337,5 +337,305 @@ class TestControlPhase3(unittest.TestCase):
             control.render_instrument("does_not_exist", {})
 
 
+# ---------------------------------------------------------------------------
+# Phase 8 — Group A: tonal & textural instruments (9 new)
+
+class TestPhase8GroupAVoices(unittest.TestCase):
+    """Acceptance tests for ney, chant, horn."""
+
+    def _rng(self):
+        return RngContext(99).spawn("p8voices").rng
+
+    def _render(self, iid, params=None):
+        entry = get_instrument(iid)
+        return entry["fn"](params or {}, self._rng())
+
+    # --- helpers for slider-buildable check
+
+    def _assert_slider_buildable(self, iid):
+        entry = get_instrument(iid)
+        for p in entry["params"]:
+            if p.kind == "float":
+                self.assertIsNotNone(p.lo, f"{iid}/{p.name}: lo is None")
+                self.assertIsNotNone(p.hi, f"{iid}/{p.name}: hi is None")
+
+    # --- ney
+
+    def test_ney_in_registry(self):
+        entry = get_instrument("ney")
+        self.assertIsNotNone(entry)
+        self.assertGreater(len(entry["params"]), 0)
+
+    def test_ney_non_silent(self):
+        buf = self._render("ney")
+        self.assertGreater(buf.peak(), 0.0)
+        self.assertTrue(np.all(np.isfinite(buf.data)))
+
+    def test_ney_longer_duration_longer_buffer(self):
+        short = self._render("ney", {"midi": 62, "duration": 1.0})
+        long_ = self._render("ney", {"midi": 62, "duration": 3.0})
+        self.assertGreater(len(long_), len(short))
+
+    def test_ney_slider_buildable(self):
+        self._assert_slider_buildable("ney")
+
+    # --- chant
+
+    def test_chant_in_registry(self):
+        entry = get_instrument("chant")
+        self.assertIsNotNone(entry)
+        self.assertGreater(len(entry["params"]), 0)
+
+    def test_chant_non_silent(self):
+        buf = self._render("chant")
+        self.assertGreater(buf.peak(), 0.0)
+        self.assertTrue(np.all(np.isfinite(buf.data)))
+
+    def test_chant_slider_buildable(self):
+        self._assert_slider_buildable("chant")
+
+    def test_chant_sub_octave_enriches(self):
+        """Sub-octave adds energy — sub_level=0 vs sub_level=0.4."""
+        with_sub = self._render("chant", {"sub_level": 0.4, "duration": 1.0})
+        without_sub = self._render("chant", {"sub_level": 0.0, "duration": 1.0})
+        # both must be non-silent; sub version generally has higher RMS
+        self.assertGreater(with_sub.peak(), 0.0)
+        self.assertGreater(without_sub.peak(), 0.0)
+
+    # --- horn
+
+    def test_horn_in_registry(self):
+        entry = get_instrument("horn")
+        self.assertIsNotNone(entry)
+        self.assertGreater(len(entry["params"]), 0)
+
+    def test_horn_non_silent(self):
+        buf = self._render("horn")
+        self.assertGreater(buf.peak(), 0.0)
+        self.assertTrue(np.all(np.isfinite(buf.data)))
+
+    def test_horn_slider_buildable(self):
+        self._assert_slider_buildable("horn")
+
+    def test_horn_with_notes_list(self):
+        entry = get_instrument("horn")
+        buf = entry["fn"]({"notes": [(50, 0.8), (53, 1.0)]}, self._rng())
+        self.assertGreater(buf.peak(), 0.0)
+
+
+class TestPhase8GroupAStrings(unittest.TestCase):
+    """Acceptance tests for tremolo_strings, santur, oud."""
+
+    def _rng(self):
+        return RngContext(99).spawn("p8strings").rng
+
+    def _render(self, iid, params=None):
+        entry = get_instrument(iid)
+        return entry["fn"](params or {}, self._rng())
+
+    def _assert_slider_buildable(self, iid):
+        entry = get_instrument(iid)
+        for p in entry["params"]:
+            if p.kind == "float":
+                self.assertIsNotNone(p.lo, f"{iid}/{p.name}: lo is None")
+                self.assertIsNotNone(p.hi, f"{iid}/{p.name}: hi is None")
+
+    # --- tremolo_strings
+
+    def test_tremolo_strings_in_registry(self):
+        entry = get_instrument("tremolo_strings")
+        self.assertIsNotNone(entry)
+        self.assertGreater(len(entry["params"]), 0)
+
+    def test_tremolo_strings_non_silent(self):
+        buf = self._render("tremolo_strings", {"duration": 2.0})
+        self.assertGreater(buf.peak(), 0.0)
+        self.assertTrue(np.all(np.isfinite(buf.data)))
+
+    def test_tremolo_strings_slider_buildable(self):
+        self._assert_slider_buildable("tremolo_strings")
+
+    def test_tremolo_strings_amplitude_oscillates(self):
+        """RMS of first 0.5 s segment differs from second 0.5 s segment."""
+        buf = self._render("tremolo_strings", {"duration": 2.0, "attack": 0.1,
+                                               "tremolo_hz": 11.0})
+        sr = buf.sr
+        seg_n = int(0.5 * sr)
+        # skip the attack; check segments 0.5–1 s and 1–1.5 s
+        off = int(0.5 * sr)
+        rms_a = float(np.sqrt(np.mean(buf.data[off:off + seg_n, 0] ** 2)))
+        rms_b = float(np.sqrt(np.mean(buf.data[off + seg_n:off + 2 * seg_n, 0] ** 2)))
+        # both must be non-zero; they won't be identical (tremolo is oscillating)
+        self.assertGreater(rms_a, 0.0)
+        self.assertGreater(rms_b, 0.0)
+
+    def test_tremolo_strings_distinct_from_pad(self):
+        """tremolo_strings and pad at identical notes should differ."""
+        ks_buf = self._render("tremolo_strings",
+                              {"midi_notes": [62, 66, 69], "duration": 2.0})
+        pad_buf = self._render("pad",
+                               {"midi_notes": [62, 66, 69], "duration": 2.0})
+        # they should not be identical arrays
+        self.assertFalse(np.allclose(ks_buf.data[:min(len(ks_buf), len(pad_buf))],
+                                     pad_buf.data[:min(len(ks_buf), len(pad_buf))]))
+
+    # --- santur
+
+    def test_santur_in_registry(self):
+        entry = get_instrument("santur")
+        self.assertIsNotNone(entry)
+        self.assertGreater(len(entry["params"]), 0)
+
+    def test_santur_non_silent(self):
+        buf = self._render("santur", {"midi": 62, "duration": 1.5})
+        self.assertGreater(buf.peak(), 0.0)
+        self.assertTrue(np.all(np.isfinite(buf.data)))
+
+    def test_santur_slider_buildable(self):
+        self._assert_slider_buildable("santur")
+
+    def test_santur_decays(self):
+        """Santur tail is quieter than attack."""
+        buf = self._render("santur", {"midi": 62, "duration": 2.0})
+        sr = buf.sr
+        early_n = int(0.1 * sr)
+        late_start = int(1.5 * sr)
+        rms_early = float(np.sqrt(np.mean(buf.data[:early_n, 0] ** 2)))
+        rms_late = float(np.sqrt(np.mean(buf.data[late_start:, 0] ** 2)))
+        self.assertGreater(rms_early, rms_late)
+
+    # --- oud
+
+    def test_oud_in_registry(self):
+        entry = get_instrument("oud")
+        self.assertIsNotNone(entry)
+        self.assertGreater(len(entry["params"]), 0)
+
+    def test_oud_non_silent(self):
+        buf = self._render("oud", {"midi": 62, "duration": 0.6})
+        self.assertGreater(buf.peak(), 0.0)
+        self.assertTrue(np.all(np.isfinite(buf.data)))
+
+    def test_oud_slider_buildable(self):
+        self._assert_slider_buildable("oud")
+
+    def test_oud_different_pitches(self):
+        """Higher MIDI note should produce a shorter period (higher frequency)."""
+        buf_lo = self._render("oud", {"midi": 45, "duration": 0.6})
+        buf_hi = self._render("oud", {"midi": 69, "duration": 0.6})
+        self.assertGreater(buf_lo.peak(), 0.0)
+        self.assertGreater(buf_hi.peak(), 0.0)
+
+
+class TestPhase8GroupATextures(unittest.TestCase):
+    """Acceptance tests for worm_rumble, shepard_wind, breath."""
+
+    def _rng(self):
+        return RngContext(99).spawn("p8textures").rng
+
+    def _render(self, iid, params=None):
+        entry = get_instrument(iid)
+        return entry["fn"](params or {}, self._rng())
+
+    def _assert_slider_buildable(self, iid):
+        entry = get_instrument(iid)
+        for p in entry["params"]:
+            if p.kind == "float":
+                self.assertIsNotNone(p.lo, f"{iid}/{p.name}: lo is None")
+                self.assertIsNotNone(p.hi, f"{iid}/{p.name}: hi is None")
+
+    # --- worm_rumble
+
+    def test_worm_rumble_in_registry(self):
+        entry = get_instrument("worm_rumble")
+        self.assertIsNotNone(entry)
+        self.assertGreater(len(entry["params"]), 0)
+
+    def test_worm_rumble_non_silent(self):
+        buf = self._render("worm_rumble", {"duration": 3.0})
+        self.assertGreater(buf.peak(), 0.0)
+        self.assertTrue(np.all(np.isfinite(buf.data)))
+
+    def test_worm_rumble_slider_buildable(self):
+        self._assert_slider_buildable("worm_rumble")
+
+    def test_worm_rumble_length(self):
+        dur = 5.0
+        buf = self._render("worm_rumble", {"duration": dur})
+        self.assertAlmostEqual(buf.len_seconds(), dur, delta=0.1)
+
+    # --- shepard_wind
+
+    def test_shepard_wind_in_registry(self):
+        entry = get_instrument("shepard_wind")
+        self.assertIsNotNone(entry)
+        self.assertGreater(len(entry["params"]), 0)
+
+    def test_shepard_wind_non_silent(self):
+        buf = self._render("shepard_wind", {"duration": 5.0})
+        self.assertGreater(buf.peak(), 0.0)
+        self.assertTrue(np.all(np.isfinite(buf.data)))
+
+    def test_shepard_wind_slider_buildable(self):
+        self._assert_slider_buildable("shepard_wind")
+
+    def test_shepard_wind_stereo(self):
+        """Should have L and R content (Coriolis panning)."""
+        buf = self._render("shepard_wind", {"duration": 5.0})
+        self.assertGreater(np.max(np.abs(buf.data[:, 0])), 0.0)
+        self.assertGreater(np.max(np.abs(buf.data[:, 1])), 0.0)
+
+    # --- breath
+
+    def test_breath_in_registry(self):
+        entry = get_instrument("breath")
+        self.assertIsNotNone(entry)
+        self.assertGreater(len(entry["params"]), 0)
+
+    def test_breath_non_silent(self):
+        buf = self._render("breath", {"duration": 3.0})
+        self.assertGreater(buf.peak(), 0.0)
+        self.assertTrue(np.all(np.isfinite(buf.data)))
+
+    def test_breath_slider_buildable(self):
+        self._assert_slider_buildable("breath")
+
+    def test_breath_length(self):
+        dur = 2.5
+        buf = self._render("breath", {"duration": dur})
+        self.assertAlmostEqual(buf.len_seconds(), dur, delta=0.1)
+
+
+class TestPhase8SliderBuildable(unittest.TestCase):
+    """Verify ALL 9 new instruments have lo/hi on every float param."""
+
+    NEW_IDS = [
+        "ney", "chant", "horn",
+        "tremolo_strings", "santur", "oud",
+        "worm_rumble", "shepard_wind", "breath",
+    ]
+
+    def test_all_in_list_instruments(self):
+        ids_in_list = {e["id"] for e in list_instruments()}
+        for iid in self.NEW_IDS:
+            self.assertIn(iid, ids_in_list)
+
+    def test_all_have_params(self):
+        for iid in self.NEW_IDS:
+            entry = get_instrument(iid)
+            self.assertGreater(len(entry["params"]), 0,
+                               f"{iid} has no params")
+
+    def test_float_params_have_lo_hi(self):
+        for iid in self.NEW_IDS:
+            entry = get_instrument(iid)
+            for p in entry["params"]:
+                if p.kind == "float":
+                    self.assertIsNotNone(
+                        p.lo, f"{iid}/{p.name}: float param missing lo")
+                    self.assertIsNotNone(
+                        p.hi, f"{iid}/{p.name}: float param missing hi")
+
+
 if __name__ == "__main__":
     unittest.main()

@@ -58,27 +58,45 @@ from forge.instruments.percussion import (
 from forge.instruments.strings import (
     CELLO_PARAMS,
     KS_PARAMS,
+    OUD_PARAMS,
     PAD_PARAMS,
     PIANO_PARAMS,
+    SANTUR_PARAMS,
+    TREMOLO_STRINGS_PARAMS,
     cello_line,
     karplus_strong,
+    oud,
     pad_chord,
     piano_note,
+    santur,
+    tremolo_strings,
 )
 from forge.instruments.textures import (
+    BREATH_PARAMS,
     DRONE_PARAMS,
+    SHEPARD_WIND_PARAMS,
     SWELL_PARAMS,
     WIND_PARAMS,
+    WORM_RUMBLE_PARAMS,
+    breath,
     drone,
+    shepard_wind,
     swell,
     wind,
+    worm_rumble,
 )
 from forge.instruments.voices import (
+    CHANT_PARAMS,
     CHOIR_PARAMS,
+    HORN_PARAMS,
     LEAD_PARAMS,
+    NEY_PARAMS,
     VOICE_PARAMS,
     choir,
     lead_phrase,
+    make_chant,
+    make_horn,
+    make_ney,
     voice_phrase,
 )
 
@@ -89,9 +107,12 @@ def _entry(fn, params, family):
 
 REGISTRY: dict = {
     # textures
-    "wind":        _entry(wind,          WIND_PARAMS,        "texture"),
-    "drone":       _entry(drone,         DRONE_PARAMS,       "texture"),
-    "swell":       _entry(swell,         SWELL_PARAMS,       "texture"),
+    "wind":            _entry(wind,            WIND_PARAMS,            "texture"),
+    "drone":           _entry(drone,           DRONE_PARAMS,           "texture"),
+    "swell":           _entry(swell,           SWELL_PARAMS,           "texture"),
+    "worm_rumble":     _entry(worm_rumble,     WORM_RUMBLE_PARAMS,     "texture"),
+    "shepard_wind":    _entry(shepard_wind,    SHEPARD_WIND_PARAMS,    "texture"),
+    "breath":          _entry(breath,          BREATH_PARAMS,          "texture"),
     # percussion
     "doum":        _entry(make_doum,     DOUM_PARAMS,        "percussion"),
     "tek":         _entry(make_tek,      TEK_PARAMS,         "percussion"),
@@ -103,14 +124,20 @@ REGISTRY: dict = {
     "frame_hit":   _entry(make_frame_hit,FRAME_HIT_PARAMS,   "percussion"),
     "frame_roll":  _entry(frame_roll,    FRAME_HIT_PARAMS,   "percussion"),
     # strings
-    "harp":        _entry(karplus_strong,KS_PARAMS,          "strings"),
-    "piano":       _entry(piano_note,    PIANO_PARAMS,       "strings"),
-    "cello":       _entry(cello_line,    CELLO_PARAMS,       "strings"),
-    "pad":         _entry(pad_chord,     PAD_PARAMS,         "strings"),
+    "harp":            _entry(karplus_strong,  KS_PARAMS,              "strings"),
+    "piano":           _entry(piano_note,      PIANO_PARAMS,           "strings"),
+    "cello":           _entry(cello_line,      CELLO_PARAMS,           "strings"),
+    "pad":             _entry(pad_chord,       PAD_PARAMS,             "strings"),
+    "tremolo_strings": _entry(tremolo_strings, TREMOLO_STRINGS_PARAMS, "strings"),
+    "santur":          _entry(santur,          SANTUR_PARAMS,          "strings"),
+    "oud":             _entry(oud,             OUD_PARAMS,             "strings"),
     # voices
     "voice":       _entry(voice_phrase,  VOICE_PARAMS,       "voice"),
     "choir":       _entry(choir,         CHOIR_PARAMS,       "voice"),
     "lead":        _entry(lead_phrase,   LEAD_PARAMS,        "voice"),
+    "ney":         _entry(make_ney,      NEY_PARAMS,         "voice"),
+    "chant":       _entry(make_chant,    CHANT_PARAMS,       "voice"),
+    "horn":        _entry(make_horn,     HORN_PARAMS,        "voice"),
     # bass
     "bass":        _entry(bass_note,     BASS_NOTE_PARAMS,   "bass"),
     "psy_bass":    _entry(psy_bass_note, PSY_BASS_PARAMS,    "bass"),
