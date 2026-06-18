@@ -195,6 +195,96 @@ def render_channel(
     return render_pattern(pattern_dict, seed=seed)
 
 
+def _render_doc_sections(
+    doc: "forge.document.model.ProjectDoc",  # type: ignore[name-defined]
+    *,
+    muted_channels: "set[int] | None" = None,
+    fallback_length_bars: int = 8,
+) -> "forge.core.buffer.AudioBuffer":  # type: ignore[name-defined]
+    """Shared render core: walk sections in order, honour per-section step overrides.
+
+    When ``doc.sections`` is non-empty, each section is rendered separately
+    with its own ``PatternSpec`` (using ``doc.get_section_steps`` so per-section
+    ``channel_steps`` overrides are applied) and placed into a master buffer at
+    the correct bar offset.  Per-section ``gain`` (defaulting to 1.0) is applied
+    to each section buffer before it is added.
+
+    When ``doc.sections`` is empty, the function falls back to the legacy
+    single-pattern approach (all channel defaults, ``fallback_length_bars`` bars).
+
+    Only ``PatternChannel`` entries contribute audio (textures / automation come
+    in Phase 2).  Channels whose index is in *muted_channels* are skipped.
+
+    Returns the UN-mastered concatenated ``AudioBuffer``.
+    """
+    from forge.core.buffer import AudioBuffer
+    from forge.core.grid import Grid
+    from forge.document.channels import PatternChannel
+
+    if muted_channels is None:
+        muted_channels = set()
+
+    channels = doc.channels
+    pat_indices = [
+        i for i, ch in enumerate(channels)
+        if isinstance(ch, PatternChannel) and i not in muted_channels
+    ]
+
+    # ---- fallback: no sections → legacy single-pattern behaviour ----
+    if not doc.sections:
+        if not pat_indices:
+            return AudioBuffer(fallback_length_bars * Grid(doc.bpm, doc.sr).n_samples(1), doc.sr)
+        tracks = [channels[i].to_track_dict() for i in pat_indices]
+        pattern_dict = {
+            "bpm": doc.bpm,
+            "length_bars": fallback_length_bars,
+            "n_steps": 16,
+            "tracks": tracks,
+        }
+        return render_pattern(pattern_dict, seed=doc.seed)
+
+    # ---- section-aware render ----
+    grid = Grid(doc.bpm, doc.sr)
+    total_bars = sum(s["length_bars"] for s in doc.sections)
+    total_samples = grid.n_samples(total_bars)
+    master_buf = AudioBuffer(total_samples, doc.sr)
+
+    if not pat_indices:
+        return master_buf  # all muted / no pattern channels
+
+    start_bar = 0
+    for si, sec in enumerate(doc.sections):
+        sec_bars = int(sec["length_bars"])
+        gain = float(sec.get("gain", 1.0))
+
+        # Build per-section tracks using section step overrides where available.
+        tracks = []
+        for ci in pat_indices:
+            steps = doc.get_section_steps(si, ci)
+            step_values = [sd.to_step_value() for sd in steps]
+            ch = channels[ci]
+            tracks.append({
+                "instrument": ch.instrument_id,
+                "steps": step_values,
+                "params": dict(ch.params),
+            })
+
+        pattern_dict = {
+            "bpm": doc.bpm,
+            "length_bars": sec_bars,
+            "n_steps": 16,
+            "tracks": tracks,
+        }
+        # Use a deterministic per-section seed derived from doc.seed + section index.
+        sec_buf = render_pattern(pattern_dict, seed=doc.seed + si)
+
+        # Place the section into the master buffer with gain applied.
+        master_buf.add_at(sec_buf.data, grid.bar_t(start_bar), gain=gain)
+        start_bar += sec_bars
+
+    return master_buf
+
+
 def export_wav_from_doc(
     doc: "forge.document.model.ProjectDoc",  # type: ignore[name-defined]
     path: "Path",
@@ -217,7 +307,6 @@ def export_wav_from_doc(
                       suitable for game state music.
     """
     from forge.core.mastering import master, write_wav
-    from forge.document.channels import PatternChannel
 
     if length_bars is None:
         if doc.sections:
@@ -225,18 +314,7 @@ def export_wav_from_doc(
         else:
             length_bars = 8
 
-    tracks = [
-        ch.to_track_dict()
-        for ch in doc.channels
-        if isinstance(ch, PatternChannel)
-    ]
-    pattern_dict = {
-        "bpm": doc.bpm,
-        "length_bars": length_bars,
-        "n_steps": 16,
-        "tracks": tracks,
-    }
-    buf = render_pattern(pattern_dict, seed=doc.seed)
+    buf = _render_doc_sections(doc, fallback_length_bars=length_bars)
 
     if loop_fold:
         from forge.core.grid import Grid
@@ -265,33 +343,17 @@ def render_doc_for_playback(
         muted_channels:  Set of channel indices to skip (muted in the UI).
     """
     from forge.core.mastering import master
-    from forge.document.channels import PatternChannel
 
     if muted_channels is None:
         muted_channels = set()
 
     if doc.sections:
-        length_bars = sum(s["length_bars"] for s in doc.sections)
+        fallback_length_bars = sum(s["length_bars"] for s in doc.sections)
     else:
-        length_bars = 8
+        fallback_length_bars = 8
 
-    tracks = [
-        ch.to_track_dict()
-        for i, ch in enumerate(doc.channels)
-        if isinstance(ch, PatternChannel) and i not in muted_channels
-    ]
-    if not tracks:
-        from forge.core.buffer import AudioBuffer
-        return AudioBuffer(doc.sr, doc.sr)  # 1 s of silence
-
-    pattern_dict = {
-        "bpm": doc.bpm,
-        "length_bars": length_bars,
-        "n_steps": 16,
-        "tracks": tracks,
-    }
-    buf = render_pattern(pattern_dict, seed=doc.seed)
-    return master(buf)
+    core = _render_doc_sections(doc, muted_channels=muted_channels, fallback_length_bars=fallback_length_bars)
+    return master(core)
 
 
 def render_texture_channel(
