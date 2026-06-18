@@ -669,15 +669,17 @@ class TrackerEditor(QWidget):
         )
         ctrl_v.addWidget(self._inst_label)
 
-        # Horizontal volume slider (below name)
-        self._vol_slider = QSlider(Qt.Orientation.Horizontal)
+        # Vertical volume slider (below name)
+        self._vol_slider = QSlider(Qt.Orientation.Vertical)
         self._vol_slider.setRange(0, 100)
         self._vol_slider.setValue(80)
+        self._vol_slider.setFixedWidth(18)
+        self._vol_slider.setMinimumHeight(50)
         self._vol_slider.setToolTip("Volume (0–100 %)")
         self._vol_slider.valueChanged.connect(
             lambda v: self.volumeChanged.emit(channel_idx, v / 100.0)
         )
-        ctrl_v.addWidget(self._vol_slider)
+        ctrl_v.addWidget(self._vol_slider, alignment=Qt.AlignmentFlag.AlignHCenter)
 
         # M / S buttons (below slider)
         btn_row = QHBoxLayout()
