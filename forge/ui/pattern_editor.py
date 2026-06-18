@@ -32,7 +32,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 from PySide6.QtCore import Qt, Signal
-from PySide6.QtGui import QColor, QFont, QKeyEvent
+from PySide6.QtGui import QColor, QFont, QKeyEvent, QPainter, QPen
 from PySide6.QtWidgets import (
     QApplication,
     QComboBox,
@@ -315,10 +315,14 @@ class _StepCell(QWidget):
         self._label = QLabel(str(step_idx + 1), self)
         self._label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self._label.setGeometry(0, 0, _CELL_W, _CELL_H)
+        self._label.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
         font = QFont()
         font.setPointSize(7)
         font.setBold(True)
         self._label.setFont(font)
+        # Initialise paint state before first _refresh
+        self._bg_color = QColor(self._c_off_even)
+        self._border_color = QColor(self._c_text_off)
         self._refresh()
 
     def set_state(
@@ -363,16 +367,25 @@ class _StepCell(QWidget):
             bg = off_color
         is_active = self._on or self._cursor or self._selected
         text_color = "#fff" if is_active else self._c_text_off
-        border_color = "#666" if self._cursor else self._c_text_off
-        self.setStyleSheet(
-            f"background-color: {bg}; border: 1px solid {border_color};"
+        border_hex = "#444" if self._cursor else self._c_text_off
+
+        self._bg_color = QColor(bg)
+        self._border_color = QColor(border_hex)
+        self._label.setStyleSheet(
+            f"color: {text_color}; background: transparent; border: none;"
         )
-        self._label.setStyleSheet(f"color: {text_color}; background: transparent; border: none;")
-        # Show MIDI note name when a pitch override is set, otherwise show step number
         if "midi" in self._params:
             self._label.setText(_midi_to_name(int(self._params["midi"])))
         else:
             self._label.setText(str(self.step_idx + 1))
+        self.update()
+
+    def paintEvent(self, _event) -> None:
+        painter = QPainter(self)
+        painter.fillRect(self.rect(), self._bg_color)
+        painter.setPen(QPen(self._border_color, 1))
+        painter.drawRect(self.rect().adjusted(0, 0, -1, -1))
+        painter.end()
 
     def mousePressEvent(self, event) -> None:
         self.clicked.emit(self.step_idx)
