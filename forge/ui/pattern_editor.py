@@ -268,10 +268,7 @@ class _StepCell(QWidget):
 
     clicked = Signal(int)  # step index
 
-    # Fixed semantic colours (shared across all channels)
-    # Off-state alternates between two shades to mark beat groups of 4
-    _C_OFF_EVEN = "#c8c8c8"   # groups 0, 2  (steps 1-4, 9-12)
-    _C_OFF_ODD  = "#b0b0b0"   # groups 1, 3  (steps 5-8, 13-16)
+    # Fixed semantic colours shared across all channels
     _C_ON_ACCENT = "#e8a03a"
     _C_ON_GHOST = "#3aae6e"
     _C_ON_PROB = "#9855d4"
@@ -295,6 +292,24 @@ class _StepCell(QWidget):
         self._cursor = False
         self._selected = False
 
+        # Off-state tints: light (even beat groups) and medium (odd beat groups),
+        # both derived from the channel colour so inactive steps are clearly coloured.
+        r = int(channel_color[1:3], 16)
+        g = int(channel_color[3:5], 16)
+        b = int(channel_color[5:7], 16)
+        def _mix(alpha: float) -> str:
+            return "#{:02x}{:02x}{:02x}".format(
+                int(r * alpha + 255 * (1 - alpha)),
+                int(g * alpha + 255 * (1 - alpha)),
+                int(b * alpha + 255 * (1 - alpha)),
+            )
+        self._c_off_even = _mix(0.22)   # light tint  — groups 0, 2
+        self._c_off_odd  = _mix(0.38)   # medium tint — groups 1, 3
+        # Dark channel-colour text for good contrast on the light tinted background
+        self._c_text_off = "#{:02x}{:02x}{:02x}".format(
+            int(r * 0.45), int(g * 0.45), int(b * 0.45)
+        )
+
         self.setFixedSize(_CELL_W, _CELL_H)
         self.setSizePolicy(QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Fixed)
         self._label = QLabel(str(step_idx + 1), self)
@@ -302,6 +317,7 @@ class _StepCell(QWidget):
         self._label.setGeometry(0, 0, _CELL_W, _CELL_H)
         font = QFont()
         font.setPointSize(7)
+        font.setBold(True)
         self._label.setFont(font)
         self._refresh()
 
@@ -329,7 +345,7 @@ class _StepCell(QWidget):
         self._refresh()
 
     def _refresh(self) -> None:
-        off_color = self._C_OFF_ODD if (self.step_idx // 4) % 2 else self._C_OFF_EVEN
+        off_color = self._c_off_odd if (self.step_idx // 4) % 2 else self._c_off_even
         if self._cursor:
             bg = self._C_CURSOR
         elif self._selected:
@@ -346,8 +362,8 @@ class _StepCell(QWidget):
         else:
             bg = off_color
         is_active = self._on or self._cursor or self._selected
-        text_color = "#444" if not is_active else "#fff"
-        border_color = "#666" if self._cursor else "#999" if not is_active else "#0006"
+        text_color = "#fff" if is_active else self._c_text_off
+        border_color = "#666" if self._cursor else self._c_text_off
         self.setStyleSheet(
             f"background-color: {bg}; border: 1px solid {border_color};"
         )
