@@ -270,5 +270,97 @@ class TestCallbackMixer(unittest.TestCase):
         svc.close()
 
 
+# ---------------------------------------------------------------------------
+# MixerWidget reverb_send tests (Phase 7)
+
+
+class TestMixerWidgetReverbSend(unittest.TestCase):
+    """Test reverb_send property, set_reverb_send, default 0.0, and presence in levels()."""
+
+    @classmethod
+    def setUpClass(cls):
+        import os
+        os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
+        from PySide6.QtWidgets import QApplication
+        cls._app = QApplication.instance() or QApplication([])
+
+    def _widget(self, names=("kick", "hat")):
+        from forge.ui.mixer import MixerWidget
+        return MixerWidget(list(names))
+
+    def test_default_reverb_send_zero(self):
+        """Default reverb_send for every strip should be 0.0."""
+        w = self._widget()
+        for name, strip in w._strips.items():
+            self.assertAlmostEqual(strip.reverb_send, 0.0,
+                msg=f"Strip {name!r} default reverb_send != 0.0")
+
+    def test_set_reverb_send_updates_property(self):
+        """set_reverb_send sets the property."""
+        w = self._widget()
+        strip = w._strips["kick"]
+        strip.set_reverb_send(0.8)
+        self.assertAlmostEqual(strip.reverb_send, 0.8, delta=0.01)
+
+    def test_set_reverb_send_zero(self):
+        """set_reverb_send(0.0) keeps property at 0.0."""
+        w = self._widget()
+        strip = w._strips["hat"]
+        strip.set_reverb_send(0.0)
+        self.assertAlmostEqual(strip.reverb_send, 0.0, delta=0.01)
+
+    def test_widget_set_reverb_send(self):
+        """MixerWidget.set_reverb_send routes to the correct strip."""
+        w = self._widget()
+        w.set_reverb_send("kick", 0.5)
+        self.assertAlmostEqual(w._strips["kick"].reverb_send, 0.5, delta=0.01)
+
+    def test_widget_set_reverb_send_noop_for_unknown(self):
+        """set_reverb_send on unknown name should be a no-op."""
+        w = self._widget()
+        w.set_reverb_send("nonexistent", 0.5)  # must not raise
+
+    def test_levels_includes_reverb_send(self):
+        """levels() dict must carry 'reverb_send' key for every strip."""
+        w = self._widget()
+        lvls = w.levels()
+        for name, vals in lvls.items():
+            self.assertIn("reverb_send", vals,
+                f"levels()['reverb_send'] missing for strip {name!r}")
+
+    def test_levels_reverb_send_default_zero(self):
+        """Default reverb_send in levels() must be 0.0."""
+        w = self._widget()
+        lvls = w.levels()
+        for name, vals in lvls.items():
+            self.assertAlmostEqual(vals["reverb_send"], 0.0, delta=0.01,
+                msg=f"Default reverb_send in levels() for {name!r} should be 0.0")
+
+    def test_levels_includes_all_keys(self):
+        """Adding reverb_send must not drop volume, muted, or pan keys."""
+        w = self._widget()
+        lvls = w.levels()
+        for name, vals in lvls.items():
+            self.assertIn("volume", vals)
+            self.assertIn("muted", vals)
+            self.assertIn("pan", vals)
+            self.assertIn("reverb_send", vals)
+
+    def test_levels_changed_includes_reverb_send(self):
+        """levelsChanged signal dict also carries 'reverb_send'."""
+        received = []
+        w = self._widget()
+        w.levelsChanged.connect(received.append)
+
+        strip = w._strips["kick"]
+        strip.set_reverb_send(0.6)
+        self._app.processEvents()
+
+        if received:
+            lvl = received[-1]
+            self.assertIn("reverb_send", lvl.get("kick", {}),
+                "levelsChanged dict missing 'reverb_send' key")
+
+
 if __name__ == "__main__":
     unittest.main()

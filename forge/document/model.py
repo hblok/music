@@ -244,6 +244,21 @@ class ProjectDoc:
         self._history.push(txn, coalesce=coalesce)
         self._notify(txn)
 
+    def set_channel_reverb_send(self, channel_idx: int, value: float, *, coalesce: bool = False) -> None:
+        """Set the reverb send amount (0.0..1.0) of a PatternChannel or TextureChannel."""
+        ch = self._channels[channel_idx]
+        if not isinstance(ch, (PatternChannel, TextureChannel)):
+            raise TypeError("set_channel_reverb_send only applies to pattern/texture channels")
+        old = ch.reverb_send
+        value = float(value)
+        if old == value:
+            return
+        txn = Transaction("set channel reverb send")
+        txn.add_change(("channel", channel_idx, "reverb_send"), old, value)
+        ch.reverb_send = value
+        self._history.push(txn, coalesce=coalesce)
+        self._notify(txn)
+
     def reroll(self, channel_idx: int) -> None:
         """Generate a new random seed for channel *channel_idx*."""
         new_seed = random.randint(0, 2 ** 31 - 1)
@@ -709,6 +724,8 @@ class ProjectDoc:
                 ch.gain = value  # type: ignore[union-attr]
             elif sub == "pan":
                 ch.pan = value  # type: ignore[union-attr]
+            elif sub == "reverb_send":
+                ch.reverb_send = value  # type: ignore[union-attr]
             elif sub == "params":
                 if value is None:
                     ch.params.pop(path[3], None)

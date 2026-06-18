@@ -195,6 +195,37 @@ def render_channel(
     return render_pattern(pattern_dict, seed=seed)
 
 
+def _apply_reverb_bus(
+    reverb_bus: "forge.core.buffer.AudioBuffer",  # type: ignore[name-defined]
+    master_buf: "forge.core.buffer.AudioBuffer",  # type: ignore[name-defined]
+    sr: int,
+    return_gain: float = 0.65,
+) -> None:
+    """Mix reverb wet returns from *reverb_bus* into *master_buf* in-place.
+
+    Builds ONE shared stereo IR pair (seeds 7 and 11, matching the legacy
+    convention), then convolves each side of the bus independently.  CPU cost
+    is O(N_samples * log(N_samples)) regardless of how many channels fed the
+    bus — linear in channel count since each extra channel just added to the
+    bus buffer before this single convolution step.
+
+    Args:
+        reverb_bus:   Pre-gain-panned mix of all reverb-send channels scaled
+                      by their per-channel reverb_send.  NOT mutated.
+        master_buf:   Dry master mix.  The wet tail is ADDED into this buffer.
+        sr:           Sample rate (passed to make_stereo_ir_pair).
+        return_gain:  Wet return level (0.65 → tail clearly audible without
+                      swamping the dry mix).
+    """
+    from forge.core.reverb import make_stereo_ir_pair, reverb as _reverb
+
+    ir_L, ir_R = make_stereo_ir_pair(seconds=2.0, decay=3.5, sr=sr)
+    wet_L = _reverb(reverb_bus.data[:, 0], ir_L, wet=1.0)
+    wet_R = _reverb(reverb_bus.data[:, 1], ir_R, wet=1.0)
+    master_buf.data[:, 0] += wet_L * return_gain
+    master_buf.data[:, 1] += wet_R * return_gain
+
+
 def _apply_gain_pan(buf: "forge.core.buffer.AudioBuffer", gain: float, pan: float) -> None:  # type: ignore[name-defined]
     """Scale *buf* in-place by *gain* and apply constant-power *pan*.
 
@@ -287,6 +318,8 @@ def _render_doc_sections(
         total_bars = fallback_length_bars
         total_samples = grid.n_samples(total_bars)
         master_buf = AudioBuffer(total_samples, doc.sr)
+        reverb_bus = AudioBuffer(total_samples, doc.sr)
+        any_reverb_send = False
 
         for ci in pat_indices:
             ch = channels[ci]
@@ -316,6 +349,11 @@ def _render_doc_sections(
             ch_buf = _rps(pattern_dict, seed=seed, param_override=override_fn)
             _apply_gain_pan(ch_buf, ch.gain, ch.pan)
             master_buf.data += ch_buf.data[:total_samples]
+            # Accumulate reverb send (after gain+pan so spatial position is preserved).
+            rs = ch.reverb_send
+            if rs > 0.0:
+                reverb_bus.data += ch_buf.data[:total_samples] * rs
+                any_reverb_send = True
 
         # Mix textures into the fallback buffer.
         for _ci, tex_ch in tex_channels:
@@ -324,6 +362,16 @@ def _render_doc_sections(
             )
             _apply_gain_pan(tex_buf, tex_ch.gain, tex_ch.pan)
             master_buf.add_at(tex_buf.data, 0.0)
+            # Accumulate texture reverb send.
+            rs = tex_ch.reverb_send
+            if rs > 0.0:
+                n_tex = min(len(tex_buf.data), total_samples)
+                reverb_bus.data[:n_tex] += tex_buf.data[:n_tex] * rs
+                any_reverb_send = True
+
+        # Apply shared reverb bus BEFORE master_gain automation.
+        if any_reverb_send:
+            _apply_reverb_bus(reverb_bus, master_buf, doc.sr)
 
         # Apply master-gain automation to the fallback buffer.
         n = master_buf.data.shape[0]
@@ -341,6 +389,8 @@ def _render_doc_sections(
     total_bars = sum(s["length_bars"] for s in doc.sections)
     total_samples = grid.n_samples(total_bars)
     master_buf = AudioBuffer(total_samples, doc.sr)
+    reverb_bus = AudioBuffer(total_samples, doc.sr)
+    any_reverb_send = False
 
     # Render each PatternChannel independently across all sections.
     for ci in pat_indices:
@@ -393,6 +443,11 @@ def _render_doc_sections(
         # Apply per-channel gain + pan then sum into master.
         _apply_gain_pan(ch_full, ch.gain, ch.pan)
         master_buf.data += ch_full.data
+        # Accumulate reverb send (after gain+pan so spatial position is preserved).
+        rs = ch.reverb_send
+        if rs > 0.0:
+            reverb_bus.data += ch_full.data * rs
+            any_reverb_send = True
 
     # Mix each TextureChannel over the full song length at t=0.
     for _ci, tex_ch in tex_channels:
@@ -401,6 +456,16 @@ def _render_doc_sections(
         )
         _apply_gain_pan(tex_buf, tex_ch.gain, tex_ch.pan)
         master_buf.add_at(tex_buf.data, 0.0)
+        # Accumulate texture reverb send.
+        rs = tex_ch.reverb_send
+        if rs > 0.0:
+            n_tex = min(len(tex_buf.data), total_samples)
+            reverb_bus.data[:n_tex] += tex_buf.data[:n_tex] * rs
+            any_reverb_send = True
+
+    # Apply shared reverb bus BEFORE master_gain automation.
+    if any_reverb_send:
+        _apply_reverb_bus(reverb_bus, master_buf, doc.sr)
 
     # Apply master-gain automation curves (multiply together when >1 lane).
     n = master_buf.data.shape[0]

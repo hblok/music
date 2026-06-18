@@ -108,6 +108,7 @@ class PatternChannel:
     seed: int = 0
     gain: float = 1.0
     pan: float = 0.0   # −1.0 = hard L, 0.0 = centre, +1.0 = hard R
+    reverb_send: float = 0.0  # 0.0 = dry, 1.0 = full send to shared reverb bus
 
     kind: ChannelKind = field(default=ChannelKind.PATTERN, init=False, repr=False)
 
@@ -138,6 +139,8 @@ class PatternChannel:
             d["gain"] = self.gain
         if self.pan != 0.0:
             d["pan"] = self.pan
+        if self.reverb_send != 0.0:
+            d["reverb_send"] = self.reverb_send
         return d
 
     @classmethod
@@ -152,6 +155,7 @@ class PatternChannel:
             seed=int(d.get("seed", 0)),
             gain=float(d.get("gain", 1.0)),
             pan=float(d.get("pan", 0.0)),
+            reverb_send=float(d.get("reverb_send", 0.0)),
         )
 
     def copy(self) -> "PatternChannel":
@@ -164,6 +168,7 @@ class PatternChannel:
             seed=self.seed,
             gain=self.gain,
             pan=self.pan,
+            reverb_send=self.reverb_send,
         )
         return ch
 
@@ -194,6 +199,7 @@ class TextureChannel:
     envelope: list[Breakpoint] = field(default_factory=list)
     gain: float = 1.0
     pan: float = 0.0   # −1.0 = hard L, 0.0 = centre, +1.0 = hard R
+    reverb_send: float = 0.0  # 0.0 = dry, 1.0 = full send to shared reverb bus
 
     kind: ChannelKind = field(default=ChannelKind.TEXTURE, init=False, repr=False)
 
@@ -209,6 +215,8 @@ class TextureChannel:
             d["gain"] = self.gain
         if self.pan != 0.0:
             d["pan"] = self.pan
+        if self.reverb_send != 0.0:
+            d["reverb_send"] = self.reverb_send
         return d
 
     @classmethod
@@ -221,6 +229,7 @@ class TextureChannel:
             envelope=envelope,
             gain=float(d.get("gain", 1.0)),
             pan=float(d.get("pan", 0.0)),
+            reverb_send=float(d.get("reverb_send", 0.0)),
         )
 
     def copy(self) -> "TextureChannel":
@@ -231,6 +240,7 @@ class TextureChannel:
             envelope=[Breakpoint(b.bar, b.value) for b in self.envelope],
             gain=self.gain,
             pan=self.pan,
+            reverb_send=self.reverb_send,
         )
 
 

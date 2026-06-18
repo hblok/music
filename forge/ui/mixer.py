@@ -26,7 +26,7 @@ from PySide6.QtWidgets import (
 
 
 class _Strip(QWidget):
-    """Single mixer strip: label + fader + mute + pan."""
+    """Single mixer strip: label + fader + mute + pan + reverb send."""
 
     changed = Signal()
 
@@ -49,6 +49,14 @@ class _Strip(QWidget):
         self._pan_slider.setValue(0)
         self._pan_slider.setFixedWidth(60)
 
+        # Reverb send slider: 0..100 maps to 0.0..1.0, default 0 (dry).
+        self._reverb_slider = QSlider(Qt.Orientation.Horizontal)
+        self._reverb_slider.setRange(0, 100)
+        self._reverb_slider.setValue(0)
+        self._reverb_slider.setFixedWidth(60)
+        self._reverb_label = QLabel("R")
+        self._reverb_label.setAlignment(Qt.AlignmentFlag.AlignHCenter)
+
         label = QLabel(name[:6])
         label.setAlignment(Qt.AlignmentFlag.AlignHCenter)
 
@@ -57,11 +65,14 @@ class _Strip(QWidget):
         layout.addWidget(label)
         layout.addWidget(self._fader, alignment=Qt.AlignmentFlag.AlignHCenter)
         layout.addWidget(self._pan_slider, alignment=Qt.AlignmentFlag.AlignHCenter)
+        layout.addWidget(self._reverb_label, alignment=Qt.AlignmentFlag.AlignHCenter)
+        layout.addWidget(self._reverb_slider, alignment=Qt.AlignmentFlag.AlignHCenter)
         layout.addWidget(self._mute_btn, alignment=Qt.AlignmentFlag.AlignHCenter)
 
         self._fader.valueChanged.connect(lambda _: self.changed.emit())
         self._mute_btn.toggled.connect(lambda _: self.changed.emit())
         self._pan_slider.valueChanged.connect(lambda _: self.changed.emit())
+        self._reverb_slider.valueChanged.connect(lambda _: self.changed.emit())
 
     @property
     def volume(self) -> float:
@@ -77,12 +88,21 @@ class _Strip(QWidget):
         """Pan position −1.0..+1.0 (slider −100..+100 mapped)."""
         return self._pan_slider.value() / 100.0
 
+    @property
+    def reverb_send(self) -> float:
+        """Reverb send amount 0.0..1.0 (slider 0..100 mapped)."""
+        return self._reverb_slider.value() / 100.0
+
     def set_volume(self, v: float) -> None:
         self._fader.setValue(int(v * 100))
 
     def set_pan(self, p: float) -> None:
         """Set pan from a float in the range −1.0..+1.0."""
         self._pan_slider.setValue(int(p * 100))
+
+    def set_reverb_send(self, v: float) -> None:
+        """Set reverb send from a float in the range 0.0..1.0."""
+        self._reverb_slider.setValue(int(v * 100))
 
 
 class MixerWidget(QWidget):
@@ -123,9 +143,14 @@ class MixerWidget(QWidget):
                     pass
 
     def levels(self) -> dict:
-        """Current levels: ``{name: {"volume": float, "muted": bool, "pan": float}}``."""
+        """Current levels: ``{name: {"volume": float, "muted": bool, "pan": float, "reverb_send": float}}``."""
         return {
-            name: {"volume": strip.volume, "muted": strip.muted, "pan": strip.pan}
+            name: {
+                "volume": strip.volume,
+                "muted": strip.muted,
+                "pan": strip.pan,
+                "reverb_send": strip.reverb_send,
+            }
             for name, strip in self._strips.items()
         }
 
@@ -137,6 +162,11 @@ class MixerWidget(QWidget):
         """Set the pan of the strip for *name* (−1.0..+1.0; no-op if absent)."""
         if name in self._strips:
             self._strips[name].set_pan(p)
+
+    def set_reverb_send(self, name: str, v: float) -> None:
+        """Set the reverb send of the strip for *name* (0.0..1.0; no-op if absent)."""
+        if name in self._strips:
+            self._strips[name].set_reverb_send(v)
 
     def set_mixer(self, mixer: "forge.playback.mixer.CallbackMixer") -> None:  # type: ignore[name-defined]
         """Bind this widget's faders/mutes to a live ``CallbackMixer``.

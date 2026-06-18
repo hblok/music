@@ -503,15 +503,20 @@ class MainWindow(QMainWindow):
                 e.set_muted(e._channel_idx != channel_idx)
 
     def _on_mixer_levels_changed(self, levels: dict) -> None:
-        """Route MixerWidget pan changes into the doc for each PatternChannel strip."""
+        """Route MixerWidget pan and reverb_send changes into the doc for each PatternChannel strip."""
         indices = getattr(self, "_mixer_channel_indices", [])
         for strip_pos, (name, vals) in enumerate(levels.items()):
             if strip_pos >= len(indices):
                 break
             channel_idx = indices[strip_pos]
             pan = vals.get("pan", 0.0)
+            reverb_send = vals.get("reverb_send", 0.0)
             try:
                 self._doc.set_channel_pan(channel_idx, pan, coalesce=True)
+            except (IndexError, TypeError):
+                pass
+            try:
+                self._doc.set_channel_reverb_send(channel_idx, reverb_send, coalesce=True)
             except (IndexError, TypeError):
                 pass
         self._buf_valid = False
