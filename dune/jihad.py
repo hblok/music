@@ -611,7 +611,8 @@ def acid_note(m, cutoff, accent=False, slide_to=None, dur=None):
     dark = signal.sosfilt(signal.butter(2, dark_c, "low", fs=SR, output="sos"), saw)
     qenv = np.exp(-tt / (0.10 if accent else 0.055))
     x = qenv * bright + (1 - qenv) * dark
-    peak = signal.sosfilt(signal.iirpeak(min(8000, cutoff * (1.8 if accent else 1.25)), 11, fs=SR), x)
+    bpk, apk = signal.iirpeak(min(8000, cutoff * (1.8 if accent else 1.25)), 11, fs=SR)
+    peak = signal.lfilter(bpk, apk, x)
     env = np.minimum(np.clip(tt / 0.002, 0, 1), np.clip((dur - tt) / 0.018, 0, 1))
     x = np.tanh(2.8 * (x + (1.9 if accent else 1.4) * peak)) * env
     x /= np.max(np.abs(x)) + 1e-12
