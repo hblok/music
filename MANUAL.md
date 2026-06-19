@@ -1,5 +1,11 @@
 # Forge Tracker — User Manual
 
+Install dependencies
+
+```bash
+pip install pyside6 sounddevice
+```
+
 Run with:
 
 ```bash
