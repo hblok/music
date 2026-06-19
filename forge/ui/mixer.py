@@ -32,25 +32,30 @@ class _Strip(QWidget):
 
     def __init__(self, name: str, parent: QWidget | None = None) -> None:
         super().__init__(parent)
+        self.setObjectName(f"mixer-strip-{name}")
         self.name = name
 
         self._fader = QSlider(Qt.Orientation.Vertical)
+        self._fader.setObjectName("fader")
         self._fader.setRange(0, 100)
         self._fader.setValue(80)
         self._fader.setFixedHeight(100)
 
         self._mute_btn = QPushButton("M")
+        self._mute_btn.setObjectName("mute-btn")
         self._mute_btn.setCheckable(True)
         self._mute_btn.setFixedSize(24, 24)
 
         # Pan slider: −100..+100 maps to −1.0..+1.0, default 0 (centre).
         self._pan_slider = QSlider(Qt.Orientation.Horizontal)
+        self._pan_slider.setObjectName("pan-slider")
         self._pan_slider.setRange(-100, 100)
         self._pan_slider.setValue(0)
         self._pan_slider.setFixedWidth(60)
 
         # Reverb send slider: 0..100 maps to 0.0..1.0, default 0 (dry).
         self._reverb_slider = QSlider(Qt.Orientation.Horizontal)
+        self._reverb_slider.setObjectName("reverb-slider")
         self._reverb_slider.setRange(0, 100)
         self._reverb_slider.setValue(0)
         self._reverb_slider.setFixedWidth(60)
@@ -58,6 +63,7 @@ class _Strip(QWidget):
         self._reverb_label.setAlignment(Qt.AlignmentFlag.AlignHCenter)
 
         label = QLabel(name[:6])
+        label.setObjectName("strip-name-label")
         label.setAlignment(Qt.AlignmentFlag.AlignHCenter)
 
         layout = QVBoxLayout(self)
@@ -121,6 +127,7 @@ class MixerWidget(QWidget):
         parent: QWidget | None = None,
     ) -> None:
         super().__init__(parent)
+        self.setObjectName("mixer-widget")
         self._strips: dict[str, _Strip] = {}
         layout = QHBoxLayout(self)
         layout.setContentsMargins(4, 4, 4, 4)

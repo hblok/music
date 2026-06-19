@@ -80,6 +80,7 @@ class MainWindow(QMainWindow):
         self._mixer_channel_indices: list[int] = []
 
         self.setWindowTitle("Forge — Tracker")
+        self.setObjectName("forge-main-window")
         self.resize(1200, 750)
 
         # --- document + render backend ---
@@ -96,6 +97,7 @@ class MainWindow(QMainWindow):
 
         # --- central widget ---
         central = QWidget()
+        central.setObjectName("central-widget")
         self.setCentralWidget(central)
         root = QVBoxLayout(central)
         root.setContentsMargins(4, 4, 4, 4)
@@ -110,6 +112,9 @@ class MainWindow(QMainWindow):
         self._play_thread: QThread | None = None
         self._play_worker: _RenderWorker | None = None
         self._buf_valid = False  # True after successful render
+        self._mix_rerender_timer = QTimer()
+        self._mix_rerender_timer.setSingleShot(True)
+        self._mix_rerender_timer.timeout.connect(self._on_mix_rerender)
         root.addWidget(self._transport)
 
         # Timeline (bird's-eye step pattern view)
@@ -120,11 +125,13 @@ class MainWindow(QMainWindow):
 
         # Main horizontal splitter
         splitter = QSplitter(Qt.Orientation.Horizontal)
+        splitter.setObjectName("main-splitter")
         self._splitter = splitter
 
         # Left: arrangement / sections view
         from forge.ui.arrangement import ArrangementView
         self._arrangement = ArrangementView(self._doc)
+        self._arrangement.setObjectName("arrangement-view")
         self._arrangement.sectionSelected.connect(self._on_section_selected)
         self._arrangement.setMinimumWidth(160)
         splitter.addWidget(self._arrangement)
@@ -132,13 +139,16 @@ class MainWindow(QMainWindow):
 
         # Centre: scrollable tracker rows
         tracker_panel = QWidget()
+        tracker_panel.setObjectName("tracker-panel")
         tracker_vbox = QVBoxLayout(tracker_panel)
         tracker_vbox.setContentsMargins(0, 0, 0, 0)
         tracker_vbox.setSpacing(2)
 
         self._tracker_scroll = QScrollArea()
+        self._tracker_scroll.setObjectName("tracker-scroll")
         self._tracker_scroll.setWidgetResizable(True)
         self._tracker_container = QWidget()
+        self._tracker_container.setObjectName("tracker-container")
         self._tracker_layout = QVBoxLayout(self._tracker_container)
         self._tracker_layout.setSpacing(2)
         self._tracker_layout.setContentsMargins(2, 2, 2, 2)
@@ -153,7 +163,9 @@ class MainWindow(QMainWindow):
         # Mixer in a floating dock widget
         from forge.ui.mixer import MixerWidget
         self._mixer = MixerWidget([], parent=self)
+        self._mixer.setObjectName("mixer")
         self._mixer_dock = QDockWidget("Mixer", self)
+        self._mixer_dock.setObjectName("mixer-dock")
         self._mixer_dock.setWidget(self._mixer)
         self._mixer_dock.setAllowedAreas(
             Qt.DockWidgetArea.RightDockWidgetArea
@@ -168,18 +180,21 @@ class MainWindow(QMainWindow):
         bottom.setContentsMargins(0, 0, 0, 0)
 
         self._workshop_area = QWidget()
+        self._workshop_area.setObjectName("workshop-area")
         self._workshop_area_layout = QVBoxLayout(self._workshop_area)
         self._workshop_area_layout.setContentsMargins(0, 0, 0, 0)
         bottom.addWidget(self._workshop_area, stretch=1)
 
         from forge.ui.ab_compare import ABCompareWidget
         self._ab_compare = ABCompareWidget(self._doc)
+        self._ab_compare.setObjectName("ab-compare")
         bottom.addWidget(self._ab_compare, stretch=0)
 
         root.addLayout(bottom)
 
         # Progress bar (shown during WAV export)
         self._progress = QProgressBar()
+        self._progress.setObjectName("export-progress")
         self._progress.setRange(0, 0)
         self._progress.setVisible(False)
         root.addWidget(self._progress)
@@ -187,6 +202,7 @@ class MainWindow(QMainWindow):
         # --- status bar ---
         self._status = QStatusBar()
         self._status_label = QLabel("Ready")
+        self._status_label.setObjectName("status-label")
         self._status.addWidget(self._status_label)
         self.setStatusBar(self._status)
 
@@ -409,15 +425,22 @@ class MainWindow(QMainWindow):
     # Render-and-play
 
     def _on_play_requested(self) -> None:
-        """Toggle play/pause; render first if the buffer is stale."""
-        if self._service.is_playing:
+        """Play/pause toggle; re-render when the buffer is stale."""
+        if self._service.is_playing and self._buf_valid:
             self._service.pause()
             return
+        if self._service.is_playing:
+            # Buffer stale while playing — stop and re-render
+            self._service.stop()
         if self._buf_valid:
             self._service.play()
             return
         if self._play_thread is not None and self._play_thread.isRunning():
             return
+        self._start_render_for_playback()
+
+    def _start_render_for_playback(self) -> None:
+        """Kick off a background render then auto-play when done."""
         self._status_label.setText("Rendering for playback…")
         self._progress.setVisible(True)
         doc = self._doc
@@ -434,6 +457,13 @@ class MainWindow(QMainWindow):
         self._play_worker.finished.connect(self._on_play_render_done)
         self._play_worker.error.connect(self._on_render_error)
         self._play_thread.start()
+
+    def _on_mix_rerender(self) -> None:
+        """Auto-rerender after mute/solo/volume change while playing."""
+        if self._play_thread is not None and self._play_thread.isRunning():
+            self._mix_rerender_timer.start(200)  # render in progress, retry
+            return
+        self._start_render_for_playback()
 
     def _on_play_render_done(self, buf) -> None:
         self._progress.setVisible(False)
@@ -484,13 +514,20 @@ class MainWindow(QMainWindow):
             self._doc.set_channel_gain(channel_idx, volume, coalesce=True)
         except (IndexError, TypeError):
             pass
+        if self._service.is_playing:
+            self._service.stop()
+            self._mix_rerender_timer.start(400)  # debounce slider drags
 
     def _on_channel_mute_changed(self, channel_idx: int, muted: bool) -> None:
         self._channel_mutes[channel_idx] = muted
         self._buf_valid = False
+        if self._service.is_playing:
+            self._service.stop()
+            self._mix_rerender_timer.start(0)
 
     def _on_channel_solo(self, channel_idx: int) -> None:
         """Solo channel_idx: if already soloed, unmute all; else mute all others."""
+        was_playing = self._service.is_playing
         other_editors = [e for e in self._tracker_editors if e._channel_idx != channel_idx]
         already_solo = all(
             self._channel_mutes.get(e._channel_idx, False) for e in other_editors
@@ -501,6 +538,8 @@ class MainWindow(QMainWindow):
         else:
             for e in self._tracker_editors:
                 e.set_muted(e._channel_idx != channel_idx)
+        if was_playing and not self._service.is_playing:
+            self._mix_rerender_timer.start(0)
 
     def _on_mixer_levels_changed(self, levels: dict) -> None:
         """Route MixerWidget pan and reverb_send changes into the doc for each PatternChannel strip."""

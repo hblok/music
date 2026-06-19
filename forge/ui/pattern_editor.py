@@ -483,6 +483,7 @@ class TrackerRow(QWidget):
         grid.setSpacing(2)
 
         lbl = QLabel(instrument_id[:8])
+        lbl.setObjectName("instrument-label")
         lbl.setFixedWidth(64)
         lbl.setAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter)
         lbl.setStyleSheet(f"color: {QColor(channel_color).darker(140).name()};")
@@ -625,6 +626,7 @@ class TrackerEditor(QWidget):
             raise TypeError("TrackerEditor requires a PatternChannel")
 
         super().__init__(parent)
+        self.setObjectName(f"tracker-editor-{channel_idx}")
         self._channel_idx = channel_idx
         self._doc = doc
         self._cursor = 0
@@ -653,6 +655,7 @@ class TrackerEditor(QWidget):
 
         # ── Left control panel ──────────────────────────────────────────────
         ctrl = QWidget()
+        ctrl.setObjectName(f"channel-ctrl-{channel_idx}")
         ctrl.setFixedWidth(90)
         ctrl_v = QVBoxLayout(ctrl)
         ctrl_v.setContentsMargins(2, 2, 4, 2)
@@ -660,6 +663,7 @@ class TrackerEditor(QWidget):
 
         # Channel name (top)
         self._inst_label = QLabel(ch.instrument_id)
+        self._inst_label.setObjectName("channel-name")
         font = QFont()
         font.setBold(True)
         font.setPointSize(8)
@@ -671,6 +675,7 @@ class TrackerEditor(QWidget):
 
         # Vertical volume slider (below name)
         self._vol_slider = QSlider(Qt.Orientation.Vertical)
+        self._vol_slider.setObjectName("volume-slider")
         self._vol_slider.setRange(0, 100)
         self._vol_slider.setValue(80)
         self._vol_slider.setFixedWidth(18)
@@ -686,6 +691,7 @@ class TrackerEditor(QWidget):
         btn_row.setSpacing(2)
         btn_row.setContentsMargins(0, 0, 0, 0)
         self._mute_btn = QPushButton("M")
+        self._mute_btn.setObjectName("mute-btn")
         self._mute_btn.setCheckable(True)
         self._mute_btn.setFixedSize(24, 18)
         self._mute_btn.setToolTip("Mute this channel")
@@ -696,6 +702,7 @@ class TrackerEditor(QWidget):
         )
         self._mute_btn.toggled.connect(self._on_mute_toggled)
         self._solo_btn = QPushButton("S")
+        self._solo_btn.setObjectName("solo-btn")
         self._solo_btn.setFixedSize(24, 18)
         self._solo_btn.setToolTip("Solo — mute all other channels")
         self._solo_btn.setStyleSheet("QPushButton { font-size: 9px; padding: 0; }")
@@ -708,12 +715,14 @@ class TrackerEditor(QWidget):
 
         # ── Step grid ───────────────────────────────────────────────────────
         self._row = TrackerRow(ch.instrument_id, ch.n_steps, channel_color, self)
+        self._row.setObjectName("tracker-row")
         self._row.stepToggled.connect(self._on_step_toggled)
         self._row.accentToggled.connect(self._on_accent_toggled)
         self._row.ghostToggled.connect(self._on_ghost_toggled)
         self._row.probClicked.connect(self._on_prob_clicked)
 
         scroll = QScrollArea()
+        scroll.setObjectName("tracker-row-scroll")
         scroll.setWidgetResizable(True)
         scroll.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
         scroll.setWidget(self._row)
@@ -721,6 +730,7 @@ class TrackerEditor(QWidget):
 
         # ── Remove button ────────────────────────────────────────────────────
         rem_btn = QPushButton("×")
+        rem_btn.setObjectName("remove-btn")
         rem_btn.setFixedSize(24, 24)
         rem_btn.setToolTip("Remove this channel")
         rem_btn.clicked.connect(lambda: self.removeRequested.emit(channel_idx))

@@ -30,16 +30,21 @@ class TransportWidget(QWidget):
         parent: QWidget | None = None,
     ) -> None:
         super().__init__(parent)
+        self.setObjectName("transport")
         self._service = service
 
         # --- widgets ---
         self._play_btn = QPushButton("▶")
+        self._play_btn.setObjectName("play-btn")
         self._play_btn.setFixedWidth(36)
         self._stop_btn = QPushButton("⏹")
+        self._stop_btn.setObjectName("stop-btn")
         self._stop_btn.setFixedWidth(36)
         self._pos_label = QLabel("  1:1")
+        self._pos_label.setObjectName("position-label")
         self._pos_label.setFixedWidth(60)
         self._seek_slider = QSlider(Qt.Orientation.Horizontal)
+        self._seek_slider.setObjectName("seek-slider")
         self._seek_slider.setRange(0, 1000)
         self._seek_slider.setValue(0)
 
