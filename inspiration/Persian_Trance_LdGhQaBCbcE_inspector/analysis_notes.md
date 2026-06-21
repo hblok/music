@@ -66,6 +66,73 @@ Re-run with `--sections 30` to force finer cuts into that region.
 - **Moderate density**: 3.6 events/sec average (not a fast-arpeggiated style)
 - RMS swing: –20.1 dB (drops) to –13.8 dB (peaks) — about 6 dB dynamic range
 
+## Scale / Maqam
+
+The maqam comparison built a pitch-class histogram from pYIN-tracked melody across
+all sections and correlated it against Arabic/Persian scale templates.
+All five top scores cluster tightly (0.491–0.503), which mirrors the flat chroma
+profile: the track doesn't cleanly belong to one 12-TET scale.
+
+Top matches:
+1. **Phrygian Dominant / Maqam Hijaz / Dastgah Homayoun** (0.495)
+2. **Double Harmonic / Maqam Hijaz Kar** (0.492)
+3. Major / Natural Minor — nearly tied (0.491)
+
+The presence of a prominent flat-2 (C# at relative energy 0.58) and the strong G
+(0.63) tips the balance toward **Dastgah Homayoun** or **Maqam Hijaz**:
+C – D♭ – E – F – G – A♭ – B♭. The major 3rd (E natural) distinguishes these from
+pure minor modes, consistent with what the ear hears as the "exotic" raised-3rd
+character of Persian music. Quarter tones (half-flats) that exist in the
+original scale are approximated to the nearest semitone in this analysis.
+
+## Harmonic / Percussive balance
+
+HPSS (harmonic-percussive source separation) per section:
+
+- Track average: **~52% harmonic, ~12% percussive** (remainder is residual/noise)
+- Dense sections §4–5 (6:27–12:05) and §18 (1:00:58–1:03:55): harmonic drops
+  to 33–45% as percussion is most prominent
+- §1 (cold open): 91% harmonic — essentially pure pad/drone with no drums
+- §17 (13-second micro-drop at 1:00:45): 97% harmonic — reverb tail only
+- The high harmonic fraction overall is consistent with rich melodic/pad layering
+  sitting well above the percussive element in the mix
+
+## Instrument estimates
+
+Analysis via HPSS + pYIN pitch tracking + onset profiling:
+
+**Confirmed with HIGH confidence:**
+- **Synthesizer pad** — high harmonic energy, very low spectral flatness (≈0.008),
+  sustained throughout; the sonic "floor" of the entire track
+- **Bass synthesizer / sub-bass** — accounts for much of the 44% energy below 250 Hz;
+  machine-generated, sustained, no human drift
+- **Darbuka / Doumbek** — onset low:high ratio 27%:37% matches the characteristic
+  doum (low) / tak (high) split; regularity 0.33 is loose enough to be a humanised
+  pattern rather than pure step sequencing
+- **Riq (Arabic tambourine)** — consistent with the same mixed low/high onset
+  profile; may overlap with or be the same layer as the Darbuka reading
+
+**Plausible with MEDIUM confidence:**
+- **Ney (Persian end-blown flute)** — vibrato detected throughout (depth ~3 semitones);
+  note: 3 st is too large for acoustic finger vibrato (0.3–0.8 st is typical) —
+  this is more likely a **synth ney with LFO pitch modulation**, a very common
+  production technique in this genre. The breathy timbre signature is real.
+- **Qanun (zither)** or **Oud (Arabic lute)** — short melodic events detected in
+  the mid range; however pYIN frequently locked onto the sub-bass fundamental
+  (C2) rather than the melodic line, so note duration (0.16 s) and low pitch
+  centre are partially artefacts. A dedicated melody-separation step (e.g. Demucs)
+  would be needed to confirm.
+
+**Analysis caveats:**
+- pYIN's minimum frequency (C2 ≈ 65 Hz) causes it to latch onto kick/sub-bass
+  transients in the harmonic component, polluting melodic pitch estimates
+- "Vibrato depth" of 3+ semitones across all sections reflects pitch-modulated
+  synth effects or LFO, not acoustic instrument vibrato
+- Hi-hat / Electronic kick receive MEDIUM/LOW estimates partly because the
+  darbuka onset pattern absorbs most of the percussive energy signature;
+  whether the percussion is acoustic darbuka or a sample/synth replica is
+  indistinguishable from spectrum alone
+
 ## Compositional observations
 
 - **Modal / drone-based**: almost no chord movement, C pedal for 95% of runtime
