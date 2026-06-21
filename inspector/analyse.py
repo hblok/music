@@ -21,7 +21,7 @@ import sys
 import time
 from pathlib import Path
 
-from . import features, report, plots
+from . import features, instruments, report, plots
 
 
 def main() -> None:
@@ -64,6 +64,9 @@ def main() -> None:
     _step("Key & harmony       (librosa)")
     harmony_data = features.analyse_harmony(audio)
 
+    _step("Instrument analysis (HPSS + pYIN + maqam)")
+    instrument_data = instruments.analyse_instruments(audio, structure_data["boundaries_sec"])
+
     # ── Essentia (single extra load at 44100 Hz for key + BPM) ───────────────
     _step("Key + BPM           (essentia @ 44100 Hz)")
     es_data = features.analyse_essentia(str(path))
@@ -77,12 +80,13 @@ def main() -> None:
 
     # ── Render ────────────────────────────────────────────────────────────────
     results = {
-        "path":      str(path),
-        "audio":     audio,
-        "tempo":     tempo_data,
-        "harmony":   harmony_data,
-        "structure": structure_data,
-        "timbre":    timbre_data,
+        "path":        str(path),
+        "audio":       audio,
+        "tempo":       tempo_data,
+        "harmony":     harmony_data,
+        "structure":   structure_data,
+        "timbre":      timbre_data,
+        "instruments": instrument_data,
     }
 
     text = report.render(results)

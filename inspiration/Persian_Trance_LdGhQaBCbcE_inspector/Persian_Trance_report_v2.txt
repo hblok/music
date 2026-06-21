@@ -1,0 +1,209 @@
+=============================================================================
+  MUSIC INSPECTOR REPORT
+=============================================================================
+  File:      /workspace/music/Persian_Trance_LdGhQaBCbcE.mp3
+  Duration:  1:10:20  (4220 s)
+  Analysed:  22050 Hz, mono
+
+── TEMPO & RHYTHM ───────────────────────────────────────────────────────────
+  BPM (librosa):    129.20
+  Tempo stability:  LOW  (free tempo or significant tempo changes)  (σ = 23.1 BPM across 30 s windows)
+  Total beats:      9193
+
+  Tempo over time (30-second windows):
+    0:00 – 0:30   99.4 BPM
+    0:30 – 1:00   99.4 BPM
+    1:00 – 1:30   99.4 BPM
+    1:30 – 2:00   99.4 BPM
+    2:00 – 2:30   99.4 BPM
+    2:30 – 3:00   99.4 BPM
+    3:00 – 3:30   99.4 BPM
+    3:30 – 4:00   95.7 BPM
+    4:00 – 4:30   95.7 BPM
+    4:30 – 5:00   95.7 BPM
+    5:00 – 5:30   95.7 BPM
+    5:30 – 6:00   95.7 BPM
+    6:00 – 6:30   92.3 BPM
+    6:30 – 7:00   92.3 BPM
+    7:00 – 7:30   92.3 BPM
+    7:30 – 8:00   92.3 BPM
+    8:00 – 8:30   92.3 BPM
+    8:30 – 9:00   92.3 BPM
+    9:00 – 9:30   92.3 BPM
+    9:30 – 10:00   92.3 BPM
+    10:00 – 10:30   92.3 BPM
+    10:30 – 11:00   92.3 BPM
+    11:00 – 11:30   92.3 BPM
+    11:30 – 12:00   92.3 BPM
+    12:00 – 12:30   184.6 BPM
+    12:30 – 13:00   99.4 BPM
+    13:00 – 13:30   99.4 BPM
+    13:30 – 14:00   99.4 BPM
+    14:00 – 14:30   99.4 BPM
+    14:30 – 15:00   99.4 BPM
+    15:00 – 15:30   99.4 BPM
+    15:30 – 16:00   99.4 BPM
+    16:00 – 16:30   99.4 BPM
+    16:30 – 17:00   95.7 BPM
+    17:00 – 17:30   95.7 BPM
+    17:30 – 18:00   95.7 BPM
+    18:00 – 18:30   95.7 BPM
+    18:30 – 19:00   172.3 BPM
+    19:00 – 19:30   172.3 BPM
+    19:30 – 20:00   83.4 BPM
+    20:00 – 20:30   172.3 BPM
+    20:30 – 21:00   172.3 BPM
+    21:00 – 21:30   172.3 BPM
+    21:30 – 22:00   83.4 BPM
+    22:00 – 22:30   95.7 BPM
+    22:30 – 23:00   95.7 BPM
+    23:00 – 23:30   95.7 BPM
+    23:30 – 24:00   95.7 BPM
+    24:00 – 24:30   95.7 BPM
+    24:30 – 25:00   95.7 BPM
+    25:00 – 25:30   95.7 BPM
+    25:30 – 26:00   95.7 BPM
+    26:00 – 26:30   95.7 BPM
+    26:30 – 27:00   95.7 BPM
+    27:00 – 27:30   95.7 BPM
+    27:30 – 28:00   95.7 BPM
+    28:00 – 28:30   99.4 BPM
+    28:30 – 29:00   99.4 BPM
+    29:00 – 29:30   99.4 BPM
+    29:30 – 30:00   99.4 BPM
+    … (81 more windows)
+
+── KEY & HARMONY ────────────────────────────────────────────────────────────
+  Key (librosa):    C major   [correlation 0.61]
+  Key (essentia):   C minor   [strength 0.78]
+
+  Chroma profile (relative to strongest note):
+      C  ████████████████████████  1.00
+      G  ███████████████░░░░░░░░░  0.63
+     C#  ██████████████░░░░░░░░░░  0.58
+     G#  ██████████████░░░░░░░░░░  0.56
+      A  █████████████░░░░░░░░░░░  0.53
+     A#  █████████████░░░░░░░░░░░  0.53
+      B  ████████████░░░░░░░░░░░░  0.48
+      D  ██████████░░░░░░░░░░░░░░  0.42
+     F#  ██████████░░░░░░░░░░░░░░  0.40
+      F  █████████░░░░░░░░░░░░░░░  0.38
+      E  █████████░░░░░░░░░░░░░░░  0.37
+     D#  ████████░░░░░░░░░░░░░░░░  0.32
+
+  Dominant note per minute:
+    0:00:  C   1:00:  C   2:00:  C   3:00:  C   4:00:  C   5:00:  C
+    6:00:  C   7:00:  G   8:00:  G   9:00: C#   10:00: C#   11:00: C#
+    12:00:  C   13:00:  C   14:00:  C   15:00:  C   16:00:  C
+    17:00:  C   18:00:  C   19:00:  C   20:00:  C   21:00:  C
+    22:00:  D   23:00:  D   24:00:  D   25:00:  C   26:00:  C
+    27:00:  C   28:00:  C   29:00:  C   30:00:  C   31:00:  C
+    32:00:  C   33:00:  C   34:00:  C   35:00:  C   36:00:  C
+    37:00:  C   38:00:  C   39:00:  C   40:00:  C   41:00:  C
+    42:00:  C   43:00:  C   44:00:  C   45:00:  C   46:00:  C
+    47:00:  C   48:00:  C   49:00:  C   50:00:  C   51:00:  C
+    52:00:  C   53:00:  C   54:00:  C   55:00:  C   56:00:  C
+    57:00:  C   58:00:  D   59:00:  D   1:00:00:  D   1:01:00:  C
+    1:02:00:  C   1:03:00:  C   1:04:00:  C   1:05:00:  C   1:06:00:  C
+    1:07:00:  C   1:08:00:  C   1:09:00:  C   1:10:00:  C
+
+── STRUCTURE ────────────────────────────────────────────────────────────────
+  20 sections detected
+
+    §    Start       End      Dur       RMS   Centroid     Density   Label
+  ───  ───────   ───────  ───────   ───────   ────────   ─────────   ──────────────
+    1     0:00      0:13     0:13    -18.7 dB      909 Hz     0.6 ev/s   INTRO / OUTRO
+    2     0:13      2:54     2:41    -13.8 dB     1205 Hz     5.4 ev/s   DROP / PEAK
+    3     2:54      6:27     3:34    -14.4 dB     1116 Hz     3.6 ev/s   MAIN
+    4     6:27      8:57     2:30    -13.8 dB     1219 Hz     5.4 ev/s   DROP / PEAK
+    5     8:57     12:05     3:08    -15.1 dB     1070 Hz     4.5 ev/s   MAIN
+    6    12:05     15:30     3:25    -16.0 dB     1015 Hz     3.3 ev/s   MAIN
+    7    15:30     18:29     2:59    -15.5 dB     1169 Hz     5.4 ev/s   BUILD
+    8    18:29     21:59     3:30    -14.9 dB      901 Hz     4.3 ev/s   MAIN
+    9    21:59     24:36     2:37    -14.3 dB     1040 Hz     5.0 ev/s   DROP / PEAK
+   10    24:36     25:04     0:28    -20.1 dB      704 Hz     2.2 ev/s   INTRO / OUTRO
+   11    25:04     27:59     2:55    -14.5 dB     1059 Hz     4.2 ev/s   MAIN
+   12    27:59     28:21     0:22    -18.6 dB      715 Hz     1.5 ev/s   INTRO / OUTRO
+   13    28:21     37:38     9:17    -14.6 dB     1065 Hz     4.3 ev/s   MAIN
+   14    37:38     57:24    19:46    -15.1 dB      996 Hz     3.7 ev/s   MAIN
+   15    57:24     58:11     0:47    -16.8 dB      664 Hz     2.0 ev/s   INTRO / OUTRO
+   16    58:11   1:00:45     2:34    -14.3 dB     1041 Hz     4.5 ev/s   MAIN
+   17  1:00:45   1:00:58     0:13    -17.6 dB      685 Hz     2.0 ev/s   INTRO / OUTRO
+   18  1:00:58   1:03:55     2:57    -14.0 dB      957 Hz     4.7 ev/s   MAIN
+   19  1:03:55   1:06:56     3:01    -14.7 dB      842 Hz     3.1 ev/s   MAIN
+   20  1:06:56   1:10:20     3:25    -14.9 dB      846 Hz     3.6 ev/s   MAIN
+
+── TIMBRAL SUMMARY ──────────────────────────────────────────────────────────
+  Avg spectral centroid:  961 Hz
+  Frequency balance:
+    Bass   (<250 Hz):    ██████████░░░░░░░░░░░░  43.7%
+    Mids   (250–4k Hz):  ███████████░░░░░░░░░░░  47.8%
+    Highs  (>4k Hz):     ██░░░░░░░░░░░░░░░░░░░░  8.6%
+  Avg onset density:      3.6 events/sec
+  RMS range:              -20.1 dB  →  -13.8 dB
+
+── INSTRUMENT HINTS ─────────────────────────────────────────────────────────
+  • Heavy sub-bass / kick (44% energy below 250 Hz)
+  • Dark tonal character (centroid 961 Hz) — heavy low/mid emphasis
+  • Moderate event density (3.6 events/sec)
+
+── INSTRUMENT ANALYSIS ──────────────────────────────────────────────────────
+  Harmonic / Percussive split per section:
+    §    Harmonic   Percussive   Flatness  Pitch centre   Vibrato  Note dur
+  ───  ──────────  ───────────  ─────────  ─────────────   ───────  ────────
+    1      91.4%        6.8%     0.0404            C♯4       yes  0.19 s
+    2      59.7%       11.2%     0.0001             C2       yes  0.19 s
+    3      59.1%        6.8%     0.0003             C3       yes  0.19 s
+    4      44.9%       26.5%     0.0000            C♯2       yes  0.19 s
+    5      35.6%       30.2%     0.0087            C♯3       yes  0.09 s
+    6      67.0%        9.4%     0.0142             C4       yes  0.19 s
+    7      51.7%       10.6%     0.0000             C2       yes  0.09 s
+    8      40.0%       14.7%     0.0096             A3       yes  0.19 s
+    9      33.3%       13.6%     0.0039             C3       yes  0.19 s
+   10      62.1%        9.2%     0.0008             C3       yes  0.19 s
+   11      39.4%       21.1%     0.0000             C2       yes  0.19 s
+   12      62.7%        9.5%     0.0151             C4       yes  0.19 s
+   13      42.1%       15.6%     0.0000            C♯2       yes  0.09 s
+   14      58.3%        7.9%     0.0040            C♯2       yes  0.19 s
+   15      55.9%        5.8%     0.0000             D3       yes  0.19 s
+   16      41.5%        8.7%     0.0000             D2       yes  0.19 s
+   17      97.2%        0.2%     0.0235             C4       yes  0.09 s
+   18      38.1%       31.1%     0.0000            C♯2       yes  0.19 s
+   19      80.0%        2.3%     0.0122             C3       yes  0.09 s
+   20      53.7%        6.3%     0.0243             C3       yes  0.19 s
+
+  Scale / Maqam comparison (cosine similarity to pitch-class histogram):
+    █████████░░░░░░░░░  0.503  Major / Dastgah Mahoor
+    █████████░░░░░░░░░  0.495  Phrygian Dominant / Maqam Hijaz / Dastgah Homayoun
+    █████████░░░░░░░░░  0.492  Double Harmonic / Maqam Hijaz Kar
+    █████████░░░░░░░░░  0.491  Natural Minor / Maqam Nahawand
+    █████████░░░░░░░░░  0.491  Maqam Saba (approx.)
+
+  Instrument estimates:
+
+    [MELODIC]
+      ●●● HIGH     Oud (Arabic lute)
+               plucked style (avg note 0.16 s), low reach C2, voiced 99% of time
+      ●●● HIGH     Synthesizer lead
+               very tonal (flatness 0.008), sustained (0.16 s/note), harmonic content 56%
+      ●●○ MEDIUM   Ney (Persian flute)
+               range C2–G4, vibrato depth 3.06 st, avg note dur 0.16 s, breathy (flatness 0.008)
+      ●●○ MEDIUM   Qanun (zither)
+               plucked (avg 0.16 s/note), midpoint C3, high reach G4
+    [HARMONIC / PADS]
+      ●●● HIGH     Synthesizer pad
+               harmonic energy 56%, spectral flatness 0.008 (lower = more tonal)
+    [BASS]
+      ●●● HIGH     Bass synthesizer / sub-bass
+               sustained low-end harmonic content, harmonic ratio 56%
+    [PERCUSSION]
+      ●●● HIGH     Darbuka / Doumbek
+               low onset ratio 27% (doum), high ratio 37% (tak), regularity 0.33
+      ●●● HIGH     Riq (Arabic tambourine)
+               mixed low/high onsets, human feel (regularity 0.33)
+      ●●○ MEDIUM   Hi-hat / cymbal (or Riq)
+               high-freq onsets 37%, regularity 0.33
+      ●○○ LOW      Electronic kick drum
+               low onsets 27%, regularity 0.33 (slightly loose), mean IOI 0.518 s
+
+=============================================================================

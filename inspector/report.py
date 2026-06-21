@@ -164,6 +164,65 @@ def render(results: dict) -> str:
     for hint in feat_mod.get_instrument_hints(timbre):
         lines.append(f"  • {hint}")
 
+    # ── Instrument analysis ───────────────────────────────────────────────────
+    instr_data = results.get("instruments")
+    if instr_data:
+        lines.append("")
+        rule("INSTRUMENT ANALYSIS")
+
+        # HPSS per section
+        isecs = instr_data.get("sections", [])
+        if isecs:
+            lines.append("  Harmonic / Percussive split per section:")
+            lines.append(f"  {'§':>3}  {'Harmonic':>10}  {'Percussive':>11}  "
+                         f"{'Flatness':>9}  Pitch centre   Vibrato  Note dur")
+            lines.append(f"  {'─'*3}  {'─'*10}  {'─'*11}  {'─'*9}  {'─'*13}   {'─'*7}  {'─'*8}")
+            for s in isecs:
+                h = s["hpss"]
+                p = s["pitch"]
+                pitch_str = f"{p['f0_median_note']:>5}" if p and p.get("f0_median_note") else "  n/a"
+                vib_str   = ("yes" if p and p.get("vibrato") else "no ") if p else " - "
+                dur_str   = f"{p['median_note_dur_s']:.2f} s" if p and p.get("median_note_dur_s") else "  n/a"
+                lines.append(
+                    f"  {s['idx']:>3}  "
+                    f"{h['harm_ratio']*100:>8.1f}%  "
+                    f"{h['perc_ratio']*100:>9.1f}%  "
+                    f"{h['flatness']:>9.4f}  "
+                    f"{pitch_str:>13}   "
+                    f"{vib_str:>7}  "
+                    f"{dur_str}"
+                )
+
+        # Maqam comparison
+        maqam = instr_data.get("maqam_matches", [])
+        if maqam:
+            lines.append("")
+            lines.append("  Scale / Maqam comparison (cosine similarity to pitch-class histogram):")
+            for m in maqam[:5]:
+                score_bar = bar(m["score"], 18, 1.0)
+                lines.append(f"    {score_bar}  {m['score']:.3f}  {m['name']}")
+
+        # Instrument estimates
+        estimates = instr_data.get("estimates", [])
+        if estimates:
+            lines.append("")
+            lines.append("  Instrument estimates:")
+            lines.append("")
+            prev_family = None
+            for e in estimates:
+                if e["family"] != prev_family:
+                    family_label = {
+                        "melodic":    "MELODIC",
+                        "harmonic":   "HARMONIC / PADS",
+                        "bass":       "BASS",
+                        "percussion": "PERCUSSION",
+                    }.get(e["family"], e["family"].upper())
+                    lines.append(f"    [{family_label}]")
+                    prev_family = e["family"]
+                conf_marker = {"HIGH": "●●●", "MEDIUM": "●●○", "LOW": "●○○"}.get(e["confidence"], "?")
+                lines.append(f"      {conf_marker} {e['confidence']:<7}  {e['name']}")
+                lines.append(f"               {e['evidence']}")
+
     lines.append("")
     lines.append("=" * _WIDTH)
     return "\n".join(lines)
