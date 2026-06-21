@@ -127,11 +127,9 @@ def choir(params: dict, rng: np.random.Generator, **ctx) -> AudioBuffer:
         voiced = np.zeros(n)
         for f_c, bw, g in formants:
             q = f_c / bw
-            sos = _sig.iirpeak(f_c, Q=max(q, 0.5), fs=sr)
-            voiced += g * _sig.sosfilt(
-                np.array(sos).reshape(1, 6) if np.array(sos).ndim == 1 else np.array(sos),
-                glottal
-            )
+            b, a = _sig.iirpeak(f_c, Q=max(q, 0.5), fs=sr)
+            sos = _sig.tf2sos(b, a)
+            voiced += g * _sig.sosfilt(sos, glottal)
 
         pan = i / max(len(notes) - 1, 1)
         L += voiced * np.cos(pan * np.pi / 2.0)

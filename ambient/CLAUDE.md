@@ -7,12 +7,72 @@ synthesized, seeded RNG, `commit()` mix-bus, per-section RMS checks, the
 `add_at`/`glide_curve`/`reverb` helpers). Read that first; this file covers
 only what is specific to the ambient work.
 
-## The track
+## Tracks
 
 - **lost** — `lost.py` (v2, ~7:50) → renders `lost_v2.wav` — a long-form
   emotional ambient journey in D: LOVE → CONFUSION → LOSS → DREAD/ANGST →
   SADNESS → HOPE. (A trance reworking of the same journey lives at
   `../trance/lost_v3.py`.)
+- **qasida** — `persian.py` (~8 min, 480 s) → renders `/workspace/music/qasida.wav`
+  — Persian/Arabic ambient trance in **C Phrygian Dominant** (Maqam Hijaz /
+  Dastgah Homayoun: C D♭ E F G A♭ B♭), inspired by the analysis of
+  `Persian_Trance_LdGhQaBCbcE.mp3`. 96 BPM, 192 bars. Uses forge instruments
+  via `../forge/instruments/`.
+
+## persian.py — structure and design
+
+### Two-part file layout
+
+```
+PART 1 — INSTRUMENTS & EFFECTS
+  SR, BPM/BAR/STEP constants, section boundaries, MIDI note constants
+  IR_ROOM_{L,R}, IR_HALL_{L,R}  — reverb impulse responses
+  NEY_PHRASE_{A,B,C,OUTRO}      — ney note lists [(midi, dur_s), ...]
+  OUD_PHRASE_{A,B}              — oud overlap lists [(midi, t_off, dur), ...]
+  _DOUM_STEPS, _TEK_STEPS, _GHOST_STEPS  — darbuka bar pattern
+  _PAD_NOTES, _CHOIR_NOTES, _SANTUR_PITCHES
+  render_drone(), render_wind(), render_pad(), render_choir()
+  render_ney(), render_oud_phrase(), render_santur_run()
+  render_bass_hit(), render_darbuka_bar()
+
+PART 2 — COMPOSITION
+  compose(seed)  — builds the AudioBuffer; all placement here
+  main()         — writes /workspace/music/qasida.wav
+```
+
+### Section arc (192 bars = 480 s at 96 BPM)
+
+| Section  | Range        | Content |
+|----------|-------------|---------|
+| INTRO    | 0–80 s       | Drone fades in; silence above it |
+| RISE     | 80–160 s     | Wind enters; darbuka and bass begin; first ney |
+| BUILD    | 160–240 s    | Choir swells appear; oud phrases start |
+| PEAK     | 240–400 s    | Santur runs added; all layers full |
+| UNWIND   | 400–460 s    | Gradual thinning; percussion fades |
+| OUTRO    | 460–480 s    | Solo ney farewell phrase; drone fades |
+
+### Instrument choices and reverb rules
+
+- **Drone** (`forge.instruments.textures.drone`) — C2 root, full track, no reverb
+- **Wind** (`textures.wind`) — RISE to OUTRO, no reverb (already diffuse)
+- **Pad chord** (`strings.pad_chord`) — C4/G4/Bb4, no reverb (too long for FFT)
+- **Choir** (`voices.choir`) — hall reverb IR (2.5 s / 2.0 decay); 45 s swells
+- **Ney** (`voices.voice_phrase` with `ney_mode=True`) — room reverb (1.8 s / 1.4 decay)
+- **Oud** (`strings.oud`) — overlapping notes assembled manually; room reverb
+- **Santur** (`strings.santur`) — ascending run, staggered 0.35 s per note; room reverb
+- **Bass** (`bass.psy_bass_note`) — C2/G2 hits on beats 0 and 8; no reverb
+- **Darbuka** (`percussion.make_doum` + `make_tek`) — Maqsum pattern, humanised ±10 ms
+
+### Reverb note
+`reverb(x, ir, wet)` trims the convolution result to `len(x)`, so the reverb
+tail is lost. Pad the input with zeros before calling to capture the ring-out:
+```python
+padded = np.concatenate([mono, np.zeros(int(tail_s * SR))])
+out = reverb(padded, IR_ROOM_L, wet=0.38)[:len(mono)]
+```
+
+### Analysis source
+`/repos/music/inspiration/Persian_Trance_LdGhQaBCbcE_inspector/analysis_notes.md`
 
 ## The three composition lessons (from user feedback — read before editing)
 
