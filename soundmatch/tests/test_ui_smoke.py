@@ -187,5 +187,177 @@ class TestDrawHelpers(unittest.TestCase):
         plt.close(fig)
 
 
+class TestPatchEditor(unittest.TestCase):
+    """Smoke test PatchEditor."""
+
+    def test_construct(self):
+        from soundmatch.ui.patch_editor import PatchEditor
+        w = PatchEditor()
+        self.assertIsNotNone(w)
+
+    def test_instrument_id(self):
+        from soundmatch.ui.patch_editor import PatchEditor
+        w = PatchEditor()
+        # Should have a valid instrument selected
+        self.assertIsNotNone(w.instrument_id)
+        self.assertTrue(len(w.instrument_id) > 0)
+
+    def test_params_dict(self):
+        from soundmatch.ui.patch_editor import PatchEditor
+        w = PatchEditor()
+        params = w.params
+        self.assertIsInstance(params, dict)
+
+    def test_seed_value(self):
+        from soundmatch.ui.patch_editor import PatchEditor
+        w = PatchEditor()
+        self.assertIsInstance(w.seed, int)
+        self.assertEqual(w.seed, 42)
+
+    def test_patch_changed_signal(self):
+        from soundmatch.ui.patch_editor import PatchEditor
+        w = PatchEditor()
+        received = []
+
+        def on_patch(inst_id, params, layers, seed):
+            received.append((inst_id, params, layers, seed))
+
+        w.patchChanged.connect(on_patch)
+        # Change seed to trigger signal (debounced)
+        w._seed_spin.setValue(123)
+        # Process the debounce timer
+        _app.processEvents()
+        # The debounce timer is 300ms; we need to wait for it
+        from PySide6.QtCore import QTimer
+        # Force the timeout by calling the slot directly
+        w._emit_patch()
+        self.assertEqual(len(received), 1)
+        self.assertEqual(received[0][3], 123)  # seed
+
+    def test_add_layer(self):
+        from soundmatch.ui.patch_editor import PatchEditor
+        w = PatchEditor()
+        w._on_add_layer()
+        self.assertEqual(len(w.layers), 1)
+
+    def test_remove_layer(self):
+        from soundmatch.ui.patch_editor import PatchEditor
+        w = PatchEditor()
+        w._on_add_layer()
+        self.assertEqual(len(w.layers), 1)
+        row = w._layer_rows[0]
+        w._on_remove_layer(row)
+        self.assertEqual(len(w.layers), 0)
+
+    def test_set_patch(self):
+        from soundmatch.ui.patch_editor import PatchEditor
+        w = PatchEditor()
+        w.set_patch("kick", {"f0": 60.0}, [("snare", {"tone": 0.5})], 999)
+        self.assertEqual(w.seed, 999)
+
+
+class TestScorecardPanel(unittest.TestCase):
+    """Smoke test ScorecardPanel."""
+
+    def test_construct(self):
+        from forge.playback.service import PlaybackService
+        from soundmatch.ui.scorecard_panel import ScorecardPanel
+        svc = PlaybackService(sr=44100, bpm=120)
+        w = ScorecardPanel(svc)
+        self.assertIsNotNone(w)
+
+    def test_set_target_metrics(self):
+        from forge.playback.service import PlaybackService
+        from inspector.metrics import characterize
+        from soundmatch.ui.scorecard_panel import ScorecardPanel
+        svc = PlaybackService(sr=44100, bpm=120)
+        w = ScorecardPanel(svc)
+        y = ensure_fixture()
+        m = characterize(y, 44100)
+        w.set_target_metrics(m)
+        # No exception
+
+    def test_set_scorecard(self):
+        from forge.playback.service import PlaybackService
+        from inspector.metrics import characterize
+        from soundmatch.core.scoring import diff
+        from soundmatch.ui.scorecard_panel import ScorecardPanel
+        svc = PlaybackService(sr=44100, bpm=120)
+        w = ScorecardPanel(svc)
+        y = ensure_fixture()
+        m = characterize(y, 44100)
+        # Create a scorecard from identical metrics
+        sc = diff(m, m)
+        w.set_scorecard(sc, cand_y=y, cand_sr=44100)
+        self.assertIsNotNone(w.scorecard)
+        self.assertAlmostEqual(w.scorecard.aggregate(), 0.0, places=5)
+
+    def test_scorecard_display_values(self):
+        from forge.playback.service import PlaybackService
+        from inspector.metrics import characterize
+        from soundmatch.core.scoring import diff
+        from soundmatch.ui.scorecard_panel import ScorecardPanel
+        svc = PlaybackService(sr=44100, bpm=120)
+        w = ScorecardPanel(svc)
+        y = ensure_fixture()
+        m = characterize(y, 44100)
+        # Create a scorecard from two different metrics
+        # High-freq noise has very different spectral shape
+        rng = np.random.default_rng(99)
+        y2 = rng.standard_normal(len(y))
+        m2 = characterize(y2, 44100)
+        sc = diff(m, m2)
+        w.set_scorecard(sc)
+        self.assertGreater(w.scorecard.aggregate(), 0.0)
+
+    def test_clear(self):
+        from forge.playback.service import PlaybackService
+        from soundmatch.ui.scorecard_panel import ScorecardPanel
+        svc = PlaybackService(sr=44100, bpm=120)
+        w = ScorecardPanel(svc)
+        w.clear()
+        self.assertIsNone(w.scorecard)
+
+    def test_play_btn_disabled_when_no_audio(self):
+        from forge.playback.service import PlaybackService
+        from soundmatch.ui.scorecard_panel import ScorecardPanel
+        svc = PlaybackService(sr=44100, bpm=120)
+        w = ScorecardPanel(svc)
+        self.assertFalse(w._play_btn.isEnabled())
+
+
+class TestMainWindowPatchEditor(unittest.TestCase):
+    """Test MainWindow with patch editor and scorecard integration."""
+
+    def test_has_patch_editor(self):
+        from forge.playback.service import PlaybackService
+        from soundmatch.ui.window import MainWindow
+        svc = PlaybackService(sr=44100, bpm=120)
+        w = MainWindow(svc)
+        self.assertIsNotNone(w.patch_editor)
+
+    def test_has_scorecard_panel(self):
+        from forge.playback.service import PlaybackService
+        from soundmatch.ui.window import MainWindow
+        svc = PlaybackService(sr=44100, bpm=120)
+        w = MainWindow(svc)
+        self.assertIsNotNone(w.scorecard_panel)
+
+    def test_patch_renders_and_scores(self):
+        from forge.playback.service import PlaybackService
+        from soundmatch.ui.window import MainWindow
+        svc = PlaybackService(sr=44100, bpm=120)
+        w = MainWindow(svc)
+        # Load synthetic audio into reference panel
+        y = ensure_fixture()
+        w.reference_panel._y = y
+        w.reference_panel._sr = 44100
+        w._characterize_target(0.0, 2.0, stem="mix")
+        # Now trigger a patch change
+        w._on_patch_changed("kick", {"f0": 60.0}, [], 42)
+        # Scorecard should be populated
+        self.assertIsNotNone(w.scorecard_panel.scorecard)
+
+
 if __name__ == "__main__":
     unittest.main()

@@ -1,13 +1,17 @@
 """soundmatch.ui.window — MainWindow for Sound-Match Studio.
 
-Docks the reference, stems, and metrics panels.  Owns a PlaybackService.
-Wires panel signals together: selection change → re-characterize, stem chosen
-→ set target stem + re-characterize.
+Docks the reference, stems, metrics, patch editor, and scorecard panels.
+Owns a PlaybackService.  Wires panel signals together: selection change →
+re-characterize, stem chosen → set target stem + re-characterize, patch
+change → render candidate + score.
 """
 
 from __future__ import annotations
 
 from pathlib import Path
+from typing import Any
+
+import numpy as np
 
 from PySide6.QtCore import Qt
 from PySide6.QtWidgets import (
@@ -23,10 +27,15 @@ from PySide6.QtWidgets import (
 
 from forge.playback.service import PlaybackService
 from inspector.metrics import characterize
+from soundmatch.core.candidate import render_phrase
+from soundmatch.core.phrase import Phrase, seed_from_metrics
+from soundmatch.core.scoring import diff
 from soundmatch.core.target import Target
-from soundmatch.ui.reference_panel import ReferencePanel
-from soundmatch.ui.stems_panel import StemsPanel
 from soundmatch.ui.metrics_panel import MetricsPanel
+from soundmatch.ui.patch_editor import PatchEditor
+from soundmatch.ui.reference_panel import ReferencePanel
+from soundmatch.ui.scorecard_panel import ScorecardPanel
+from soundmatch.ui.stems_panel import StemsPanel
 
 
 class MainWindow(QMainWindow):
@@ -46,6 +55,8 @@ class MainWindow(QMainWindow):
         self._service = service
         self._target: Target | None = None
         self._ref_path: Path | None = None
+        self._target_metrics = None
+        self._phrase: Phrase | None = None
 
         self.setWindowTitle("Sound-Match Studio")
         self.setObjectName("soundmatch-main-window")
@@ -93,6 +104,29 @@ class MainWindow(QMainWindow):
         )
         self.addDockWidget(Qt.DockWidgetArea.RightDockWidgetArea, metrics_dock)
 
+        # Patch editor (dock right, below metrics)
+        self._patch_editor = PatchEditor()
+        self._patch_editor.setObjectName("patch-editor")
+        self._patch_editor.patchChanged.connect(self._on_patch_changed)
+        patch_dock = QDockWidget("Patch Editor", self)
+        patch_dock.setObjectName("patch-editor-dock")
+        patch_dock.setWidget(self._patch_editor)
+        patch_dock.setAllowedAreas(
+            Qt.DockWidgetArea.LeftDockWidgetArea | Qt.DockWidgetArea.RightDockWidgetArea,
+        )
+        self.addDockWidget(Qt.DockWidgetArea.RightDockWidgetArea, patch_dock)
+
+        # Scorecard panel (dock right, below patch editor)
+        self._scorecard = ScorecardPanel(service)
+        self._scorecard.setObjectName("scorecard-panel")
+        scorecard_dock = QDockWidget("Scorecard", self)
+        scorecard_dock.setObjectName("scorecard-dock")
+        scorecard_dock.setWidget(self._scorecard)
+        scorecard_dock.setAllowedAreas(
+            Qt.DockWidgetArea.LeftDockWidgetArea | Qt.DockWidgetArea.RightDockWidgetArea,
+        )
+        self.addDockWidget(Qt.DockWidgetArea.RightDockWidgetArea, scorecard_dock)
+
         # Status bar
         self._status = QStatusBar()
         self._status_label = QLabel("Ready")
@@ -136,6 +170,40 @@ class MainWindow(QMainWindow):
             end_s = len(y) / sr
         self._characterize_target(start_s, end_s, stem=stem_name)
 
+    def _on_patch_changed(
+        self,
+        instrument_id: str,
+        params: dict[str, Any],
+        layers: list[tuple[str, dict[str, Any]]],
+        seed: int,
+    ) -> None:
+        """Handle patch change: render candidate, characterize, score."""
+        if self._target_metrics is None:
+            self._status_label.setText("No target — load and select reference first")
+            return
+
+        if self._phrase is None:
+            # Seed a phrase from the target metrics
+            self._phrase = seed_from_metrics(self._target_metrics, bpm=138.0)
+
+        try:
+            buf = render_phrase(
+                self._phrase, instrument_id, params, layers, seed,
+            )
+            # Convert to mono for characterization
+            cand_y = buf.data.mean(axis=1) if buf.data.ndim == 2 else buf.data
+            cand_y = np.ascontiguousarray(cand_y)
+            cand_metrics = characterize(cand_y, buf.sr)
+            sc = diff(self._target_metrics, cand_metrics)
+            self._scorecard.set_scorecard(sc, cand_y=cand_y, cand_sr=buf.sr)
+            agg = sc.aggregate()
+            worst = sc.worst()
+            self._status_label.setText(
+                f"Candidate: agg={agg:.4f} worst={worst}"
+            )
+        except Exception as exc:
+            self._status_label.setText(f"Render error: {exc}")
+
     def _characterize_target(self, start_s: float, end_s: float, stem: str = "other") -> None:
         """Characterize the target and update the metrics panel."""
         y, sr = self._reference.audio_data
@@ -160,7 +228,13 @@ class MainWindow(QMainWindow):
                 else:
                     m = characterize(y, sr)
 
+            self._target_metrics = m
             self._metrics.set_metrics(m)
+            self._scorecard.set_target_metrics(m)
+
+            # Seed a phrase from the target metrics
+            self._phrase = seed_from_metrics(m, bpm=138.0)
+
             self._status_label.setText(
                 f"Target: perc={m.percussive_ratio:.1f}% cent={m.centroid_hz:.0f}Hz"
             )
@@ -178,3 +252,11 @@ class MainWindow(QMainWindow):
     @property
     def metrics_panel(self) -> MetricsPanel:
         return self._metrics
+
+    @property
+    def patch_editor(self) -> PatchEditor:
+        return self._patch_editor
+
+    @property
+    def scorecard_panel(self) -> ScorecardPanel:
+        return self._scorecard
