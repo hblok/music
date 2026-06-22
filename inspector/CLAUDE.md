@@ -53,6 +53,18 @@ Analysis time: ~3–4 minutes for a 70-minute MP3 on a single core.
 - **Tempo-over-time table cap**: the report displays at most 60 rows (30 min).
   The full list is in the results dict if you need it programmatically.
 
+## Workflow: saving results
+
+When running the inspector for a track and saving the output, write **two files**:
+
+1. `<name>.md` — the raw `--out` report (full machine output)
+2. `<name>_report.md` — a human analysis summary written by Claude after reading the output
+
+The summary should cover: key (prefer essentia if high confidence), BPM and stability,
+dominant-note timeline patterns (what harmonically changes and when), instrument hints,
+and any quirks or surprises in the data. Write it as prose/bullets, not a re-paste of
+the raw numbers.
+
 ## Output files (when --plots)
 
 Saved to `<input_stem>_inspector/` next to the audio file:
