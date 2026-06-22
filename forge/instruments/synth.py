@@ -49,8 +49,8 @@ SYNTH_BRASS_PARAMS = [
                 label="2nd formant (brightness)"),
     ParamSchema("formant2_mix", "float", 0.4, lo=0.0, hi=2.0),
     ParamSchema("lp_cutoff", "float", 8500.0, lo=2000.0, hi=14000.0, unit="Hz"),
-    ParamSchema("attack", "float", 0.045, lo=0.002, hi=0.1, unit="s"),
-    ParamSchema("release", "float", 0.08, lo=0.02, hi=0.4, unit="s"),
+    ParamSchema("attack", "float", 0.065, lo=0.002, hi=0.2, unit="s"),
+    ParamSchema("release", "float", 0.10, lo=0.02, hi=0.4, unit="s"),
     ParamSchema("bloom", "float", 0.6, lo=0.0, hi=1.0,
                 label="Attack brightness bloom"),
     ParamSchema("bloom_cutoff", "float", 1300.0, lo=400.0, hi=4000.0, unit="Hz",
@@ -123,8 +123,8 @@ def synth_brass(params: dict, rng: np.random.Generator, **ctx) -> AudioBuffer:
     formant2_hz = float(params.get("formant2_hz", 1750.0))
     formant2_mix = float(params.get("formant2_mix", 0.4))
     lp_cutoff = float(params.get("lp_cutoff", 8500.0))
-    attack = float(params.get("attack", 0.045))
-    release = float(params.get("release", 0.08))
+    attack = float(params.get("attack", 0.065))
+    release = float(params.get("release", 0.10))
     bloom = float(params.get("bloom", 0.6))
     bloom_cutoff = float(params.get("bloom_cutoff", 1300.0))
     scoop = float(params.get("scoop", 0.02))

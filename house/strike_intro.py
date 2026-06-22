@@ -89,32 +89,40 @@ G_BASS = 0.70
 def compose(seed: int = 7) -> AudioBuffer:
     root = RngContext(seed)
     mix = AudioBuffer(int(TOTAL * SR), SR)
-    ir_L, ir_R = make_stereo_ir_pair(1.3, 0.5, sr=SR, lp_cutoff=5000.0)
+    ir_L, ir_R = make_stereo_ir_pair(2.6, 0.9, sr=SR, lp_cutoff=3200.0)
 
-    # ── Lead: dense 4-note chord stabs (light plate for space) ───────────────
+    # ── Lead: dense 4-note chord stabs (deep dark reverb plate) ─────────────
     lead_rng = root.spawn("lead")
     for i, (start_s, chord_key) in enumerate(STABS):
         chord = CHORDS[chord_key]
-        # Compute per-stab duration from gap to next stab (punchy + separated)
+        # Compute per-stab duration — longer overlapping tails blur into a wash
         if i + 1 < len(STABS):
             next_start = STABS[i + 1][0]
-            dur = min(0.8 * (next_start - start_s), 0.22)
+            dur = min(max(0.9 * (next_start - start_s), 0.32), 0.5)
         else:
-            dur = 0.22
+            dur = 0.4
+
+        # Per-stab attack variation: all tones in the chord share one attack
+        # time so the chord stays tight, but different stabs swell differently.
+        stab_rng = lead_rng.spawn(f"stab{i}")
+        att = float(stab_rng.rng.uniform(0.05, 0.15))
 
         # Render each chord tone separately then sum
-        stab_L = np.zeros(int((dur + 0.5) * SR))  # extra tail for reverb
-        stab_R = np.zeros(int((dur + 0.5) * SR))
+        stab_L = np.zeros(int((dur + 0.8) * SR))  # extra tail for reverb
+        stab_R = np.zeros(int((dur + 0.8) * SR))
         tone_gain = G_LEAD / len(chord) ** 0.5     # ~0.425 per tone (4 tones)
         for midi in chord:
-            tone_ctx = lead_rng.spawn(f"s{i}_{midi}")
-            buf = synth_brass({"notes": [(midi, dur)]}, tone_ctx.rng, sr=SR)
+            buf = synth_brass(
+                {"notes": [(midi, dur)], "attack": att, "lp_cutoff": 6000.0},
+                stab_rng.spawn(f"t{midi}").rng,
+                sr=SR,
+            )
             n = min(len(buf.L), len(stab_L))
             stab_L[:n] += buf.L[:n]
             stab_R[:n] += buf.R[:n]
 
-        # Light plate reverb on the summed chord
-        L, R = reverb_stereo(stab_L, stab_R, ir_L, ir_R, wet=0.15)
+        # Deep dark plate reverb on the summed chord
+        L, R = reverb_stereo(stab_L, stab_R, ir_L, ir_R, wet=0.40)
         mix.add_at(np.column_stack([L, R]), start_s, gain=tone_gain)
 
     # ── Bass: sustained G#1 pedal, re-struck every half-bar (pedal pulse) ─────
