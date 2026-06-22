@@ -49,8 +49,12 @@ SYNTH_BRASS_PARAMS = [
                 label="2nd formant (brightness)"),
     ParamSchema("formant2_mix", "float", 0.4, lo=0.0, hi=2.0),
     ParamSchema("lp_cutoff", "float", 8500.0, lo=2000.0, hi=14000.0, unit="Hz"),
-    ParamSchema("attack", "float", 0.012, lo=0.002, hi=0.1, unit="s"),
-    ParamSchema("release", "float", 0.06, lo=0.02, hi=0.4, unit="s"),
+    ParamSchema("attack", "float", 0.045, lo=0.002, hi=0.1, unit="s"),
+    ParamSchema("release", "float", 0.08, lo=0.02, hi=0.4, unit="s"),
+    ParamSchema("bloom", "float", 0.6, lo=0.0, hi=1.0,
+                label="Attack brightness bloom"),
+    ParamSchema("bloom_cutoff", "float", 1300.0, lo=400.0, hi=4000.0, unit="Hz",
+                label="Bloom onset lowpass cutoff"),
     ParamSchema("scoop", "float", 0.02, lo=0.0, hi=0.12,
                 label="Pitch scoop into each note"),
     ParamSchema("width", "float", 0.35, lo=0.0, hi=1.0,
@@ -119,8 +123,10 @@ def synth_brass(params: dict, rng: np.random.Generator, **ctx) -> AudioBuffer:
     formant2_hz = float(params.get("formant2_hz", 1750.0))
     formant2_mix = float(params.get("formant2_mix", 0.4))
     lp_cutoff = float(params.get("lp_cutoff", 8500.0))
-    attack = float(params.get("attack", 0.012))
-    release = float(params.get("release", 0.06))
+    attack = float(params.get("attack", 0.045))
+    release = float(params.get("release", 0.08))
+    bloom = float(params.get("bloom", 0.6))
+    bloom_cutoff = float(params.get("bloom_cutoff", 1300.0))
     scoop = float(params.get("scoop", 0.02))
     width = float(params.get("width", 0.35))
 
@@ -165,6 +171,19 @@ def synth_brass(params: dict, rng: np.random.Generator, **ctx) -> AudioBuffer:
         pan = float(np.clip(pan, 0.0, 1.0))
         L += voice * np.cos(pan * np.pi / 2.0)
         R += voice * np.sin(pan * np.pi / 2.0)
+
+    # Brightness bloom: tone starts dark and opens up over the attack window.
+    # xf ramps from 0→1 over n_bloom samples (ease-in); at xf=0 we use the
+    # dark (lowpassed) signal, at xf=1 we use the full-bright signal.
+    if bloom > 0.0:
+        n_bloom = int(attack * sr)
+        if n_bloom > 1 and n_bloom <= n:
+            xf = np.ones(n)
+            xf[:n_bloom] = np.linspace(0.0, 1.0, n_bloom) ** 2
+            L_dark = lowpass(L, bloom_cutoff, order=2, sr=sr)
+            R_dark = lowpass(R, bloom_cutoff, order=2, sr=sr)
+            L = xf * L + (1.0 - xf) * ((1.0 - bloom) * L + bloom * L_dark)
+            R = xf * R + (1.0 - xf) * ((1.0 - bloom) * R + bloom * R_dark)
 
     env = _stab_env(notes, n, sr, attack, release, legato)
     L *= env
