@@ -92,7 +92,7 @@ class MainWindow(QMainWindow):
         )
         self.addDockWidget(Qt.DockWidgetArea.LeftDockWidgetArea, ref_dock)
 
-        # ── Dock: Stems panel (left, below reference) ─────────
+        # ── Dock: Stems panel (left, tabbed with reference) ───
         self._stems = StemsPanel(service)
         self._stems.setObjectName("stems-panel")
         self._stems.targetChosen.connect(self._on_stem_chosen)
@@ -103,6 +103,7 @@ class MainWindow(QMainWindow):
             Qt.DockWidgetArea.LeftDockWidgetArea | Qt.DockWidgetArea.RightDockWidgetArea,
         )
         self.addDockWidget(Qt.DockWidgetArea.LeftDockWidgetArea, stems_dock)
+        self.tabifyDockWidget(ref_dock, stems_dock)
 
         # ── Dock: Metrics panel (right) ───────────────────────
         self._metrics = MetricsPanel()
@@ -115,7 +116,7 @@ class MainWindow(QMainWindow):
         )
         self.addDockWidget(Qt.DockWidgetArea.RightDockWidgetArea, metrics_dock)
 
-        # ── Dock: Patch editor (right, below metrics) ─────────
+        # ── Dock: Patch editor (right, tabbed with metrics) ───
         self._patch_editor = PatchEditor()
         self._patch_editor.setObjectName("patch-editor")
         self._patch_editor.patchChanged.connect(self._on_patch_changed)
@@ -127,8 +128,9 @@ class MainWindow(QMainWindow):
             Qt.DockWidgetArea.LeftDockWidgetArea | Qt.DockWidgetArea.RightDockWidgetArea,
         )
         self.addDockWidget(Qt.DockWidgetArea.RightDockWidgetArea, patch_dock)
+        self.tabifyDockWidget(metrics_dock, patch_dock)
 
-        # ── Dock: Scorecard panel (right, below patch editor) ─
+        # ── Dock: Scorecard panel (right, tabbed with metrics) ─
         self._scorecard = ScorecardPanel(service)
         self._scorecard.setObjectName("scorecard-panel")
         scorecard_dock = QDockWidget("Scorecard", self)
@@ -138,6 +140,7 @@ class MainWindow(QMainWindow):
             Qt.DockWidgetArea.LeftDockWidgetArea | Qt.DockWidgetArea.RightDockWidgetArea,
         )
         self.addDockWidget(Qt.DockWidgetArea.RightDockWidgetArea, scorecard_dock)
+        self.tabifyDockWidget(patch_dock, scorecard_dock)
 
         # ── Dock: Variant grid (bottom) ────────────────────────
         self._variant_grid = VariantGrid(service=service)
@@ -161,6 +164,10 @@ class MainWindow(QMainWindow):
 
         # Tabify A/B viewer with variant grid
         self.tabifyDockWidget(variant_dock, ab_dock)
+
+        # Raise the primary tabs so they're visible on startup
+        ref_dock.raise_()
+        metrics_dock.raise_()
 
         # Status bar
         self._status = QStatusBar()
