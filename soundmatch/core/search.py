@@ -12,8 +12,11 @@ Runs on a worker thread in the UI; results are returned as the best
 from __future__ import annotations
 
 import itertools
+import logging
 from dataclasses import dataclass
 from typing import Any
+
+log = logging.getLogger(__name__)
 
 from inspector.metrics import Metrics, characterize
 from soundmatch.core.candidate import render_phrase
@@ -145,7 +148,8 @@ def coarse_search(
                 best_score = agg
                 best_params = dict(candidate_params)
                 best_scorecard = sc
-        except Exception:
+        except Exception as exc:
+            log.debug("search iteration failed: %s", exc)
             continue
 
     if best_scorecard is None:
@@ -154,6 +158,7 @@ def coarse_search(
             seed, sr, weights,
         )
 
+    log.debug("coarse_search done: %d iterations, best=%.4f", iterations, best_score)
     return SearchResult(
         best_params=best_params,
         best_layers=list(layers),

@@ -7,9 +7,12 @@ candidate, scorecard, and variants — never re-implemented.
 
 from __future__ import annotations
 
+import logging
 from typing import Any
 
 import numpy as np
+
+log = logging.getLogger(__name__)
 
 from forge.core.buffer import AudioBuffer
 from forge.core.rng import RngContext
@@ -74,7 +77,8 @@ def render_phrase(
 
             try:
                 buf = fn(note_params, note_rng.rng, sr=sr)
-            except Exception:
+            except Exception as exc:
+                log.warning("render note %d failed (%s): %s", note_idx, inst_id, exc)
                 continue
 
             # Add at the note onset time

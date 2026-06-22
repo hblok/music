@@ -6,7 +6,10 @@ Qt widget.  Both the metrics_panel and ab_viewer use this — no copy-paste.
 
 from __future__ import annotations
 
+import logging
 import numpy as np
+
+log = logging.getLogger(__name__)
 
 from PySide6.QtWidgets import QSizePolicy
 

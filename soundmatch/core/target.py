@@ -6,10 +6,13 @@ for loading and separation; ``inspector.metrics.characterize`` for measurement.
 
 from __future__ import annotations
 
+import logging
 from pathlib import Path
 from typing import Optional
 
 import numpy as np
+
+log = logging.getLogger(__name__)
 
 from inspector.metrics import Metrics, characterize
 

@@ -8,8 +8,11 @@ layer list for the tonal+snap split, a seed spin-box, and emits a debounced
 
 from __future__ import annotations
 
+import logging
 from collections import defaultdict
 from typing import Any
+
+log = logging.getLogger(__name__)
 
 from PySide6.QtCore import Qt, QTimer, Signal
 from PySide6.QtWidgets import (
@@ -262,6 +265,7 @@ class PatchEditor(QWidget):
         params = self._param_panel.current_params() if self._param_panel else {}
         layers = [(row.instrument_id, row.params) for row in self._layer_rows]
         seed = self._seed_spin.value()
+        log.debug("patchChanged: %s seed=%d layers=%d", inst_id, seed, len(layers))
         self.patchChanged.emit(inst_id, params, layers, seed)
 
     # ── Public API ───────────────────────────────────────────────────

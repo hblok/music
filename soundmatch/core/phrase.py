@@ -7,8 +7,11 @@ converting onsets to note times and chord detections to MIDI pitches.
 
 from __future__ import annotations
 
+import logging
 from dataclasses import dataclass, field
 from typing import Any
+
+log = logging.getLogger(__name__)
 
 import numpy as np
 

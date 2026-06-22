@@ -8,9 +8,12 @@ Displays target Metrics as:
 
 from __future__ import annotations
 
+import logging
 from typing import Any
 
 import numpy as np
+
+log = logging.getLogger(__name__)
 
 from PySide6.QtCore import Signal
 from PySide6.QtWidgets import (
@@ -105,6 +108,7 @@ class MetricsPanel(QWidget):
         ----------
         metrics: The Metrics to display.
         """
+        log.debug("set_metrics: perc=%.1f%% cent=%.0fHz", metrics.percussive_ratio, metrics.centroid_hz)
         self._metrics = metrics
 
         # Numbers

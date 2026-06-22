@@ -98,6 +98,7 @@ class MainWindow(QMainWindow):
         # ── Dock: Stems panel (left, tabbed with reference) ───
         self._stems = StemsPanel(service)
         self._stems.setObjectName("stems-panel")
+        self._stems.separateRequested.connect(self._on_separate_requested)
         self._stems.targetChosen.connect(self._on_stem_chosen)
         stems_dock = QDockWidget("Stems", self)
         stems_dock.setObjectName("stems-dock")
@@ -486,6 +487,16 @@ class MainWindow(QMainWindow):
         seed = self._patch_editor.seed
         self._patch_editor.set_patch(inst_id, params, layers, seed)
         self._status_label.setText("Promoted variant → Patch Editor")
+
+    def _on_separate_requested(self) -> None:
+        """Handle Separate Stems button: run demucs on the loaded reference."""
+        if self._ref_path is None:
+            log.warning("separate requested but no reference file is loaded")
+            self._status_label.setText("Load a reference file first")
+            return
+        log.info("separate requested: %s", self._ref_path)
+        self._status_label.setText("Separating stems…")
+        self._stems.separate(str(self._ref_path), sr=self._service.sr)
 
     def _on_suggest_requested(self) -> None:
         """Run a coarse param search and apply the best result."""

@@ -14,11 +14,14 @@ Three exporters, all in core (no Qt imports) so they are testable headless:
 
 from __future__ import annotations
 
+import logging
 import textwrap
 from pathlib import Path
 from typing import Any
 
 import numpy as np
+
+log = logging.getLogger(__name__)
 
 from inspector.metrics import Metrics
 from soundmatch.core.phrase import Phrase

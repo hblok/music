@@ -9,9 +9,12 @@ the candidate audio (looped via PlaybackService).
 
 from __future__ import annotations
 
+import logging
 from typing import Any
 
 import numpy as np
+
+log = logging.getLogger(__name__)
 
 from PySide6.QtCore import Qt, Signal
 from PySide6.QtWidgets import (
@@ -107,6 +110,7 @@ class ScorecardPanel(QWidget):
 
     def set_scorecard(self, scorecard: Any, cand_y: np.ndarray | None = None, cand_sr: int = 44100) -> None:
         """Set a pre-computed Scorecard and optional candidate audio."""
+        log.debug("set_scorecard: agg=%.4f worst=%s", scorecard.aggregate(), scorecard.worst())
         self._scorecard = scorecard
         self._cand_y = cand_y
         self._cand_sr = cand_sr
@@ -195,6 +199,7 @@ class ScorecardPanel(QWidget):
         """Play the candidate audio via PlaybackService."""
         if self._cand_y is None:
             return
+        log.debug("playing candidate audio sr=%d", self._cand_sr)
         from forge.core.buffer import AudioBuffer
         buf = AudioBuffer.from_mono(self._cand_y, sr=self._cand_sr)
         self._service.load(buf)

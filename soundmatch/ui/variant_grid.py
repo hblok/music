@@ -8,7 +8,10 @@ card's params back to the Patch Editor.
 
 from __future__ import annotations
 
+import logging
 from typing import Any
+
+log = logging.getLogger(__name__)
 
 import numpy as np
 

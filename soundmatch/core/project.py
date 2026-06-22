@@ -10,8 +10,11 @@ from __future__ import annotations
 
 import hashlib
 import json
+import logging
 from dataclasses import dataclass, field
 from pathlib import Path
+
+log = logging.getLogger(__name__)
 from typing import Any, Optional
 
 from inspector.metrics import Metrics
@@ -119,6 +122,7 @@ class MatchProject:
         data = self.to_dict()
         text = json.dumps(data, indent=2, ensure_ascii=False)
         p.write_text(text, encoding="utf-8")
+        log.info("project saved: %s", p)
 
     @classmethod
     def load(cls, p: Path) -> MatchProject:
@@ -134,7 +138,9 @@ class MatchProject:
         """
         text = p.read_text(encoding="utf-8")
         data = json.loads(text)
-        return cls.from_dict(data)
+        proj = cls.from_dict(data)
+        log.info("project loaded: %s", p)
+        return proj
 
     def update_sha(self) -> None:
         """Re-compute and store the reference file SHA-256 if the file exists."""

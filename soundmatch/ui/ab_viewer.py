@@ -10,7 +10,10 @@ not document parameters.
 
 from __future__ import annotations
 
+import logging
 from pathlib import Path
+
+log = logging.getLogger(__name__)
 from typing import Any
 
 import numpy as np
@@ -123,6 +126,7 @@ class ABViewer(QWidget):
 
     def set_target(self, y: np.ndarray, sr: int) -> None:
         """Set the target (A) audio and display its spectrogram."""
+        log.debug("set_target: %d samples sr=%d", len(y), sr)
         self._target_y = y
         self._target_sr = sr
         self._target_spec.set_audio(y, sr, title="A — Target")
@@ -131,6 +135,7 @@ class ABViewer(QWidget):
 
     def set_candidate(self, y: np.ndarray, sr: int) -> None:
         """Set the candidate (B) audio and display its spectrogram."""
+        log.debug("set_candidate: %d samples sr=%d", len(y), sr)
         self._cand_y = y
         self._cand_sr = sr
         self._cand_spec.set_audio(y, sr, title="B — Candidate")
