@@ -64,6 +64,7 @@ def draw_waveform(
     y: np.ndarray,
     sr: int,
     *,
+    duration_s: float | None = None,
     color: str = "#4a9eda",
     linewidth: float = 0.3,
     alpha: float = 0.85,
@@ -74,16 +75,19 @@ def draw_waveform(
 
     Parameters
     ----------
-    ax       : Matplotlib Axes to draw onto.
-    y        : Mono audio signal.
-    sr       : Sample rate.
-    color    : Line color.
-    linewidth: Line width.
-    alpha    : Alpha.
-    title    : Optional title string.
-    xlim     : Optional (t_min, t_max) in seconds.
+    ax         : Matplotlib Axes to draw onto.
+    y          : Mono audio signal (may be a display-downsampled array).
+    sr         : Sample rate (used only when duration_s is None).
+    duration_s : Total audio duration in seconds. Pass this when y is
+                 downsampled so the time axis remains correct.
+    color      : Line color.
+    linewidth  : Line width.
+    alpha      : Alpha.
+    title      : Optional title string.
+    xlim       : Optional (t_min, t_max) in seconds.
     """
-    times = np.linspace(0, len(y) / sr, len(y))
+    total = duration_s if duration_s is not None else len(y) / sr
+    times = np.linspace(0, total, len(y))
     ax.plot(times, y, color=color, linewidth=linewidth, alpha=alpha, rasterized=True)
     ax.set_ylabel("Amplitude")
     if title:
@@ -177,18 +181,26 @@ class WaveformWidget(FigureCanvas):
         self.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
         self.setMinimumHeight(40)
 
-    def set_audio(self, y: np.ndarray, sr: int, *, title: str | None = None) -> None:
+    def set_audio(
+        self,
+        y: np.ndarray,
+        sr: int,
+        *,
+        duration_s: float | None = None,
+        title: str | None = None,
+    ) -> None:
         """Display a waveform of the given mono audio.
 
         Parameters
         ----------
-        y     : Mono audio signal.
-        sr    : Sample rate.
-        title : Optional title.
+        y          : Mono audio signal (may be display-downsampled).
+        sr         : Sample rate (used only when duration_s is None).
+        duration_s : Total audio duration; pass when y is downsampled.
+        title      : Optional title.
         """
         self._ax.clear()
         self._ax.set_visible(True)
-        draw_waveform(self._ax, y, sr, title=title)
+        draw_waveform(self._ax, y, sr, duration_s=duration_s, title=title)
         self.draw()
 
     def set_selection(self, start_s: float, end_s: float) -> None:

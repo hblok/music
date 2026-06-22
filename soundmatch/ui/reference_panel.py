@@ -25,9 +25,10 @@ from soundmatch.ui.spectrogram import SpectrogramWidget, WaveformWidget
 
 
 class _AudioLoader(QObject):
-    """Worker: loads audio and computes mel spectrogram data off the main thread."""
+    """Worker: loads audio and computes display data off the main thread."""
 
-    finished = Signal(object, int, object, int)  # y, sr, S_db, hop
+    # y_full, sr, y_display, duration_s, S_db, hop
+    finished = Signal(object, int, object, float, object, int)
     error = Signal(str)
 
     def __init__(self, path: str, sr: int) -> None:
@@ -43,14 +44,27 @@ class _AudioLoader(QObject):
             audio = load_audio(self._path, sr=self._sr)
             y = audio["y"]
             sr_out = int(audio.get("sr", self._sr))
+            duration_s = float(len(y) / sr_out)
+
+            # Peak-envelope downsample for waveform display (~2000 pts)
+            y_display = self._peak_downsample(y, target=2000)
 
             hop = 4096
             S = librosa.feature.melspectrogram(y=y, sr=sr_out, n_mels=128, hop_length=hop)
             S_db = librosa.power_to_db(S, ref=np.max)
 
-            self.finished.emit(y, sr_out, S_db, hop)
+            self.finished.emit(y, sr_out, y_display, duration_s, S_db, hop)
         except Exception as exc:
             self.error.emit(str(exc))
+
+    @staticmethod
+    def _peak_downsample(y: np.ndarray, target: int) -> np.ndarray:
+        if len(y) <= target:
+            return y
+        block = len(y) // target
+        trimmed = y[: block * target].reshape(target, block)
+        idx = np.argmax(np.abs(trimmed), axis=1)
+        return trimmed[np.arange(target), idx]
 
 
 class ReferencePanel(QWidget):
@@ -186,24 +200,31 @@ class ReferencePanel(QWidget):
 
     # ------------------------------------------------------------------ slots
 
-    def _on_audio_loaded(self, y: object, sr: int, S_db: object, hop: int) -> None:
-        """Called on the main thread when the background load + mel computation finish."""
-        y_arr = np.asarray(y)
-        S_db_arr = np.asarray(S_db)
-
-        self._y = y_arr
+    def _on_audio_loaded(
+        self,
+        y: object,
+        sr: int,
+        y_display: object,
+        duration_s: float,
+        S_db: object,
+        hop: int,
+    ) -> None:
+        """Called on the main thread when background load + display computation finish."""
+        self._y = np.asarray(y)
         self._sr = sr
-        duration = len(y_arr) / sr
-        self._end_s = min(10.0, duration)
+        self._end_s = min(10.0, duration_s)
         self._start_spin.setText(f"{self._start_s:.1f} s")
         self._end_spin.setText(f"{self._end_s:.1f} s")
 
         if self._path is not None:
             self._file_label.setText(self._path.name)
 
-        self._waveform.set_audio(y_arr, sr, title="Waveform")
+        # Use the downsampled array for plotting — correct duration via duration_s
+        self._waveform.set_audio(
+            np.asarray(y_display), sr, duration_s=duration_s, title="Waveform"
+        )
         self._waveform.set_selection(self._start_s, self._end_s)
-        self._spectrogram.set_spectrogram_data(S_db_arr, sr, hop, title="Spectrogram")
+        self._spectrogram.set_spectrogram_data(np.asarray(S_db), sr, hop, title="Spectrogram")
         self._load_btn.setEnabled(True)
 
     def _on_load_error(self, msg: str) -> None:
