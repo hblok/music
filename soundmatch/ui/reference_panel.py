@@ -103,6 +103,7 @@ class ReferencePanel(QWidget):
         self._end_s: float = 10.0
         self._path: Path | None = None
         self._load_thread: QThread | None = None
+        self._load_worker: _AudioLoader | None = None
 
         self.setObjectName("reference-panel")
         layout = QVBoxLayout(self)
@@ -183,6 +184,8 @@ class ReferencePanel(QWidget):
         worker.error.connect(thread.quit)
         thread.finished.connect(thread.deleteLater)
 
+        # Keep strong Python references so neither gets GC'd before the thread runs
+        self._load_worker = worker
         self._load_thread = thread
         thread.start()
 
