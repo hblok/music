@@ -9,15 +9,24 @@ Usage::
 from __future__ import annotations
 
 import argparse
+import logging
 import sys
 
 
 def main(argv=None) -> int:
-    print("main - start")
     parser = argparse.ArgumentParser(description="Sound-Match Studio")
     parser.add_argument("--sr", type=int, default=44100, help="Sample rate")
+    parser.add_argument("-v", "--verbose", action="store_true", help="Enable debug logging")
     parser.add_argument("file", nargs="?", default=None, help="Reference audio file to load")
     args = parser.parse_args(argv)
+
+    logging.basicConfig(
+        level=logging.DEBUG if args.verbose else logging.INFO,
+        format="%(asctime)s %(levelname)-8s %(name)s: %(message)s",
+        datefmt="%H:%M:%S",
+    )
+    log = logging.getLogger(__name__)
+    log.info("Sound-Match Studio starting (sr=%d)", args.sr)
 
     from PySide6.QtWidgets import QApplication
     from PySide6.QtGui import QPalette, QColor

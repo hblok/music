@@ -11,11 +11,14 @@ File menu: New / Open / Save MatchProject (.smatch JSON).
 
 from __future__ import annotations
 
+import logging
 import json
 from pathlib import Path
 from typing import Any
 
 import numpy as np
+
+log = logging.getLogger(__name__)
 
 from PySide6.QtCore import Qt
 from PySide6.QtWidgets import (
@@ -377,6 +380,7 @@ class MainWindow(QMainWindow):
 
     def _on_selection_changed(self, start_s: float, end_s: float) -> None:
         """Handle selection change: characterize the selected region."""
+        log.debug("selection changed: %.2f–%.2fs", start_s, end_s)
         self._status_label.setText("Characterizing…")
         QApplication.processEvents()
         self._characterize_target(start_s, end_s, stem="mix")
@@ -388,6 +392,7 @@ class MainWindow(QMainWindow):
         y, sr = self._reference.audio_data
         if y is not None:
             end_s = len(y) / sr
+        log.debug("stem chosen: %s", stem_name)
         self._status_label.setText(f"Characterizing stem '{stem_name}'…")
         QApplication.processEvents()
         self._characterize_target(start_s, end_s, stem=stem_name)
@@ -403,25 +408,21 @@ class MainWindow(QMainWindow):
         if self._target_metrics is None:
             self._status_label.setText("No target — load and select reference first")
             return
+        log.debug("patch changed: %s seed=%d", instrument_id, seed)
         self._status_label.setText("Rendering…")
         QApplication.processEvents()
 
         if self._phrase is None:
-            # Seed a phrase from the target metrics
             self._phrase = seed_from_metrics(self._target_metrics, bpm=138.0)
 
         try:
-            buf = render_phrase(
-                self._phrase, instrument_id, params, layers, seed,
-            )
-            # Convert to mono for characterization
+            buf = render_phrase(self._phrase, instrument_id, params, layers, seed)
             cand_y = buf.data.mean(axis=1) if buf.data.ndim == 2 else buf.data
             cand_y = np.ascontiguousarray(cand_y)
             cand_metrics = characterize(cand_y, buf.sr)
             sc = diff(self._target_metrics, cand_metrics)
             self._scorecard.set_scorecard(sc, cand_y=cand_y, cand_sr=buf.sr)
 
-            # Update A/B viewer
             self._cand_y = cand_y
             self._cand_sr = buf.sr
             self._ab_viewer.set_candidate(cand_y, buf.sr)
@@ -431,10 +432,10 @@ class MainWindow(QMainWindow):
 
             agg = sc.aggregate()
             worst = sc.worst()
-            self._status_label.setText(
-                f"Candidate: agg={agg:.4f} worst={worst}"
-            )
+            log.debug("render done: agg=%.4f worst=%s", agg, worst)
+            self._status_label.setText(f"Candidate: agg={agg:.4f} worst={worst}")
         except Exception as exc:
+            log.error("render error: %s", exc, exc_info=True)
             self._status_label.setText(f"Render error: {exc}")
 
     def _on_sweep_requested(self, axis: str, values: list) -> None:
@@ -442,13 +443,12 @@ class MainWindow(QMainWindow):
         if self._target_metrics is None or self._phrase is None:
             self._status_label.setText("No target — characterize first")
             return
+        log.debug("sweep requested: axis=%s values=%s", axis, values)
         self._status_label.setText(f"Sweeping '{axis}'…")
         QApplication.processEvents()
 
         try:
-            specs = sweep(
-                self._patch_editor.params, axis, values,
-            )
+            specs = sweep(self._patch_editor.params, axis, values)
             results = render_and_score(
                 self._phrase,
                 self._patch_editor.instrument_id,
@@ -459,7 +459,6 @@ class MainWindow(QMainWindow):
                 seed=self._patch_editor.seed,
             )
 
-            # Collect audio data for each result
             audio_data: list[tuple[np.ndarray, int]] = []
             for r in results:
                 merged = dict(self._patch_editor.params)
@@ -474,11 +473,11 @@ class MainWindow(QMainWindow):
                 y = buf.data.mean(axis=1) if buf.data.ndim == 2 else buf.data
                 audio_data.append((y, buf.sr))
 
+            log.debug("sweep done: %d variants on '%s'", len(results), axis)
             self._variant_grid.set_results(results, audio_data=audio_data)
-            self._status_label.setText(
-                f"Swept {len(results)} variants on axis '{axis}'"
-            )
+            self._status_label.setText(f"Swept {len(results)} variants on axis '{axis}'")
         except Exception as exc:
+            log.error("sweep error: %s", exc, exc_info=True)
             self._status_label.setText(f"Sweep error: {exc}")
 
     def _on_promote_requested(self, params: dict, layers: list) -> None:
@@ -494,6 +493,7 @@ class MainWindow(QMainWindow):
             self._status_label.setText("No target — characterize first")
             return
 
+        log.debug("suggest requested")
         from soundmatch.core.search import coarse_search
         self._status_label.setText("Searching…")
         QApplication.processEvents()
@@ -507,18 +507,18 @@ class MainWindow(QMainWindow):
                 self._patch_editor.layers,
                 self._patch_editor.seed,
             )
-            # Apply the best params
             self._patch_editor.set_patch(
                 result.instrument_id,
                 result.best_params,
                 result.best_layers,
                 result.seed,
             )
+            log.debug("suggest done: agg=%.4f iterations=%d", result.best_score, result.iterations)
             self._status_label.setText(
-                f"Suggest: agg={result.best_score:.4f} "
-                f"({result.iterations} iterations)"
+                f"Suggest: agg={result.best_score:.4f} ({result.iterations} iterations)"
             )
         except Exception as exc:
+            log.error("suggest error: %s", exc, exc_info=True)
             self._status_label.setText(f"Search error: {exc}")
 
     def _characterize_target(self, start_s: float, end_s: float, stem: str = "other") -> None:
@@ -527,42 +527,33 @@ class MainWindow(QMainWindow):
         if y is None:
             return
 
-        # Create target and measure
+        log.debug("characterize: %.2f–%.2fs stem=%s", start_s, end_s, stem)
         try:
-            # Use the loaded audio directly for characterization
-            # (no separation needed if stem="mix")
             if stem == "mix":
-                # Extract region
                 i0 = int(start_s * sr)
                 i1 = min(int(end_s * sr), len(y))
-                region = y[i0:i1]
-                m = characterize(region, sr)
+                m = characterize(y[i0:i1], sr)
             else:
-                # Try to get stem audio from stems panel
                 stem_audio = self._stems.get_stem_audio(stem)
-                if stem_audio is not None:
-                    m = characterize(stem_audio, sr)
-                else:
-                    m = characterize(y, sr)
+                m = characterize(stem_audio if stem_audio is not None else y, sr)
 
             self._target_metrics = m
             self._metrics.set_metrics(m)
             self._scorecard.set_target_metrics(m)
-
-            # Seed a phrase from the target metrics
             self._phrase = seed_from_metrics(m, bpm=138.0)
 
-            # Update project
             self._project.start_s = start_s
             self._project.end_s = end_s
             self._project.stem = stem
             self._project.target_metrics = m
             self._project.phrase = self._phrase
 
+            log.debug("characterize done: perc=%.1f%% cent=%.0fHz", m.percussive_ratio, m.centroid_hz)
             self._status_label.setText(
                 f"Target: perc={m.percussive_ratio:.1f}% cent={m.centroid_hz:.0f}Hz"
             )
         except Exception as exc:
+            log.error("characterize error: %s", exc, exc_info=True)
             self._status_label.setText(f"Characterization error: {exc}")
 
     def _target_y_for_ab(self) -> np.ndarray | None:

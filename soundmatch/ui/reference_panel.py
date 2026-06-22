@@ -6,9 +6,13 @@ time selection that emits ``selectionChanged(start_s, end_s)``.
 
 from __future__ import annotations
 
+import logging
+import time
 from pathlib import Path
 
 import numpy as np
+
+log = logging.getLogger(__name__)
 
 from PySide6.QtCore import QObject, QThread, Signal
 from PySide6.QtWidgets import (
@@ -37,32 +41,30 @@ class _AudioLoader(QObject):
         self._sr = sr
 
     def run(self) -> None:
-        import time
         t0 = time.perf_counter()
         try:
             from inspector.features import load_audio
             import librosa
 
-            print(f"[load] starting: {self._path}", flush=True)
+            log.debug("load starting: %s", self._path)
             audio = load_audio(self._path, sr=self._sr)
             y = audio["y"]
             sr_out = int(audio.get("sr", self._sr))
             duration_s = float(len(y) / sr_out)
-            print(f"[load] audio loaded: {duration_s:.1f}s, {len(y)} samples ({time.perf_counter()-t0:.2f}s)", flush=True)
+            log.debug("load audio done: %.1fs, %d samples (%.2fs)", duration_s, len(y), time.perf_counter() - t0)
 
             y_display = self._peak_downsample(y, target=2000)
-            print(f"[load] waveform downsampled to {len(y_display)} pts ({time.perf_counter()-t0:.2f}s)", flush=True)
+            log.debug("waveform downsampled to %d pts (%.2fs)", len(y_display), time.perf_counter() - t0)
 
             hop = 4096
             S = librosa.feature.melspectrogram(y=y, sr=sr_out, n_mels=128, hop_length=hop)
             S_db = librosa.power_to_db(S, ref=np.max)
-            print(f"[load] spectrogram computed {S_db.shape} ({time.perf_counter()-t0:.2f}s)", flush=True)
+            log.debug("spectrogram computed %s (%.2fs)", S_db.shape, time.perf_counter() - t0)
 
-            print(f"[load] emitting finished signal ({time.perf_counter()-t0:.2f}s)", flush=True)
             self.finished.emit(y, sr_out, y_display, duration_s, S_db, hop)
-            print(f"[load] signal emitted ({time.perf_counter()-t0:.2f}s)", flush=True)
+            log.debug("finished signal emitted (%.2fs)", time.perf_counter() - t0)
         except Exception as exc:
-            print(f"[load] error: {exc}", flush=True)
+            log.error("load error: %s", exc, exc_info=True)
             self.error.emit(str(exc))
 
     @staticmethod
@@ -221,9 +223,8 @@ class ReferencePanel(QWidget):
         hop: int,
     ) -> None:
         """Called on the main thread when background load + display computation finish."""
-        import time
         t0 = time.perf_counter()
-        print(f"[ui] _on_audio_loaded called on main thread", flush=True)
+        log.debug("_on_audio_loaded: main thread, sr=%d, duration=%.1fs", sr, duration_s)
 
         self._y = np.asarray(y)
         self._sr = sr
@@ -233,23 +234,22 @@ class ReferencePanel(QWidget):
 
         if self._path is not None:
             self._file_label.setText(self._path.name)
-        print(f"[ui] labels updated ({time.perf_counter()-t0:.2f}s)", flush=True)
+        log.debug("labels updated (%.2fs)", time.perf_counter() - t0)
 
-        self._waveform.set_audio(
-            np.asarray(y_display), sr, duration_s=duration_s, title="Waveform"
-        )
-        print(f"[ui] waveform drawn ({time.perf_counter()-t0:.2f}s)", flush=True)
+        self._waveform.set_audio(np.asarray(y_display), sr, duration_s=duration_s, title="Waveform")
+        log.debug("waveform drawn (%.2fs)", time.perf_counter() - t0)
 
         self._waveform.set_selection(self._start_s, self._end_s)
-        print(f"[ui] selection drawn ({time.perf_counter()-t0:.2f}s)", flush=True)
+        log.debug("selection drawn (%.2fs)", time.perf_counter() - t0)
 
         self._spectrogram.set_spectrogram_data(np.asarray(S_db), sr, hop, title="Spectrogram")
-        print(f"[ui] spectrogram drawn ({time.perf_counter()-t0:.2f}s)", flush=True)
+        log.debug("spectrogram drawn (%.2fs)", time.perf_counter() - t0)
 
         self._load_btn.setEnabled(True)
-        print(f"[ui] done ({time.perf_counter()-t0:.2f}s)", flush=True)
+        log.info("audio ready: %s (%.2fs total)", self._path.name if self._path else "?", time.perf_counter() - t0)
 
     def _on_load_error(self, msg: str) -> None:
+        log.error("audio load failed: %s", msg)
         self._file_label.setText(f"Error: {msg}")
         self._load_btn.setEnabled(True)
 
