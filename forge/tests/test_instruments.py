@@ -471,6 +471,47 @@ class TestReed(unittest.TestCase):
                 self.assertIsNotNone(p.hi, f"sax/{p.name}: hi is None")
 
 
+class TestSynth(unittest.TestCase):
+    """Acceptance tests for the synth_brass stab (synth family)."""
+
+    def _rng(self):
+        return RngContext(11).spawn("synth").rng
+
+    def _render(self, params=None):
+        return get_instrument("synth_brass")["fn"](params or {}, self._rng())
+
+    def test_synth_brass_in_registry(self):
+        entry = get_instrument("synth_brass")
+        self.assertEqual(entry["family"], "synth")
+        self.assertGreater(len(entry["params"]), 0)
+
+    def test_synth_family_present(self):
+        families = {e["family"] for e in REGISTRY.values()}
+        self.assertIn("synth", families)
+
+    def test_synth_brass_non_silent_finite_stereo(self):
+        buf = self._render({"notes": [(49, 0.4)]})
+        self.assertGreater(buf.peak(), 0.0)
+        self.assertTrue(np.all(np.isfinite(buf.data)))
+        self.assertEqual(buf.data.shape[1], 2)
+
+    def test_synth_brass_single_note_shorthand(self):
+        self.assertGreater(self._render({"midi": 47, "duration": 0.3}).peak(), 0.0)
+
+    def test_synth_brass_is_bright(self):
+        # The patch is a bright stab: its spectral centroid should sit well up.
+        import librosa
+        y = self._render({"notes": [(49, 0.4)]}).L
+        cent = float(librosa.feature.spectral_centroid(y=y, sr=44100).mean())
+        self.assertGreater(cent, 1500.0)
+
+    def test_synth_brass_slider_buildable(self):
+        for p in get_instrument("synth_brass")["params"]:
+            if p.kind == "float":
+                self.assertIsNotNone(p.lo, f"synth_brass/{p.name}: lo is None")
+                self.assertIsNotNone(p.hi, f"synth_brass/{p.name}: hi is None")
+
+
 class TestPhase8GroupAStrings(unittest.TestCase):
     """Acceptance tests for tremolo_strings, santur, oud."""
 

@@ -55,7 +55,7 @@ Phrase/note instruments take MIDI numbers (`midi_to_hz`). `notes` /
 ## Module → family map
 
 One file per coherent family. Families currently in `REGISTRY`:
-`texture, percussion, strings, voice, reed, bass, fx`.
+`texture, percussion, strings, voice, reed, synth, bass, fx`.
 
 | Module | Family | Instruments (registry id → callable) |
 |--------|--------|--------------------------------------|
@@ -64,6 +64,7 @@ One file per coherent family. Families currently in `REGISTRY`:
 | `strings.py` | strings | `harp`(karplus_strong) `piano`(piano_note) `cello`(cello_line) `pad`(pad_chord) `tremolo_strings` `santur` `oud` |
 | `voices.py` | voice | `voice`(voice_phrase, duduk) `choir` `lead`(lead_phrase) `ney`(make_ney) `chant`(make_chant) `horn`(make_horn) |
 | `reed.py` | reed | `sax`(sax_phrase, alto saxophone) |
+| `synth.py` | synth | `synth_brass`(synth_brass, saw brass/organ stab) |
 | `bass.py` | bass | `bass`(bass_note) `psy_bass`(psy_bass_note) `acid`(acid_note) |
 | `fx.py` | fx | `zap` `riser` `explosion` `heart` `rev_cymbal` `boom` `sub_boom` `machine_chug` `thopter` |
 
@@ -93,6 +94,13 @@ carnyx/war horn brass (phrase or single midi+duration).
 **reed**: `sax` alto saxophone — reed-buzz harmonics through an `iirpeak` body
 formant, per-note tonguing, delayed vibrato bloom (phrase or single
 midi+duration). Modelled on `../../inspiration/black_box/intro_report.md`.
+
+**synth**: `synth_brass` saw-stack brass/organ **stab** (phrase or single,
+**stereo**) — detuned saws → tanh grit → highpass-thinned fundamental →
+resonant body formant(s); bright (centroid ~2.5 kHz). Tuned to the
+demucs-isolated lead stem of the Black Box "Strike It Up" intro. Distinct from
+`voices.lead` (warm trance lead): brighter, formant-forward, suppressed
+fundamental.
 
 **bass**: `bass` warm saw (note) · `psy_bass` pitch-falling psy (note) ·
 `acid` 303-style (note).
