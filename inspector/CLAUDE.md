@@ -16,6 +16,8 @@ python3 -m inspector.analyse <file.mp3> [--plots] [--out report.txt] [--sections
 --sections N   Force N structural sections (default: auto, ~1 per 3 minutes)
 --interval S   Chroma sampling interval in seconds (default: auto from duration,
                targets ~30 data points, clamped [1, 60] s; sub-second allowed)
+--start S      Start time in seconds (default: 0)
+--end S        End time in seconds (default: EOF); use with --start to zoom in
 ```
 
 ## File map

@@ -39,6 +39,10 @@ def main() -> None:
                         help="Force N sections (default: auto)")
     parser.add_argument("--interval",       type=float, default=None,  metavar="SECS",
                         help="Chroma sampling interval in seconds (default: auto from duration)")
+    parser.add_argument("--start",          type=float, default=0.0,   metavar="SECS",
+                        help="Start time in seconds (default: 0)")
+    parser.add_argument("--end",            type=float, default=None,  metavar="SECS",
+                        help="End time in seconds (default: EOF)")
     args = parser.parse_args()
 
     path = Path(args.file)
@@ -49,9 +53,11 @@ def main() -> None:
 
     # ── Load ──────────────────────────────────────────────────────────────────
     print(f"\nLoading  {path.name}", flush=True)
-    audio = features.load_audio(str(path), sr=args.sr)
+    audio = features.load_audio(str(path), sr=args.sr, offset=args.start, end=args.end)
     duration = audio["duration"]
-    print(f"         {duration:.0f} s at {audio['sr']} Hz mono", flush=True)
+    range_str = (f"  [{args.start:.1f}s – {args.end:.1f}s]" if args.end is not None else
+                 f"  [{args.start:.1f}s – EOF]" if args.start else "")
+    print(f"         {duration:.1f} s at {audio['sr']} Hz mono{range_str}", flush=True)
 
     # Auto-deduce chroma interval: target ~30 data points, clamped [1, 60] s
     interval = args.interval if args.interval is not None else min(60.0, max(1.0, duration / 30))
@@ -76,7 +82,7 @@ def main() -> None:
 
     # ── Essentia (single extra load at 44100 Hz for key + BPM) ───────────────
     _step("Key + BPM           (essentia @ 44100 Hz)")
-    es_data = features.analyse_essentia(str(path))
+    es_data = features.analyse_essentia(str(path), offset=args.start, end=args.end)
 
     # Merge essentia results into the relevant dicts
     tempo_data["bpm_essentia"]   = es_data["bpm_essentia"]

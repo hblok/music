@@ -32,14 +32,21 @@ _HOP_COARSE = 4096   # structure, chromagram over whole track
 # Audio loading
 # ---------------------------------------------------------------------------
 
-def load_audio(path: str, sr: int = 22050) -> dict:
-    """Load and resample to mono at `sr` Hz. Returns audio dict."""
-    y, sr_out = librosa.load(path, sr=sr, mono=True)
+def load_audio(path: str, sr: int = 22050,
+               offset: float = 0.0, end: Optional[float] = None) -> dict:
+    """Load and resample to mono at `sr` Hz. Returns audio dict.
+
+    offset / end: time range in seconds (end=None means until EOF).
+    time_offset is stored so downstream functions can apply it to timestamps.
+    """
+    duration = (end - offset) if end is not None else None
+    y, sr_out = librosa.load(path, sr=sr, mono=True, offset=offset, duration=duration)
     return {
         "path": path,
         "y": y,
         "sr": sr_out,
         "duration": float(len(y) / sr_out),
+        "time_offset": offset,
     }
 
 
@@ -62,12 +69,13 @@ def analyse_tempo(audio: dict) -> dict:
     _, beat_frames = librosa.beat.beat_track(
         onset_envelope=onset_env, sr=sr, hop_length=_HOP_FINE, bpm=global_bpm
     )
-    beat_times = librosa.frames_to_time(beat_frames, sr=sr, hop_length=_HOP_FINE)
+    time_offset = audio.get("time_offset", 0.0)
+    beat_times = librosa.frames_to_time(beat_frames, sr=sr, hop_length=_HOP_FINE) + time_offset
 
     # Tempo in 30-second windows
     window_frames = max(1, int(30.0 * sr / _HOP_FINE))
     tempo_over_time: list[dict] = []
-    t = 0.0
+    t = time_offset
     i = 0
     while i < len(onset_env):
         chunk = onset_env[i : i + window_frames]
@@ -114,7 +122,7 @@ def analyse_harmony(audio: dict, interval_sec: float = 60.0) -> dict:
     frames_per_interval = max(1, int(interval_sec * sr / _HOP_COARSE))
     actual_interval = frames_per_interval * _HOP_COARSE / sr
     chroma_over_time: list[dict] = []
-    t = 0.0
+    t = audio.get("time_offset", 0.0)
     for i in range(0, chroma.shape[1], frames_per_interval):
         chunk = chroma[:, i : i + frames_per_interval]
         dominant = _NOTES[int(chunk.mean(axis=1).argmax())]
@@ -185,8 +193,13 @@ def analyse_structure(audio: dict, k: Optional[int] = None) -> dict:
 # ---------------------------------------------------------------------------
 
 def analyse_timbre(audio: dict, boundaries_sec: list[float]) -> list[dict]:
-    """Spectral features for each section defined by boundaries_sec."""
+    """Spectral features for each section defined by boundaries_sec.
+
+    boundaries_sec are 0-based (relative to the loaded slice). time_offset
+    is added when storing t_start/t_end so the report shows absolute track times.
+    """
     y, sr = audio["y"], audio["sr"]
+    time_offset = audio.get("time_offset", 0.0)
     sections: list[dict] = []
 
     freqs = librosa.fft_frequencies(sr=sr)
@@ -226,8 +239,8 @@ def analyse_timbre(audio: dict, boundaries_sec: list[float]) -> list[dict]:
 
         sections.append({
             "idx":        i + 1,
-            "t_start":    t0,
-            "t_end":      t1,
+            "t_start":    t0 + time_offset,
+            "t_end":      t1 + time_offset,
             "duration":   t1 - t0,
             "rms_db":     rms_db,
             "centroid_hz":  centroid,
@@ -247,7 +260,7 @@ def analyse_timbre(audio: dict, boundaries_sec: list[float]) -> list[dict]:
 # Essentia analysis  (key + BPM in a single audio load at 44100 Hz)
 # ---------------------------------------------------------------------------
 
-def analyse_essentia(path: str) -> dict:
+def analyse_essentia(path: str, offset: float = 0.0, end: Optional[float] = None) -> dict:
     """Run essentia KeyExtractor + RhythmExtractor2013 from one 44100 Hz load.
 
     Returns a dict that is merged into tempo_data and harmony_data by the caller.
@@ -260,7 +273,11 @@ def analyse_essentia(path: str) -> dict:
     try:
         import essentia.standard as es  # noqa: PLC0415
 
-        loader = es.MonoLoader(filename=str(path), sampleRate=44100)
+        loader = es.MonoLoader(
+            filename=str(path), sampleRate=44100,
+            startTime=offset,
+            endTime=end if end is not None else 1e6,
+        )
         audio  = loader()
 
         key_ext = es.KeyExtractor()
