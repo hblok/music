@@ -90,6 +90,7 @@ class ReferencePanel(QWidget):
     """
 
     selectionChanged = Signal(float, float)
+    fileLoaded = Signal(object)  # Path — emitted when audio finishes loading
 
     def __init__(
         self,
@@ -247,6 +248,8 @@ class ReferencePanel(QWidget):
 
         self._load_btn.setEnabled(True)
         log.info("audio ready: %s (%.2fs total)", self._path.name if self._path else "?", time.perf_counter() - t0)
+        if self._path is not None:
+            self.fileLoaded.emit(self._path)
 
     def _on_load_error(self, msg: str) -> None:
         log.error("audio load failed: %s", msg)

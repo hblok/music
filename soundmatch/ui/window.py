@@ -86,6 +86,7 @@ class MainWindow(QMainWindow):
         # ── Dock: Reference panel (left) ───────────────────────
         self._reference = ReferencePanel(service)
         self._reference.setObjectName("reference-panel")
+        self._reference.fileLoaded.connect(self._on_reference_file_loaded)
         self._reference.selectionChanged.connect(self._on_selection_changed)
         ref_dock = QDockWidget("Reference", self)
         ref_dock.setObjectName("reference-dock")
@@ -368,6 +369,12 @@ class MainWindow(QMainWindow):
             self._status_label.setText(f"Montage exported: {Path(path_str).name}")
 
     # ── Panel signal slots ──────────────────────────────────────────
+
+    def _on_reference_file_loaded(self, path: object) -> None:
+        """Keep self._ref_path in sync whenever the reference panel finishes loading."""
+        from pathlib import Path as _Path
+        self._ref_path = _Path(str(path))
+        log.debug("ref_path synced: %s", self._ref_path)
 
     def _on_open_reference(self) -> None:
         path_str, _ = QFileDialog.getOpenFileName(
