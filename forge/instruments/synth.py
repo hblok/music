@@ -51,6 +51,9 @@ SYNTH_BRASS_PARAMS = [
     ParamSchema("lp_cutoff", "float", 8500.0, lo=2000.0, hi=14000.0, unit="Hz"),
     ParamSchema("attack", "float", 0.065, lo=0.002, hi=0.2, unit="s"),
     ParamSchema("release", "float", 0.10, lo=0.02, hi=0.4, unit="s"),
+    ParamSchema("perc_decay", "float", 0.0, lo=0.0, hi=0.5, unit="s",
+                label="Percussive decay tau (0 = sustained stab; >0 = "
+                      "instant-attack exp-decay staccato)"),
     ParamSchema("bloom", "float", 0.6, lo=0.0, hi=1.0,
                 label="Attack brightness bloom"),
     ParamSchema("bloom_cutoff", "float", 1300.0, lo=400.0, hi=4000.0, unit="Hz",
@@ -86,6 +89,33 @@ def _stab_env(notes, n, sr, attack, release, legato):
         rel_n = 0 if (legato and idx < last) else min(int(release * sr), seg_n - att_n)
         if rel_n > 0:
             seg[-rel_n:] *= np.linspace(1.0, 0.0, rel_n)
+        env[a:a + seg_n] = seg
+        edge += dur
+    return env
+
+
+def _perc_env(notes, n, sr, attack, decay_tau):
+    """Percussive articulation: near-instant attack then exponential decay.
+
+    Each note becomes a staccato stab — energy concentrated at the onset and
+    decaying with time-constant ``decay_tau`` — so the result reads as
+    *percussive* (sharp transient) rather than a sustained tone. This is the
+    envelope of the Black Box "Strike It Up" intro stabs, whose mid-band decays
+    to 25 % in ~60–100 ms (HPSS reads the isolated lead as ~82 % percussive).
+    """
+    env = np.zeros(n)
+    edge = 0.0
+    for _m, dur in notes:
+        a = int(edge * sr)
+        seg_n = min(int(dur * sr), n - a)
+        if seg_n <= 0:
+            edge += dur
+            continue
+        t = np.arange(seg_n) / sr
+        seg = np.exp(-t / decay_tau)
+        att_n = min(int(attack * sr), seg_n)
+        if att_n > 1:
+            seg[:att_n] *= np.linspace(0.0, 1.0, att_n)
         env[a:a + seg_n] = seg
         edge += dur
     return env
@@ -131,6 +161,7 @@ def synth_brass(params: dict, rng: np.random.Generator, **ctx) -> AudioBuffer:
     lp_cutoff = float(params.get("lp_cutoff", 8500.0))
     attack = float(params.get("attack", 0.065))
     release = float(params.get("release", 0.10))
+    perc_decay = float(params.get("perc_decay", 0.0))
     bloom = float(params.get("bloom", 0.6))
     bloom_cutoff = float(params.get("bloom_cutoff", 1300.0))
     scoop = float(params.get("scoop", 0.02))
@@ -216,7 +247,10 @@ def synth_brass(params: dict, rng: np.random.Generator, **ctx) -> AudioBuffer:
         L = L + rasp * n_L * amp_L
         R = R + rasp * n_R * amp_R
 
-    env = _stab_env(notes, n, sr, attack, release, legato)
+    if perc_decay > 0.0:
+        env = _perc_env(notes, n, sr, attack, perc_decay)
+    else:
+        env = _stab_env(notes, n, sr, attack, release, legato)
     L *= env
     R *= env
     peak = max(np.max(np.abs(L)), np.max(np.abs(R))) + 1e-12

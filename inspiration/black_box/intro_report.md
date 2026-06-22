@@ -4,6 +4,24 @@
 **Analysed**: 0.19 s actual chroma resolution (--interval 0.1, snapped to HOP_COARSE frame)
 **BPM**: 117.5 — one beat = 0.511s, one 8th = 0.255s, one 16th = 0.128s
 
+> **CORRECTION (later, from demucs stem separation — supersedes the "alto sax"
+> and "held opening note" conclusions below).** The whole-mix analysis here was
+> misled twice:
+>
+> 1. **Not a held opening note.** The isolated lead ("other") stem shows the
+>    opening is **6 repeated G#-major stabs** (onsets 1.05/1.32/1.59/1.83/2.06/
+>    2.36 s), not one sustained G#4. Chroma can't distinguish repeats of the
+>    same pitch, so it read them as a single long note.
+> 2. **Not a saxophone.** HPSS on the isolated stem reads **~82 % percussive**:
+>    each hit is a *staccato* G#-major chord (mid-band decays to 25 % in
+>    ~60–100 ms) topped by a **bright noise "snap"** at 3–8 kHz — the
+>    snare-like attack chiff. Two layers: a saw-brass stab + a noise transient.
+>    Centroid ~2.5 kHz. This is a synth/orchestra-hit-style stab, not a reed.
+>
+> The faithful recreation is `house/strike_intro.py` (lead-only render matches
+> the stem at 80 % percussive / 2535 Hz centroid / 38 vs 36 onsets), built on
+> `synth_brass(perc_decay=…)` + a per-stab noise snap.
+
 ---
 
 ## The melodic phrase: exact notes

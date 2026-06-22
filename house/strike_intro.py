@@ -14,6 +14,12 @@ trackers gave four contradictory answers):
   • LEAD (stem "other") — dense **4-note chord stabs** (G# major vamp moving to
     B and C# major), ~38 stabs in a steady 8th/16th-note rhythm. Chord voicings:
     G# [G#3 C5 D#5 G#5], B [B3 D#5 F#5 B5], C# [C#4 F5 G#5 C#6].
+    Two layers, matching how it's heard ("brass synth / sax / snare drum"):
+      (1) tonal — a *staccato* saw-brass chord (synth_brass perc_decay), and
+      (2) a bright noise "snap" at the onset (3-6.5 kHz burst, the snare-like
+          chiff). The isolated stem reads ~82% percussive (HPSS) with a body
+          that decays to 25% in ~60-100 ms — i.e. punchy stabs, not a sax swell.
+          The earlier sustained version read 0.3% percussive and sounded wrong.
     Bass is currently silenced (ENABLE_BASS = False) — focusing on the brass lead.
   • BASS (stem "bass") — a sustained **G#1 pedal** (MIDI 32, ~52 Hz), the
     dominant pedal under the C#-minor centre.  Gated by ENABLE_BASS.
@@ -41,6 +47,7 @@ from forge.core.buffer import AudioBuffer
 from forge.core.rng import RngContext
 from forge.core.mastering import master
 from forge.core.reverb import make_stereo_ir_pair, reverb_stereo
+from forge.core.dsp import bandpass
 
 from forge.instruments.synth import synth_brass
 from forge.instruments.bass import bass_note
@@ -85,35 +92,49 @@ G_HAT  = 0.30
 G_CLAP = 0.38
 G_BASS = 0.70
 
+# ── Lead timbre: percussive stab + noise "snare" snap ─────────────────────────
+# The isolated lead stem reads ~82% percussive (HPSS): each hit is a *staccato*
+# G#-major chord (mid-band decays to 25% in ~60-100 ms) topped by a bright noisy
+# attack chiff at 3-6.5 kHz — the "snare drum" layer. Two layers, as heard.
+STAB_DUR     = 0.34     # render length per stab; perc_decay shapes the real tail
+STAB_ATTACK  = 0.004    # near-instant onset (sharp transient, not a sax swell)
+STAB_DECAY   = 0.060    # exp-decay tau — staccato, drives the percussive feel
+STAB_LP      = 7500.0   # tone lowpass; with the snap, hits source centroid ~2.5kHz
+SNAP_LEVEL   = 0.16     # noise snap level, fraction of the chord's peak
+SNAP_LO      = 3000.0   # snap band low edge
+SNAP_HI      = 8000.0   # snap band high edge
+SNAP_TAU     = 0.050    # snap decay tau (~70 ms to 25%)
+REVERB_WET   = 0.03     # keep low — a long tail re-smears the staccato stabs
+IR_SECONDS   = 0.30     # short, bright room (not a long dark plate)
+IR_DECAY     = 0.6
+IR_LP        = 7000.0
 
-def compose(seed: int = 7) -> AudioBuffer:
+
+def compose(seed: int = 7, drums: bool | None = None, bass: bool | None = None) -> AudioBuffer:
+    drums = ENABLE_DRUMS if drums is None else drums
+    bass = ENABLE_BASS if bass is None else bass
     root = RngContext(seed)
     mix = AudioBuffer(int(TOTAL * SR), SR)
-    ir_L, ir_R = make_stereo_ir_pair(2.6, 0.9, sr=SR, lp_cutoff=3200.0)
+    # Tight, fairly dry room — the source lead is close-mic'd/dry, and a long
+    # plate would smear the staccato snap that defines the sound.
+    ir_L, ir_R = make_stereo_ir_pair(IR_SECONDS, IR_DECAY, sr=SR, lp_cutoff=IR_LP)
 
-    # ── Lead: dense 4-note chord stabs (deep dark reverb plate) ─────────────
+    # ── Lead: percussive G#-major chord stabs + noise snap (two layers) ──────
     lead_rng = root.spawn("lead")
+    tone_gain = G_LEAD / len(next(iter(CHORDS.values()))) ** 0.5   # ~0.42/tone
+    snap_env = np.exp(-np.arange(int(STAB_DUR * SR)) / (SNAP_TAU * SR))
     for i, (start_s, chord_key) in enumerate(STABS):
         chord = CHORDS[chord_key]
-        # Compute per-stab duration — longer overlapping tails blur into a wash
-        if i + 1 < len(STABS):
-            next_start = STABS[i + 1][0]
-            dur = min(max(0.9 * (next_start - start_s), 0.32), 0.5)
-        else:
-            dur = 0.4
-
-        # Per-stab attack variation: all tones in the chord share one attack
-        # time so the chord stays tight, but different stabs swell differently.
         stab_rng = lead_rng.spawn(f"stab{i}")
-        att = float(stab_rng.rng.uniform(0.05, 0.15))
 
-        # Render each chord tone separately then sum
-        stab_L = np.zeros(int((dur + 0.8) * SR))  # extra tail for reverb
-        stab_R = np.zeros(int((dur + 0.8) * SR))
-        tone_gain = G_LEAD / len(chord) ** 0.5     # ~0.425 per tone (4 tones)
+        # Layer 1 — tonal: each chord tone as a staccato (perc-decay) saw stab.
+        stab_L = np.zeros(int((STAB_DUR + 0.6) * SR))  # extra tail for reverb
+        stab_R = np.zeros(int((STAB_DUR + 0.6) * SR))
         for midi in chord:
             buf = synth_brass(
-                {"notes": [(midi, dur)], "attack": att, "lp_cutoff": 6000.0},
+                {"notes": [(midi, STAB_DUR)], "attack": STAB_ATTACK,
+                 "perc_decay": STAB_DECAY, "lp_cutoff": STAB_LP,
+                 "bloom": 0.2, "rasp": 0.22},
                 stab_rng.spawn(f"t{midi}").rng,
                 sr=SR,
             )
@@ -121,12 +142,22 @@ def compose(seed: int = 7) -> AudioBuffer:
             stab_L[:n] += buf.L[:n]
             stab_R[:n] += buf.R[:n]
 
-        # Deep dark plate reverb on the summed chord
-        L, R = reverb_stereo(stab_L, stab_R, ir_L, ir_R, wet=0.40)
+        # Layer 2 — the "snare" snap: a short bright noise burst at the onset,
+        # decorrelated L/R for width, scaled to the chord's own peak.
+        peak = max(np.max(np.abs(stab_L)), np.max(np.abs(stab_R))) + 1e-12
+        ne = len(snap_env)
+        for ch, snap_rng in ((stab_L, stab_rng.spawn("snapL").rng),
+                             (stab_R, stab_rng.spawn("snapR").rng)):
+            nz = bandpass(snap_rng.standard_normal(ne), SNAP_LO, SNAP_HI, sr=SR)
+            nz /= np.max(np.abs(nz)) + 1e-12
+            ch[:ne] += SNAP_LEVEL * peak * nz * snap_env
+
+        # Tight room reverb on the summed two-layer stab
+        L, R = reverb_stereo(stab_L, stab_R, ir_L, ir_R, wet=REVERB_WET)
         mix.add_at(np.column_stack([L, R]), start_s, gain=tone_gain)
 
     # ── Bass: sustained G#1 pedal, re-struck every half-bar (pedal pulse) ─────
-    if ENABLE_BASS:
+    if bass:
         b_rng = root.spawn("bass")
         t = 0.0
         while t < TOTAL - 0.3:
@@ -137,7 +168,7 @@ def compose(seed: int = 7) -> AudioBuffer:
             t += 2 * BEAT
 
     # ── Drums: drop at beat 2, run to the end ────────────────────────────────
-    if ENABLE_DRUMS:
+    if drums:
         k_rng = root.spawn("kick")
         h_rng = root.spawn("hat")
         c_rng = root.spawn("clap")
@@ -159,15 +190,21 @@ def compose(seed: int = 7) -> AudioBuffer:
 
 
 def main() -> None:
-    out_path = Path("/workspace/music/house_strike_intro.wav")
-    out_path.parent.mkdir(parents=True, exist_ok=True)
+    out_dir = Path("/workspace/music")
+    out_dir.mkdir(parents=True, exist_ok=True)
     print("Composing Strike It Up intro recreation …")
-    mix = compose(seed=7)
-    sf.write(str(out_path), mix.data, SR, subtype="PCM_24")
-    dur = len(mix.data) / SR
-    print(f"Written {out_path}  ({dur:.1f} s, {SR} Hz, 24-bit PCM)")
-    rms = mix.section_rms(9)
-    print("Section RMS arc:", " ".join(f"{x:.3f}" for x in rms))
+
+    full = compose(seed=7)
+    full_path = out_dir / "house_strike_intro.wav"
+    sf.write(str(full_path), full.data, SR, subtype="PCM_24")
+    print(f"Written {full_path}  ({len(full.data)/SR:.1f} s, {SR} Hz, 24-bit PCM)")
+    print("Section RMS arc:", " ".join(f"{x:.3f}" for x in full.section_rms(9)))
+
+    # Lead-only render — A/B this against the isolated source "other" stem.
+    lead = compose(seed=7, drums=False, bass=False)
+    lead_path = out_dir / "house_strike_intro_leadonly.wav"
+    sf.write(str(lead_path), lead.data, SR, subtype="PCM_24")
+    print(f"Written {lead_path}  (lead only)")
 
 
 if __name__ == "__main__":
