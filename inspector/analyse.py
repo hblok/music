@@ -35,8 +35,10 @@ def main() -> None:
     parser.add_argument("--out",            metavar="FILE",      help="Write report to FILE")
     parser.add_argument("--sr",             type=int, default=22050, metavar="HZ",
                         help="Analysis sample rate (default 22050)")
-    parser.add_argument("--sections",       type=int, default=None, metavar="N",
+    parser.add_argument("--sections",       type=int,   default=None,  metavar="N",
                         help="Force N sections (default: auto)")
+    parser.add_argument("--interval",       type=float, default=None,  metavar="SECS",
+                        help="Chroma sampling interval in seconds (default: auto from duration)")
     args = parser.parse_args()
 
     path = Path(args.file)
@@ -48,7 +50,12 @@ def main() -> None:
     # ── Load ──────────────────────────────────────────────────────────────────
     print(f"\nLoading  {path.name}", flush=True)
     audio = features.load_audio(str(path), sr=args.sr)
-    print(f"         {audio['duration']:.0f} s at {audio['sr']} Hz mono", flush=True)
+    duration = audio["duration"]
+    print(f"         {duration:.0f} s at {audio['sr']} Hz mono", flush=True)
+
+    # Auto-deduce chroma interval: target ~30 data points, clamped [1, 60] s
+    interval = args.interval if args.interval is not None else min(60.0, max(1.0, duration / 30))
+    print(f"         chroma interval: {interval:.2f} s ({duration / interval:.0f} samples)", flush=True)
 
     # ── Librosa analyses (all use the same in-memory audio) ───────────────────
     _step("Tempo & rhythm      (librosa)")
@@ -62,7 +69,7 @@ def main() -> None:
     timbre_data = features.analyse_timbre(audio, structure_data["boundaries_sec"])
 
     _step("Key & harmony       (librosa)")
-    harmony_data = features.analyse_harmony(audio)
+    harmony_data = features.analyse_harmony(audio, interval_sec=interval)
 
     _step("Instrument analysis (HPSS + pYIN + maqam)")
     instrument_data = instruments.analyse_instruments(audio, structure_data["boundaries_sec"])

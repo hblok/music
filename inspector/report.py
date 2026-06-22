@@ -91,11 +91,19 @@ def render(results: dict) -> str:
 
     cot = harmony.get("chroma_over_time", [])
     if cot:
+        interval = harmony.get("interval_sec", 60.0)
+        if interval >= 60.0:
+            label = "Dominant note per minute:"
+        elif interval >= 1.0:
+            label = f"Dominant note every {interval:.1f}s:"
+        else:
+            label = f"Dominant note every {interval:.2f}s:"
+        fmt_t = (lambda t: f"{t:.2f}s") if interval < 1.0 else _fmt
         lines.append("")
-        lines.append("  Dominant note per minute:")
+        lines.append(f"  {label}")
         row = "    "
         for w in cot:
-            item = f"{_fmt(w['t_start'])}:{w['dominant_note']:>3}   "
+            item = f"{fmt_t(w['t_start'])}:{w['dominant_note']:>3}   "
             if len(row) + len(item) > _WIDTH - 2:
                 lines.append(row.rstrip())
                 row = "    " + item

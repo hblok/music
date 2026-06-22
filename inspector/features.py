@@ -96,8 +96,8 @@ def analyse_tempo(audio: dict) -> dict:
 # Key, harmony, chroma  (librosa)
 # ---------------------------------------------------------------------------
 
-def analyse_harmony(audio: dict) -> dict:
-    """Key via Krumhansl-Kessler, chroma profile, dominant note per minute."""
+def analyse_harmony(audio: dict, interval_sec: float = 60.0) -> dict:
+    """Key via Krumhansl-Kessler, chroma profile, dominant note over time."""
     y, sr = audio["y"], audio["sr"]
 
     chroma = librosa.feature.chroma_cqt(y=y, sr=sr, hop_length=_HOP_COARSE)
@@ -110,15 +110,16 @@ def analyse_harmony(audio: dict) -> dict:
     ranked = sorted(range(12), key=lambda i: -chroma_norm[i])
     top_notes = [(_NOTES[i], float(chroma_norm[i])) for i in ranked]
 
-    # Dominant note per minute
-    frames_per_min = max(1, int(60.0 * sr / _HOP_COARSE))
+    # Dominant note per interval
+    frames_per_interval = max(1, int(interval_sec * sr / _HOP_COARSE))
+    actual_interval = frames_per_interval * _HOP_COARSE / sr
     chroma_over_time: list[dict] = []
     t = 0.0
-    for i in range(0, chroma.shape[1], frames_per_min):
-        chunk = chroma[:, i : i + frames_per_min]
+    for i in range(0, chroma.shape[1], frames_per_interval):
+        chunk = chroma[:, i : i + frames_per_interval]
         dominant = _NOTES[int(chunk.mean(axis=1).argmax())]
         chroma_over_time.append({"t_start": t, "dominant_note": dominant})
-        t += 60.0
+        t += actual_interval
 
     return {
         "key": key,
@@ -127,6 +128,7 @@ def analyse_harmony(audio: dict) -> dict:
         "chroma_mean": chroma_mean.tolist(),
         "top_notes": top_notes,
         "chroma_over_time": chroma_over_time,
+        "interval_sec": actual_interval,
         # essentia fields populated later
         "key_essentia": None,
         "mode_essentia": None,

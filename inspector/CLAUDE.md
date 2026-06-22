@@ -14,6 +14,8 @@ python3 -m inspector.analyse <file.mp3> [--plots] [--out report.txt] [--sections
 --out FILE     Write text report to FILE (also printed to stdout)
 --sr HZ        Analysis sample rate (default 22050; lower = faster but coarser)
 --sections N   Force N structural sections (default: auto, ~1 per 3 minutes)
+--interval S   Chroma sampling interval in seconds (default: auto from duration,
+               targets ~30 data points, clamped [1, 60] s; sub-second allowed)
 ```
 
 ## File map
