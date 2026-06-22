@@ -359,6 +359,204 @@ class TestMainWindowPatchEditor(unittest.TestCase):
         self.assertIsNotNone(w.scorecard_panel.scorecard)
 
 
+class TestABViewer(unittest.TestCase):
+    """Smoke test ABViewer widget."""
+
+    def test_construct(self):
+        from soundmatch.ui.ab_viewer import ABViewer
+        w = ABViewer()
+        self.assertIsNotNone(w)
+
+    def test_set_target(self):
+        from soundmatch.ui.ab_viewer import ABViewer
+        w = ABViewer()
+        y = ensure_fixture()
+        w.set_target(y, 44100)
+        self.assertTrue(w._play_a_btn.isEnabled())
+
+    def test_set_candidate(self):
+        from soundmatch.ui.ab_viewer import ABViewer
+        w = ABViewer()
+        y = ensure_fixture()
+        w.set_candidate(y, 44100)
+        self.assertTrue(w._play_b_btn.isEnabled())
+
+    def test_clear(self):
+        from soundmatch.ui.ab_viewer import ABViewer
+        w = ABViewer()
+        y = ensure_fixture()
+        w.set_target(y, 44100)
+        w.set_candidate(y, 44100)
+        w.clear()
+        self.assertFalse(w._play_a_btn.isEnabled())
+        self.assertFalse(w._play_b_btn.isEnabled())
+
+    def test_export_montage(self):
+        """Test that export_montage produces a PNG file."""
+        import tempfile
+        from soundmatch.ui.ab_viewer import ABViewer
+        w = ABViewer()
+        y = ensure_fixture()
+        w.set_target(y, 44100)
+        w.set_candidate(y * 0.5, 44100)
+        with tempfile.TemporaryDirectory() as tmp:
+            p = Path(tmp) / "test_montage.png"
+            w.export_montage(p)
+            self.assertTrue(p.exists())
+            self.assertGreater(p.stat().st_size, 0)
+
+    def test_current_property(self):
+        from soundmatch.ui.ab_viewer import ABViewer
+        w = ABViewer()
+        self.assertEqual(w.current, "A")
+
+    def test_export_enabled_when_both_set(self):
+        from soundmatch.ui.ab_viewer import ABViewer
+        w = ABViewer()
+        y = ensure_fixture()
+        self.assertFalse(w._export_btn.isEnabled())
+        w.set_target(y, 44100)
+        self.assertFalse(w._export_btn.isEnabled())
+        w.set_candidate(y, 44100)
+        self.assertTrue(w._export_btn.isEnabled())
+
+
+class TestExporters(unittest.TestCase):
+    """Test headless exporter functions."""
+
+    def test_export_snippet(self):
+        import tempfile
+        from soundmatch.core.exporters import export_snippet
+        from soundmatch.core.phrase import Phrase, Note
+        phrase = Phrase(bpm=120.0, length_s=2.0, notes=[Note(t=0.0, midi=[60])])
+        with tempfile.TemporaryDirectory() as tmp:
+            p = Path(tmp) / "snippet.py"
+            export_snippet(phrase, "kick", {"f0": 60.0}, [], 42, p)
+            self.assertTrue(p.exists())
+            content = p.read_text()
+            self.assertIn("render_phrase", content)
+            self.assertIn("kick", content)
+
+    def test_export_snippet_with_layers(self):
+        import tempfile
+        from soundmatch.core.exporters import export_snippet
+        from soundmatch.core.phrase import Phrase, Note
+        phrase = Phrase(bpm=120.0, length_s=2.0, notes=[Note(t=0.0, midi=[60])])
+        with tempfile.TemporaryDirectory() as tmp:
+            p = Path(tmp) / "snippet.py"
+            export_snippet(
+                phrase, "synth_brass", {"f0": 60.0},
+                [("snare", {"tone": 0.5})], 42, p,
+            )
+            content = p.read_text()
+            self.assertIn("snare", content)
+
+    def test_export_markdown(self):
+        import tempfile
+        from inspector.metrics import characterize
+        from soundmatch.core.exporters import export_markdown
+        y = ensure_fixture()
+        m = characterize(y, 44100)
+        with tempfile.TemporaryDirectory() as tmp:
+            p = Path(tmp) / "report.md"
+            export_markdown(m, reference="test.wav", instrument_id="synth_brass", path=p)
+            self.assertTrue(p.exists())
+            content = p.read_text()
+            self.assertIn("Percussive Ratio", content)
+            self.assertIn("Spectral Centroid", content)
+            self.assertIn("test.wav", content)
+
+    def test_export_markdown_with_scorecard(self):
+        import tempfile
+        from inspector.metrics import characterize
+        from soundmatch.core.exporters import export_markdown
+        from soundmatch.core.scoring import diff
+        y = ensure_fixture()
+        m = characterize(y, 44100)
+        rng = np.random.default_rng(99)
+        y2 = rng.standard_normal(len(y))
+        m2 = characterize(y2, 44100)
+        sc = diff(m, m2)
+        with tempfile.TemporaryDirectory() as tmp:
+            p = Path(tmp) / "report.md"
+            export_markdown(m, cand_metrics=m2, scorecard_dict=sc.to_dict(), path=p)
+            content = p.read_text()
+            self.assertIn("Candidate Comparison", content)
+            self.assertIn("percussive_ratio", content)
+
+    def test_export_montage_png(self):
+        import tempfile
+        from soundmatch.core.exporters import export_montage_png
+        y = ensure_fixture()
+        with tempfile.TemporaryDirectory() as tmp:
+            p = Path(tmp) / "montage.png"
+            export_montage_png(y, 44100, y * 0.5, 44100, p)
+            self.assertTrue(p.exists())
+            self.assertGreater(p.stat().st_size, 0)
+
+
+class TestProjectSaveLoad(unittest.TestCase):
+    """Test project save/load through MainWindow."""
+
+    def test_new_project(self):
+        from forge.playback.service import PlaybackService
+        from soundmatch.ui.window import MainWindow
+        svc = PlaybackService(sr=44100, bpm=120)
+        w = MainWindow(svc)
+        w._on_new_project()
+        self.assertIsNone(w._target_metrics)
+
+    def test_save_and_load_project(self):
+        import tempfile
+        from forge.playback.service import PlaybackService
+        from inspector.metrics import characterize
+        from soundmatch.core.phrase import seed_from_metrics
+        from soundmatch.core.project import MatchProject
+        from soundmatch.ui.window import MainWindow
+        svc = PlaybackService(sr=44100, bpm=120)
+        w = MainWindow(svc)
+
+        # Set up some target metrics
+        y = ensure_fixture()
+        m = characterize(y, 44100)
+        w._target_metrics = m
+        w._phrase = seed_from_metrics(m, bpm=138.0)
+
+        # Save
+        with tempfile.TemporaryDirectory() as tmp:
+            p = Path(tmp) / "test_project.smatch"
+            w._save_project_to(p)
+            self.assertTrue(p.exists())
+
+            # Load into a new window
+            w2 = MainWindow(svc)
+            proj = MatchProject.load(p)
+            self.assertIsNotNone(proj.target_metrics)
+            self.assertAlmostEqual(
+                proj.target_metrics.percussive_ratio, m.percussive_ratio, places=1,
+            )
+
+
+class TestMainWindowVariantGrid(unittest.TestCase):
+    """Test MainWindow variant grid integration."""
+
+    def test_has_variant_grid(self):
+        from forge.playback.service import PlaybackService
+        from soundmatch.ui.window import MainWindow
+        svc = PlaybackService(sr=44100, bpm=120)
+        w = MainWindow(svc)
+        self.assertIsNotNone(w.variant_grid)
+
+    def test_has_ab_viewer(self):
+        from forge.playback.service import PlaybackService
+        from soundmatch.ui.window import MainWindow
+        svc = PlaybackService(sr=44100, bpm=120)
+        w = MainWindow(svc)
+        self.assertIsNotNone(w.ab_viewer)
+
+
+# --- Keep existing variant card/grid tests below ---
+
 class TestVariantCard(unittest.TestCase):
     """Smoke test _VariantCard widget."""
 
