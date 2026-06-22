@@ -124,6 +124,35 @@ class SpectrogramWidget(FigureCanvas):
         draw_spectrogram(self._ax, y, sr, title=title)
         self.draw()
 
+    def set_spectrogram_data(
+        self,
+        S_db: np.ndarray,
+        sr: int,
+        hop: int,
+        *,
+        title: str | None = None,
+    ) -> None:
+        """Display a pre-computed mel spectrogram (avoids re-computing on main thread).
+
+        Parameters
+        ----------
+        S_db  : Mel spectrogram in dB, shape (n_mels, time).
+        sr    : Sample rate used when computing S_db.
+        hop   : Hop length used when computing S_db.
+        title : Optional title.
+        """
+        import librosa.display
+
+        self._ax.clear()
+        self._ax.set_visible(True)
+        librosa.display.specshow(
+            S_db, sr=sr, hop_length=hop, x_axis="time",
+            y_axis="mel", ax=self._ax, cmap="magma",
+        )
+        if title:
+            self._ax.set_title(title, fontsize=9)
+        self.draw()
+
     def clear(self) -> None:
         """Clear the display."""
         self._ax.clear()

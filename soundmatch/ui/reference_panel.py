@@ -10,7 +10,7 @@ from pathlib import Path
 
 import numpy as np
 
-from PySide6.QtCore import Signal
+from PySide6.QtCore import QObject, QThread, Signal
 from PySide6.QtWidgets import (
     QFileDialog,
     QHBoxLayout,
@@ -22,6 +22,35 @@ from PySide6.QtWidgets import (
 
 from forge.playback.service import PlaybackService
 from soundmatch.ui.spectrogram import SpectrogramWidget, WaveformWidget
+
+
+class _AudioLoader(QObject):
+    """Worker: loads audio and computes mel spectrogram data off the main thread."""
+
+    finished = Signal(object, int, object, int)  # y, sr, S_db, hop
+    error = Signal(str)
+
+    def __init__(self, path: str, sr: int) -> None:
+        super().__init__()
+        self._path = path
+        self._sr = sr
+
+    def run(self) -> None:
+        try:
+            from inspector.features import load_audio
+            import librosa
+
+            audio = load_audio(self._path, sr=self._sr)
+            y = audio["y"]
+            sr_out = int(audio.get("sr", self._sr))
+
+            hop = 4096
+            S = librosa.feature.melspectrogram(y=y, sr=sr_out, n_mels=128, hop_length=hop)
+            S_db = librosa.power_to_db(S, ref=np.max)
+
+            self.finished.emit(y, sr_out, S_db, hop)
+        except Exception as exc:
+            self.error.emit(str(exc))
 
 
 class ReferencePanel(QWidget):
@@ -45,11 +74,13 @@ class ReferencePanel(QWidget):
     ) -> None:
         super().__init__(parent)
         self._service = service
+        self._target_sr: int = service.sr
         self._y: np.ndarray | None = None
-        self._sr: int = 44100
+        self._sr: int = self._target_sr
         self._start_s: float = 0.0
         self._end_s: float = 10.0
         self._path: Path | None = None
+        self._load_thread: QThread | None = None
 
         self.setObjectName("reference-panel")
         layout = QVBoxLayout(self)
@@ -57,7 +88,7 @@ class ReferencePanel(QWidget):
 
         # Top bar: load button + label
         top = QHBoxLayout()
-        self._load_btn = QPushButton("Load Reference\u2026")
+        self._load_btn = QPushButton("Load Reference…")
         self._load_btn.setObjectName("load-reference-btn")
         self._load_btn.clicked.connect(self._on_load)
         top.addWidget(self._load_btn)
@@ -96,36 +127,42 @@ class ReferencePanel(QWidget):
         layout.addLayout(sel_layout)
 
         # Play reference button
-        self._play_btn = QPushButton("\u25b6 Play")
+        self._play_btn = QPushButton("▶ Play")
         self._play_btn.setObjectName("play-reference-btn")
         self._play_btn.clicked.connect(self._on_play)
         layout.addWidget(self._play_btn)
 
-    def load_audio(self, path: Path, sr: int = 22050) -> None:
-        """Load an audio file and display it.
+    def load_audio(self, path: Path, sr: int | None = None) -> None:
+        """Load an audio file in the background and display it when ready.
 
         Parameters
         ----------
         path: Path to the audio file.
-        sr  : Target sample rate for analysis.
+        sr  : Target sample rate (defaults to the service sample rate).
         """
-        from inspector.features import load_audio
-
-        audio = load_audio(str(path), sr=sr)
-        self._y = audio["y"]
-        self._sr = audio.get("sr", sr)
+        target_sr = sr if sr is not None else self._target_sr
         self._path = path
+        self._file_label.setText(f"Loading {path.name}…")
+        self._load_btn.setEnabled(False)
 
-        duration = len(self._y) / self._sr
-        self._end_s = min(10.0, duration)
-        self._start_spin.setText(f"{self._start_s:.1f} s")
-        self._end_spin.setText(f"{self._end_s:.1f} s")
-        self._file_label.setText(path.name)
+        # Cancel any in-progress load
+        if self._load_thread is not None and self._load_thread.isRunning():
+            self._load_thread.quit()
+            self._load_thread.wait()
 
-        # Display
-        self._waveform.set_audio(self._y, self._sr, title="Waveform")
-        self._waveform.set_selection(self._start_s, self._end_s)
-        self._spectrogram.set_audio(self._y, self._sr, title="Spectrogram")
+        worker = _AudioLoader(str(path), target_sr)
+        thread = QThread(self)
+        worker.moveToThread(thread)
+
+        thread.started.connect(worker.run)
+        worker.finished.connect(self._on_audio_loaded)
+        worker.error.connect(self._on_load_error)
+        worker.finished.connect(thread.quit)
+        worker.error.connect(thread.quit)
+        thread.finished.connect(thread.deleteLater)
+
+        self._load_thread = thread
+        thread.start()
 
     def set_selection(self, start_s: float, end_s: float) -> None:
         """Programmatically set the time selection."""
@@ -148,6 +185,30 @@ class ReferencePanel(QWidget):
         return self._path
 
     # ------------------------------------------------------------------ slots
+
+    def _on_audio_loaded(self, y: object, sr: int, S_db: object, hop: int) -> None:
+        """Called on the main thread when the background load + mel computation finish."""
+        y_arr = np.asarray(y)
+        S_db_arr = np.asarray(S_db)
+
+        self._y = y_arr
+        self._sr = sr
+        duration = len(y_arr) / sr
+        self._end_s = min(10.0, duration)
+        self._start_spin.setText(f"{self._start_s:.1f} s")
+        self._end_spin.setText(f"{self._end_s:.1f} s")
+
+        if self._path is not None:
+            self._file_label.setText(self._path.name)
+
+        self._waveform.set_audio(y_arr, sr, title="Waveform")
+        self._waveform.set_selection(self._start_s, self._end_s)
+        self._spectrogram.set_spectrogram_data(S_db_arr, sr, hop, title="Spectrogram")
+        self._load_btn.setEnabled(True)
+
+    def _on_load_error(self, msg: str) -> None:
+        self._file_label.setText(f"Error: {msg}")
+        self._load_btn.setEnabled(True)
 
     def _on_load(self) -> None:
         path_str, _ = QFileDialog.getOpenFileName(

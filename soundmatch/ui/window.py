@@ -232,7 +232,7 @@ class MainWindow(QMainWindow):
         if proj.reference_path and proj.reference_path.exists():
             self._ref_path = proj.reference_path
             self._reference.load_audio(proj.reference_path)
-            self._status_label.setText(f"Loaded: {proj.reference_path.name}")
+            self._status_label.setText(f"Loading: {proj.reference_path.name}…")
         else:
             self._status_label.setText(f"Project opened (reference not found)")
 
@@ -366,21 +366,23 @@ class MainWindow(QMainWindow):
         if path_str:
             self._ref_path = Path(path_str)
             self._reference.load_audio(self._ref_path)
-            self._status_label.setText(f"Loaded: {self._ref_path.name}")
+            self._status_label.setText(f"Loading: {self._ref_path.name}…")
 
     def _on_selection_changed(self, start_s: float, end_s: float) -> None:
         """Handle selection change: characterize the selected region."""
+        self._status_label.setText("Characterizing…")
+        QApplication.processEvents()
         self._characterize_target(start_s, end_s, stem="mix")
 
     def _on_stem_chosen(self, stem_name: str) -> None:
         """Handle stem choice: re-characterize with the chosen stem."""
         start_s = 0.0
         end_s = 10.0
-        # Get current selection from reference panel
         y, sr = self._reference.audio_data
         if y is not None:
-            start_s = 0.0
             end_s = len(y) / sr
+        self._status_label.setText(f"Characterizing stem '{stem_name}'…")
+        QApplication.processEvents()
         self._characterize_target(start_s, end_s, stem=stem_name)
 
     def _on_patch_changed(
@@ -394,6 +396,8 @@ class MainWindow(QMainWindow):
         if self._target_metrics is None:
             self._status_label.setText("No target — load and select reference first")
             return
+        self._status_label.setText("Rendering…")
+        QApplication.processEvents()
 
         if self._phrase is None:
             # Seed a phrase from the target metrics
@@ -431,6 +435,8 @@ class MainWindow(QMainWindow):
         if self._target_metrics is None or self._phrase is None:
             self._status_label.setText("No target — characterize first")
             return
+        self._status_label.setText(f"Sweeping '{axis}'…")
+        QApplication.processEvents()
 
         try:
             specs = sweep(
