@@ -11,12 +11,12 @@ Transcribed from the demucs-isolated stems of
 into stems first is what finally made the analysis reliable (whole-mix pitch
 trackers gave four contradictory answers):
 
-  • LEAD (stem "other") — a bright **synth-brass stab** riff, pitch classes
-    G#/B/C# in a LOW register: G#3, B2, C#3 (MIDI 56/47/49). A 5–♭7–root cell
-    over the pedal. Timbre: centroid ~2.5 kHz, suppressed fundamental, a
-    resonant body formant up at the 5th–6th harmonic — NOT a mellow sax.
+  • LEAD (stem "other") — dense **4-note chord stabs** (G# major vamp moving to
+    B and C# major), ~38 stabs in a steady 8th/16th-note rhythm. Chord voicings:
+    G# [G#3 C5 D#5 G#5], B [B3 D#5 F#5 B5], C# [C#4 F5 G#5 C#6].
+    Bass is currently silenced (ENABLE_BASS = False) — focusing on the brass lead.
   • BASS (stem "bass") — a sustained **G#1 pedal** (MIDI 32, ~52 Hz), the
-    dominant pedal under the C#-minor centre.
+    dominant pedal under the C#-minor centre.  Gated by ENABLE_BASS.
   • 117.5 BPM, dead-straight. Lead enters ~0.6 s after the drop; kick /
     offbeat open hat / backbeat clap drop at ~1 s (second 2 of the source).
 
@@ -52,19 +52,30 @@ BEAT = 60.0 / BPM                     # 0.5106 s
 TOTAL = 9.4                           # ~9 s intro + short tail
 
 # Notes (concert pitch) from the isolated stems
-GS3, B2, CS3 = 56, 47, 49            # lead: G#3, B2, C#3
 GS1 = 32                             # bass: G#1 pedal (~52 Hz)
 
-# ── Lead: (start_s, midi, dur_s) — synth-brass stabs transcribed from the
-#    "other" stem, shifted so the piece starts at t=0 (= second 1.0 of source).
-LEAD = [
-    (1.62, GS3, 0.17),
-    (2.00, B2, 0.20), (2.49, B2, 0.37), (2.87, CS3, 0.42),     # B B C# cell
-    (3.50, B2, 0.18),
-    (4.18, GS3, 0.20),
-    (4.50, B2, 0.20), (4.76, B2, 0.13), (4.89, CS3, 0.21),     # cell again
-    (6.52, B2, 0.20), (6.75, B2, 0.17), (6.92, CS3, 0.22), (7.18, CS3, 0.17),
-    (8.56, B2, 0.19), (8.83, CS3, 0.14),
+# ── Feature flags ─────────────────────────────────────────────────────────────
+ENABLE_BASS  = False    # silenced for now — focusing on the brass lead
+ENABLE_DRUMS = True
+
+# ── Chord voicings (MIDI note numbers) ────────────────────────────────────────
+CHORDS = {
+    "Gs": [56, 72, 75, 80],   # G# major:  G#3 C5  D#5 G#5
+    "B":  [59, 75, 78, 83],   # B  major:  B3  D#5 F#5 B5
+    "Cs": [61, 77, 80, 85],   # C# major:  C#4 F5  G#5 C#6
+}
+
+# ── Stab sequence: (start_s, chord_key) — times are seconds from piece start
+#    (= second 1.0 of the source).
+STABS = [
+    (1.09, "Gs"), (1.34, "Gs"), (1.59, "Gs"), (1.83, "Gs"), (2.07, "Gs"), (2.35, "Gs"),
+    (2.48, "B"),  (2.73, "B"),  (2.86, "Cs"), (3.12, "Cs"),
+    (3.36, "Gs"), (3.61, "Gs"), (3.75, "Gs"), (3.99, "Gs"), (4.15, "Gs"), (4.38, "Gs"),
+    (4.51, "B"),  (4.75, "B"),  (4.88, "Cs"),
+    (5.12, "Gs"), (5.39, "Gs"), (5.61, "Gs"), (5.88, "Gs"), (6.12, "Gs"), (6.39, "Gs"),
+    (6.53, "B"),  (6.76, "B"),  (6.90, "Cs"), (7.15, "Cs"),
+    (7.39, "Gs"), (7.66, "Gs"), (7.80, "Gs"), (8.05, "Gs"), (8.17, "Gs"), (8.42, "Gs"),
+    (8.56, "B"),  (8.79, "Cs"), (8.95, "Gs"),
 ]
 
 # Relative gains (master() peak-normalises afterwards)
@@ -80,40 +91,61 @@ def compose(seed: int = 7) -> AudioBuffer:
     mix = AudioBuffer(int(TOTAL * SR), SR)
     ir_L, ir_R = make_stereo_ir_pair(1.3, 0.5, sr=SR, lp_cutoff=5000.0)
 
-    # ── Lead synth-brass stabs (light plate for space) ───────────────────────
+    # ── Lead: dense 4-note chord stabs (light plate for space) ───────────────
     lead_rng = root.spawn("lead")
-    for i, (t, midi, dur) in enumerate(LEAD):
-        buf = synth_brass({"notes": [(midi, dur)]}, lead_rng.spawn(f"n{i}").rng, sr=SR)
-        L, R = reverb_stereo(buf.L, buf.R, ir_L, ir_R, wet=0.15)
-        mix.add_at(np.column_stack([L, R]), t, gain=G_LEAD)
+    for i, (start_s, chord_key) in enumerate(STABS):
+        chord = CHORDS[chord_key]
+        # Compute per-stab duration from gap to next stab (punchy + separated)
+        if i + 1 < len(STABS):
+            next_start = STABS[i + 1][0]
+            dur = min(0.8 * (next_start - start_s), 0.22)
+        else:
+            dur = 0.22
+
+        # Render each chord tone separately then sum
+        stab_L = np.zeros(int((dur + 0.5) * SR))  # extra tail for reverb
+        stab_R = np.zeros(int((dur + 0.5) * SR))
+        tone_gain = G_LEAD / len(chord) ** 0.5     # ~0.425 per tone (4 tones)
+        for midi in chord:
+            tone_ctx = lead_rng.spawn(f"s{i}_{midi}")
+            buf = synth_brass({"notes": [(midi, dur)]}, tone_ctx.rng, sr=SR)
+            n = min(len(buf.L), len(stab_L))
+            stab_L[:n] += buf.L[:n]
+            stab_R[:n] += buf.R[:n]
+
+        # Light plate reverb on the summed chord
+        L, R = reverb_stereo(stab_L, stab_R, ir_L, ir_R, wet=0.15)
+        mix.add_at(np.column_stack([L, R]), start_s, gain=tone_gain)
 
     # ── Bass: sustained G#1 pedal, re-struck every half-bar (pedal pulse) ─────
-    b_rng = root.spawn("bass")
-    t = 0.0
-    while t < TOTAL - 0.3:
-        bass = bass_note({"midi": GS1, "duration": 1.3, "lp_cutoff": 1100.0,
-                          "drive": 0.8, "sub_mix": 0.6},
-                         b_rng.spawn(f"b{t:.2f}").rng, sr=SR)
-        mix.add_at(bass.L, t, gain=G_BASS)
-        t += 2 * BEAT
+    if ENABLE_BASS:
+        b_rng = root.spawn("bass")
+        t = 0.0
+        while t < TOTAL - 0.3:
+            bass = bass_note({"midi": GS1, "duration": 1.3, "lp_cutoff": 1100.0,
+                              "drive": 0.8, "sub_mix": 0.6},
+                             b_rng.spawn(f"b{t:.2f}").rng, sr=SR)
+            mix.add_at(bass.L, t, gain=G_BASS)
+            t += 2 * BEAT
 
     # ── Drums: drop at beat 2, run to the end ────────────────────────────────
-    k_rng = root.spawn("kick")
-    h_rng = root.spawn("hat")
-    c_rng = root.spawn("clap")
-    kick = make_kick({"f0": 52.0, "f1": 40.0, "duration": 0.5,
-                      "drive": 1.6, "sub_level": 0.55}, k_rng.spawn("k").rng, sr=SR)
-    clap = make_clap({}, c_rng.spawn("c").rng, sr=SR)
+    if ENABLE_DRUMS:
+        k_rng = root.spawn("kick")
+        h_rng = root.spawn("hat")
+        c_rng = root.spawn("clap")
+        kick = make_kick({"f0": 52.0, "f1": 40.0, "duration": 0.5,
+                          "drive": 1.6, "sub_level": 0.55}, k_rng.spawn("k").rng, sr=SR)
+        clap = make_clap({}, c_rng.spawn("c").rng, sr=SR)
 
-    n_beats = int((TOTAL - 0.4) / BEAT)
-    for i in range(2, n_beats):                      # i = global beat index
-        bt = i * BEAT
-        mix.add_at(kick.L, bt, gain=G_KICK)          # four-on-the-floor
-        oh = make_hat({"open_": True, "decay_open": 0.30},
-                      h_rng.spawn(f"oh{i}").rng, sr=SR)
-        mix.add_at(oh.L, bt + 0.5 * BEAT, gain=G_HAT)  # offbeat open hat
-        if (i - 2) % 4 in (1, 3):                     # backbeat clap
-            mix.add_at(clap.L, bt, gain=G_CLAP)
+        n_beats = int((TOTAL - 0.4) / BEAT)
+        for i in range(2, n_beats):                      # i = global beat index
+            bt = i * BEAT
+            mix.add_at(kick.L, bt, gain=G_KICK)          # four-on-the-floor
+            oh = make_hat({"open_": True, "decay_open": 0.30},
+                          h_rng.spawn(f"oh{i}").rng, sr=SR)
+            mix.add_at(oh.L, bt + 0.5 * BEAT, gain=G_HAT)  # offbeat open hat
+            if (i - 2) % 4 in (1, 3):                     # backbeat clap
+                mix.add_at(clap.L, bt, gain=G_CLAP)
 
     return master(mix, target=0.92, fade_in_s=0.0, fade_out_s=0.5)
 
