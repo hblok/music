@@ -1,22 +1,22 @@
 # Phase 1 — Headless Core (no Qt)
 
 ## Remaining Core Modules
-- [ ] Fix candidate.py (remove stub AudioBuffer, fix RngContext.spawn usage)
-- [ ] Create core/scoring.py (Scorecard dataclass, diff(), aggregate, worst)
-- [ ] Create core/variants.py (VariantSpec, sweep(), render_and_score())
-- [ ] Create core/project.py (MatchProject dataclass, save/load JSON)
+- [x] Fix candidate.py (remove stub AudioBuffer, fix RngContext.spawn usage)
+- [x] Create core/scoring.py (Scorecard dataclass, diff(), aggregate, worst)
+- [x] Create core/variants.py (VariantSpec, sweep(), render_and_score())
+- [x] Create core/project.py (MatchProject dataclass, save/load JSON)
 
 ## Phase 1 Tests
-- [ ] Create tests/test_target.py
-- [ ] Create tests/test_phrase.py
-- [ ] Create tests/test_candidate.py
-- [ ] Create tests/test_scoring.py
-- [ ] Create tests/test_variants.py
-- [ ] Create tests/test_project.py
+- [x] Create tests/test_target.py
+- [x] Create tests/test_phrase.py
+- [x] Create tests/test_candidate.py
+- [x] Create tests/test_scoring.py
+- [x] Create tests/test_variants.py
+- [x] Create tests/test_project.py
 
 ## Phase 1 Acceptance
-- [ ] All tests green: `python -m unittest discover soundmatch/tests`
-- [ ] Commit: `soundmatch: headless core (target/phrase/candidate/scoring/variants/project) + tests`
+- [x] All tests green: `python -m unittest discover soundmatch/tests` (90/90 pass)
+- [x] Commit: `soundmatch: headless core (target/phrase/candidate/scoring/variants/project) + tests`
 
 # Phase 2 — Read-only inspector GUI
 - [ ] app.py, ui/window.py, ui/reference_panel.py, ui/stems_panel.py, ui/metrics_panel.py, ui/spectrogram.py
