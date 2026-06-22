@@ -37,24 +37,32 @@ class _AudioLoader(QObject):
         self._sr = sr
 
     def run(self) -> None:
+        import time
+        t0 = time.perf_counter()
         try:
             from inspector.features import load_audio
             import librosa
 
+            print(f"[load] starting: {self._path}", flush=True)
             audio = load_audio(self._path, sr=self._sr)
             y = audio["y"]
             sr_out = int(audio.get("sr", self._sr))
             duration_s = float(len(y) / sr_out)
+            print(f"[load] audio loaded: {duration_s:.1f}s, {len(y)} samples ({time.perf_counter()-t0:.2f}s)", flush=True)
 
-            # Peak-envelope downsample for waveform display (~2000 pts)
             y_display = self._peak_downsample(y, target=2000)
+            print(f"[load] waveform downsampled to {len(y_display)} pts ({time.perf_counter()-t0:.2f}s)", flush=True)
 
             hop = 4096
             S = librosa.feature.melspectrogram(y=y, sr=sr_out, n_mels=128, hop_length=hop)
             S_db = librosa.power_to_db(S, ref=np.max)
+            print(f"[load] spectrogram computed {S_db.shape} ({time.perf_counter()-t0:.2f}s)", flush=True)
 
+            print(f"[load] emitting finished signal ({time.perf_counter()-t0:.2f}s)", flush=True)
             self.finished.emit(y, sr_out, y_display, duration_s, S_db, hop)
+            print(f"[load] signal emitted ({time.perf_counter()-t0:.2f}s)", flush=True)
         except Exception as exc:
+            print(f"[load] error: {exc}", flush=True)
             self.error.emit(str(exc))
 
     @staticmethod
@@ -210,6 +218,10 @@ class ReferencePanel(QWidget):
         hop: int,
     ) -> None:
         """Called on the main thread when background load + display computation finish."""
+        import time
+        t0 = time.perf_counter()
+        print(f"[ui] _on_audio_loaded called on main thread", flush=True)
+
         self._y = np.asarray(y)
         self._sr = sr
         self._end_s = min(10.0, duration_s)
@@ -218,14 +230,21 @@ class ReferencePanel(QWidget):
 
         if self._path is not None:
             self._file_label.setText(self._path.name)
+        print(f"[ui] labels updated ({time.perf_counter()-t0:.2f}s)", flush=True)
 
-        # Use the downsampled array for plotting — correct duration via duration_s
         self._waveform.set_audio(
             np.asarray(y_display), sr, duration_s=duration_s, title="Waveform"
         )
+        print(f"[ui] waveform drawn ({time.perf_counter()-t0:.2f}s)", flush=True)
+
         self._waveform.set_selection(self._start_s, self._end_s)
+        print(f"[ui] selection drawn ({time.perf_counter()-t0:.2f}s)", flush=True)
+
         self._spectrogram.set_spectrogram_data(np.asarray(S_db), sr, hop, title="Spectrogram")
+        print(f"[ui] spectrogram drawn ({time.perf_counter()-t0:.2f}s)", flush=True)
+
         self._load_btn.setEnabled(True)
+        print(f"[ui] done ({time.perf_counter()-t0:.2f}s)", flush=True)
 
     def _on_load_error(self, msg: str) -> None:
         self._file_label.setText(f"Error: {msg}")
