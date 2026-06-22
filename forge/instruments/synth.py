@@ -15,7 +15,7 @@ import numpy as np
 from scipy import signal as _signal
 
 from forge.core.buffer import AudioBuffer
-from forge.core.dsp import glide_curve, highpass, lowpass, raised_cosine_attack, warm_partials
+from forge.core.dsp import bandpass, glide_curve, highpass, lowpass, raised_cosine_attack, warm_partials
 from forge.instruments.base import ParamSchema
 
 SR = 44100
@@ -36,7 +36,7 @@ SYNTH_BRASS_PARAMS = [
     ParamSchema("n_harmonics", "int", 24, lo=6, hi=48),
     ParamSchema("rolloff", "float", 0.7, lo=0.6, hi=1.6,
                 label="Saw rolloff exp (lower = brighter)"),
-    ParamSchema("drive", "float", 1.6, lo=0.5, hi=4.0, label="Tanh drive (grit)"),
+    ParamSchema("drive", "float", 2.0, lo=0.5, hi=4.0, label="Tanh drive (grit)"),
     ParamSchema("hp_cutoff", "float", 320.0, lo=40.0, hi=800.0, unit="Hz",
                 label="Highpass — thins the fundamental"),
     ParamSchema("hp_order", "int", 3, lo=1, hi=6, label="Highpass slope"),
@@ -59,6 +59,12 @@ SYNTH_BRASS_PARAMS = [
                 label="Pitch scoop into each note"),
     ParamSchema("width", "float", 0.35, lo=0.0, hi=1.0,
                 label="Stereo spread of detuned voices"),
+    ParamSchema("rasp", "float", 0.50, lo=0.0, hi=1.0,
+                label="Breath/buzz rasp (harshness)"),
+    ParamSchema("rasp_lo", "float", 1200.0, lo=300.0, hi=4000.0, unit="Hz",
+                label="Rasp band low cut"),
+    ParamSchema("rasp_hi", "float", 6500.0, lo=1000.0, hi=14000.0, unit="Hz",
+                label="Rasp band high cut"),
 ]
 
 
@@ -114,7 +120,7 @@ def synth_brass(params: dict, rng: np.random.Generator, **ctx) -> AudioBuffer:
     detune = float(params.get("detune", 0.007))
     n_harmonics = int(params.get("n_harmonics", 24))
     rolloff = float(params.get("rolloff", 0.7))
-    drive = float(params.get("drive", 1.6))
+    drive = float(params.get("drive", 2.0))
     hp_cutoff = float(params.get("hp_cutoff", 320.0))
     hp_order = int(params.get("hp_order", 3))
     formant_hz = float(params.get("formant_hz", 720.0))
@@ -129,6 +135,9 @@ def synth_brass(params: dict, rng: np.random.Generator, **ctx) -> AudioBuffer:
     bloom_cutoff = float(params.get("bloom_cutoff", 1300.0))
     scoop = float(params.get("scoop", 0.02))
     width = float(params.get("width", 0.35))
+    rasp = float(params.get("rasp", 0.50))
+    rasp_lo = float(params.get("rasp_lo", 1200.0))
+    rasp_hi = float(params.get("rasp_hi", 6500.0))
 
     total_dur = sum(d for _, d in notes)
     n = int(total_dur * sr)
@@ -184,6 +193,28 @@ def synth_brass(params: dict, rng: np.random.Generator, **ctx) -> AudioBuffer:
             R_dark = lowpass(R, bloom_cutoff, order=2, sr=sr)
             L = xf * L + (1.0 - xf) * ((1.0 - bloom) * L + bloom * L_dark)
             R = xf * R + (1.0 - xf) * ((1.0 - bloom) * R + bloom * R_dark)
+
+    # Voiced rasp: amplitude-tracked bandpass noise adds brass/reed breath buzz.
+    # Decorrelated L/R noise gives width without cancellation in mono.
+    # The rasp is scaled relative to the tone's own peak so `rasp=1.0` would
+    # contribute noise at the same level as the signal's peak — i.e. `rasp` is
+    # a genuine mix fraction between tonal (0) and noisy (1).
+    if rasp > 0.0:
+        rasp_hi_clamped = min(rasp_hi, sr * 0.49)
+        n_L = bandpass(rng.standard_normal(n), rasp_lo, rasp_hi_clamped, order=2, sr=sr)
+        n_R = bandpass(rng.standard_normal(n), rasp_lo, rasp_hi_clamped, order=2, sr=sr)
+        n_L /= np.max(np.abs(n_L)) + 1e-12
+        n_R /= np.max(np.abs(n_R)) + 1e-12
+        # Amplitude follower: smooth envelope shapes the noise so rasp tracks
+        # the note attack/release.  Normalised to unit peak, then scaled by the
+        # tone's own peak so the mix ratio stays constant regardless of L/R gain.
+        tone_peak = max(np.max(np.abs(L)), np.max(np.abs(R))) + 1e-12
+        amp_L = lowpass(np.abs(L), 80.0, order=2, sr=sr)
+        amp_R = lowpass(np.abs(R), 80.0, order=2, sr=sr)
+        amp_L = amp_L / (np.max(amp_L) + 1e-12) * tone_peak
+        amp_R = amp_R / (np.max(amp_R) + 1e-12) * tone_peak
+        L = L + rasp * n_L * amp_L
+        R = R + rasp * n_R * amp_R
 
     env = _stab_env(notes, n, sr, attack, release, legato)
     L *= env
