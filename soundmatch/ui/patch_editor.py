@@ -84,12 +84,15 @@ class PatchEditor(QWidget):
     Signals:
         patchChanged(instrument_id, params, layers, seed):
             Emitted (debounced) when any patch parameter changes.
+        suggestRequested():
+            Emitted when the "Suggest" button is clicked.
 
     Args:
         parent: Optional parent widget.
     """
 
     patchChanged = Signal(str, dict, list, int)  # instrument_id, params, layers, seed
+    suggestRequested = Signal()
 
     def __init__(self, parent: QWidget | None = None) -> None:
         super().__init__(parent)
@@ -140,6 +143,13 @@ class PatchEditor(QWidget):
         reroll_btn.setObjectName("reroll-btn")
         reroll_btn.clicked.connect(self._on_reroll)
         seed_row.addWidget(reroll_btn)
+
+        suggest_btn = QPushButton("💡 Suggest")
+        suggest_btn.setObjectName("suggest-btn")
+        suggest_btn.setToolTip("Run a coarse param search to find a good starting patch")
+        suggest_btn.clicked.connect(self.suggestRequested.emit)
+        seed_row.addWidget(suggest_btn)
+
         seed_row.addStretch()
         layout.addLayout(seed_row)
 

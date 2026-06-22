@@ -119,6 +119,7 @@ class MainWindow(QMainWindow):
         self._patch_editor = PatchEditor()
         self._patch_editor.setObjectName("patch-editor")
         self._patch_editor.patchChanged.connect(self._on_patch_changed)
+        self._patch_editor.suggestRequested.connect(self._on_suggest_requested)
         patch_dock = QDockWidget("Patch Editor", self)
         patch_dock.setObjectName("patch-editor-dock")
         patch_dock.setWidget(self._patch_editor)
@@ -473,6 +474,39 @@ class MainWindow(QMainWindow):
         seed = self._patch_editor.seed
         self._patch_editor.set_patch(inst_id, params, layers, seed)
         self._status_label.setText("Promoted variant → Patch Editor")
+
+    def _on_suggest_requested(self) -> None:
+        """Run a coarse param search and apply the best result."""
+        if self._target_metrics is None or self._phrase is None:
+            self._status_label.setText("No target — characterize first")
+            return
+
+        from soundmatch.core.search import coarse_search
+        self._status_label.setText("Searching…")
+        QApplication.processEvents()
+
+        try:
+            result = coarse_search(
+                self._target_metrics,
+                self._phrase,
+                self._patch_editor.instrument_id,
+                self._patch_editor.params,
+                self._patch_editor.layers,
+                self._patch_editor.seed,
+            )
+            # Apply the best params
+            self._patch_editor.set_patch(
+                result.instrument_id,
+                result.best_params,
+                result.best_layers,
+                result.seed,
+            )
+            self._status_label.setText(
+                f"Suggest: agg={result.best_score:.4f} "
+                f"({result.iterations} iterations)"
+            )
+        except Exception as exc:
+            self._status_label.setText(f"Search error: {exc}")
 
     def _characterize_target(self, start_s: float, end_s: float, stem: str = "other") -> None:
         """Characterize the target and update the metrics panel."""

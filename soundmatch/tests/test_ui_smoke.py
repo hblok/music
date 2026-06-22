@@ -681,5 +681,20 @@ class TestVariantGrid(unittest.TestCase):
         self.assertEqual(received[0][1], [("snare", {})])
 
 
+class TestPatchEditorSuggest(unittest.TestCase):
+    """Test PatchEditor suggest button."""
+
+    def test_suggest_signal(self):
+        from soundmatch.ui.patch_editor import PatchEditor
+        w = PatchEditor()
+        received = []
+        w.suggestRequested.connect(lambda: received.append(True))
+        # Find and click the suggest button
+        suggest_btn = w.findChild(object, 'suggest-btn')
+        self.assertIsNotNone(suggest_btn)
+        suggest_btn.click()
+        self.assertEqual(len(received), 1)
+
+
 if __name__ == "__main__":
     unittest.main()
