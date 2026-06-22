@@ -140,6 +140,7 @@ class StemsPanel(QWidget):
 
     separateRequested = Signal()
     targetChosen = Signal(str)
+    stemsReady = Signal(object, int)  # (stems dict, sr) — emitted after any successful load
 
     def __init__(
         self,
@@ -219,6 +220,7 @@ class StemsPanel(QWidget):
         self._sr = sr
         self._rebuild_rows()
         self._status.setText(f"{len(stems)} stems loaded")
+        self.stemsReady.emit(stems, sr)
 
     def get_stem_audio(self, stem_name: str) -> np.ndarray | None:
         """Return the mono audio for a specific stem, or None."""
@@ -244,6 +246,7 @@ class StemsPanel(QWidget):
         self._stems = stems
         self._rebuild_rows()
         self._status.setText(f"Separated {len(stems)} stems")
+        self.stemsReady.emit(stems, self._sr)
 
     def _on_separation_error(self, msg: str) -> None:
         log.error("separation failed: %s", msg)

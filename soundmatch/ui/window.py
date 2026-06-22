@@ -100,6 +100,7 @@ class MainWindow(QMainWindow):
         self._stems = StemsPanel(service)
         self._stems.setObjectName("stems-panel")
         self._stems.separateRequested.connect(self._on_separate_requested)
+        self._stems.stemsReady.connect(self._on_stems_ready)
         self._stems.targetChosen.connect(self._on_stem_chosen)
         stems_dock = QDockWidget("Stems", self)
         stems_dock.setObjectName("stems-dock")
@@ -261,6 +262,10 @@ class MainWindow(QMainWindow):
             self._patch_editor.set_patch(
                 proj.instrument_id, proj.params, proj.layers, proj.seed,
             )
+
+        # Restore stems if the stems directory still exists
+        if proj.stems_dir and proj.stems_dir.is_dir():
+            self._load_stems_from_dir(proj.stems_dir)
 
     def _on_save_project(self) -> None:
         """Save the project (prompt for path if not yet saved)."""
@@ -494,6 +499,44 @@ class MainWindow(QMainWindow):
         seed = self._patch_editor.seed
         self._patch_editor.set_patch(inst_id, params, layers, seed)
         self._status_label.setText("Promoted variant → Patch Editor")
+
+    def _load_stems_from_dir(self, stems_dir: Path) -> None:
+        """Load stem .wav files from a directory into the stems panel."""
+        import soundfile as sf
+        stems: dict = {}
+        sr = self._service.sr
+        try:
+            for wav in sorted(stems_dir.glob("*.wav")):
+                audio, file_sr = sf.read(str(wav), dtype="float32", always_2d=False)
+                if audio.ndim == 2:
+                    audio = audio.mean(axis=1)
+                stems[wav.stem] = audio
+                sr = file_sr
+            if stems:
+                log.info("loaded %d stems from %s", len(stems), stems_dir)
+                self._stems.set_stems(stems, sr)
+            else:
+                log.warning("stems dir exists but contains no .wav files: %s", stems_dir)
+        except Exception as exc:
+            log.error("failed to load stems from %s: %s", stems_dir, exc, exc_info=True)
+
+    def _on_stems_ready(self, stems: object, sr: int) -> None:
+        """Save separated stems to disk and record the dir in the project."""
+        import soundfile as sf
+        stems_dict: dict = stems  # type: ignore[assignment]
+        if not stems_dict or self._ref_path is None:
+            return
+        stems_dir = self._ref_path.parent / f"{self._ref_path.stem}_stems"
+        try:
+            stems_dir.mkdir(exist_ok=True)
+            for name, audio in stems_dict.items():
+                out = stems_dir / f"{name}.wav"
+                sf.write(str(out), audio, sr)
+            self._project.stems_dir = stems_dir
+            log.info("stems saved to %s", stems_dir)
+            self._status_label.setText(f"Stems saved: {stems_dir.name}/")
+        except Exception as exc:
+            log.error("failed to save stems: %s", exc, exc_info=True)
 
     def _on_separate_requested(self) -> None:
         """Handle Separate Stems button: run demucs on the loaded reference."""

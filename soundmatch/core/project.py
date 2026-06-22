@@ -65,6 +65,7 @@ class MatchProject:
     seed: int = 42
     variant_specs: list[VariantSpec] = field(default_factory=list)
     best_variant: Optional[VariantResult] = None
+    stems_dir: Optional[Path] = None
 
     def to_dict(self) -> dict[str, Any]:
         """Serialize to a plain dict for JSON save."""
@@ -82,6 +83,7 @@ class MatchProject:
             "seed": self.seed,
             "variant_specs": [s.to_dict() for s in self.variant_specs],
             "best_variant": self.best_variant.to_dict() if self.best_variant else None,
+            "stems_dir": str(self.stems_dir) if self.stems_dir else None,
         }
 
     @classmethod
@@ -110,6 +112,7 @@ class MatchProject:
             seed=d.get("seed", 42),
             variant_specs=variant_specs,
             best_variant=best_variant,
+            stems_dir=Path(d["stems_dir"]) if d.get("stems_dir") else None,
         )
 
     def save(self, p: Path) -> None:

@@ -86,9 +86,10 @@ class PlaybackService:
     # Buffer management
 
     def load(self, buf: AudioBuffer) -> None:
-        """Replace the current buffer (takes effect immediately)."""
+        """Replace the current buffer and reset position to the start."""
         with self._lock:
             self._buf = buf
+        self.clock.seek(0)
 
     def unload(self) -> None:
         with self._lock:
