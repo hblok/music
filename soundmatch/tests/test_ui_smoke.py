@@ -359,5 +359,129 @@ class TestMainWindowPatchEditor(unittest.TestCase):
         self.assertIsNotNone(w.scorecard_panel.scorecard)
 
 
+class TestVariantCard(unittest.TestCase):
+    """Smoke test _VariantCard widget."""
+
+    def test_construct(self):
+        from soundmatch.ui.variant_grid import _VariantCard
+        card = _VariantCard(name="V0", score=0.25, metrics_summary="perc=50%")
+        self.assertIsNotNone(card)
+
+    def test_construct_with_audio(self):
+        from soundmatch.ui.variant_grid import _VariantCard
+        y = ensure_fixture()
+        card = _VariantCard(
+            name="V0", score=0.1, metrics_summary="cent=440Hz",
+            y=y, sr=44100,
+        )
+        self.assertIsNotNone(card)
+
+    def test_promote_signal(self):
+        from soundmatch.ui.variant_grid import _VariantCard
+        card = _VariantCard(
+            name="V0", score=0.3, metrics_summary="",
+            params={"f0": 60.0}, layers=[("snare", {"tone": 0.5})],
+        )
+        received = []
+        card.promoteRequested.connect(lambda p, l: received.append((p, l)))
+        card._on_promote()
+        self.assertEqual(len(received), 1)
+        self.assertEqual(received[0][0], {"f0": 60.0})
+        self.assertEqual(received[0][1], [("snare", {"tone": 0.5})])
+
+
+class TestVariantGrid(unittest.TestCase):
+    """Smoke test VariantGrid widget."""
+
+    def test_construct(self):
+        from soundmatch.ui.variant_grid import VariantGrid
+        grid = VariantGrid()
+        self.assertIsNotNone(grid)
+
+    def test_set_results_with_stubs(self):
+        from soundmatch.ui.variant_grid import VariantGrid
+        grid = VariantGrid()
+        # Use simple namespace objects as stubs
+        from types import SimpleNamespace
+        stubs = [
+            SimpleNamespace(name="V0", aggregate=0.15, summary="cent=440Hz",
+                            params={"f0": 60.0}, layers=[]),
+            SimpleNamespace(name="V1", aggregate=0.35, summary="cent=880Hz",
+                            params={"f0": 120.0}, layers=[]),
+            SimpleNamespace(name="V2", aggregate=0.55, summary="cent=220Hz",
+                            params={"f0": 30.0}, layers=[]),
+        ]
+        y = ensure_fixture()
+        audio_data = [(y, 44100)] * 3
+        grid.set_results(stubs, audio_data=audio_data)
+        self.assertEqual(len(grid._cards), 3)
+        self.assertEqual(grid._count_label.text(), "3 variants")
+
+    def test_set_results_clears_previous(self):
+        from soundmatch.ui.variant_grid import VariantGrid
+        grid = VariantGrid()
+        from types import SimpleNamespace
+        stubs1 = [SimpleNamespace(name="A", aggregate=0.1, summary="",
+                                   params={}, layers=[])]
+        stubs2 = [
+            SimpleNamespace(name="B", aggregate=0.2, summary="",
+                            params={}, layers=[]),
+            SimpleNamespace(name="C", aggregate=0.3, summary="",
+                            params={}, layers=[]),
+        ]
+        grid.set_results(stubs1)
+        self.assertEqual(len(grid._cards), 1)
+        grid.set_results(stubs2)
+        self.assertEqual(len(grid._cards), 2)
+
+    def test_sweep_requested_signal(self):
+        from soundmatch.ui.variant_grid import VariantGrid
+        grid = VariantGrid()
+        received = []
+        grid.sweepRequested.connect(lambda a, v: received.append((a, v)))
+        # Set axis and values
+        grid._axis_combo.setCurrentText("drive")
+        grid._values_edit.setText("0.0, 0.5, 1.0")
+        grid._on_sweep()
+        self.assertEqual(len(received), 1)
+        self.assertEqual(received[0][0], "drive")
+        self.assertEqual(received[0][1], [0.0, 0.5, 1.0])
+
+    def test_sweep_ignores_empty_values(self):
+        from soundmatch.ui.variant_grid import VariantGrid
+        grid = VariantGrid()
+        received = []
+        grid.sweepRequested.connect(lambda a, v: received.append((a, v)))
+        grid._values_edit.setText("")
+        grid._on_sweep()
+        self.assertEqual(len(received), 0)
+
+    def test_sweep_ignores_bad_values(self):
+        from soundmatch.ui.variant_grid import VariantGrid
+        grid = VariantGrid()
+        received = []
+        grid.sweepRequested.connect(lambda a, v: received.append((a, v)))
+        grid._values_edit.setText("abc, def")
+        grid._on_sweep()
+        self.assertEqual(len(received), 0)
+
+    def test_promote_requested_signal(self):
+        from soundmatch.ui.variant_grid import VariantGrid
+        grid = VariantGrid()
+        from types import SimpleNamespace
+        stubs = [
+            SimpleNamespace(name="V0", aggregate=0.2, summary="",
+                            params={"f0": 60.0}, layers=[("snare", {})]),
+        ]
+        grid.set_results(stubs)
+        received = []
+        grid.promoteRequested.connect(lambda p, l: received.append((p, l)))
+        # Simulate promote from the card
+        grid._cards[0]._on_promote()
+        self.assertEqual(len(received), 1)
+        self.assertEqual(received[0][0], {"f0": 60.0})
+        self.assertEqual(received[0][1], [("snare", {})])
+
+
 if __name__ == "__main__":
     unittest.main()
