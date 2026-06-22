@@ -13,6 +13,7 @@ import sys
 
 
 def main(argv=None) -> int:
+    print("main - start")
     parser = argparse.ArgumentParser(description="Sound-Match Studio")
     parser.add_argument("--sr", type=int, default=44100, help="Sample rate")
     parser.add_argument("file", nargs="?", default=None, help="Reference audio file to load")
