@@ -21,7 +21,7 @@ import sys
 import time
 from pathlib import Path
 
-from . import features, instruments, report, plots
+from . import features, instruments, report, plots, separation, transcription
 
 
 def main() -> None:
@@ -43,6 +43,10 @@ def main() -> None:
                         help="Start time in seconds (default: 0)")
     parser.add_argument("--end",            type=float, default=None,  metavar="SECS",
                         help="End time in seconds (default: EOF)")
+    parser.add_argument("--separate", "--stems", action="store_true",
+                        help="Run demucs stem separation + per-stem transcription")
+    parser.add_argument("--stems-out",      metavar="DIR",  default=None,
+                        help="Save separated stems as WAVs into DIR (requires --separate)")
     args = parser.parse_args()
 
     path = Path(args.file)
@@ -91,6 +95,25 @@ def main() -> None:
     harmony_data["mode_essentia"]         = es_data["mode_essentia"]
     harmony_data["key_strength_essentia"] = es_data["key_strength_essentia"]
 
+    # ── Stem separation + per-stem transcription (optional) ──────────────────
+    stems_results: dict | None = None
+    if args.separate:
+        _step("Stem separation      (demucs htdemucs, CPU)")
+        print("         (first run downloads model; may take ~30 s)", flush=True)
+        stems_raw, reason = separation.separate_stems(
+            str(path),
+            offset=args.start,
+            end=args.end,
+            sr=args.sr,
+            stems_out_dir=args.stems_out,
+        )
+        if stems_raw is None:
+            print(f"         ⚠  {reason}", flush=True)
+        else:
+            print(f"         stems: {', '.join(stems_raw['names'])}", flush=True)
+            _step("Per-stem transcription")
+            stems_results = _transcribe_stems(stems_raw, audio.get("time_offset", 0.0))
+
     # ── Render ────────────────────────────────────────────────────────────────
     results = {
         "path":        str(path),
@@ -100,6 +123,7 @@ def main() -> None:
         "structure":   structure_data,
         "timbre":      timbre_data,
         "instruments": instrument_data,
+        "stems":       stems_results,
     }
 
     text = report.render(results)
@@ -123,6 +147,39 @@ def main() -> None:
 
 def _step(msg: str) -> None:
     print(f"\n▶ {msg}", flush=True)
+
+
+def _transcribe_stems(stems_raw: dict, time_offset: float) -> dict:
+    """Run per-stem transcription and collect results."""
+    stem_data: dict = {"names": stems_raw["names"], "sr_mono": stems_raw["sr_mono"], "stems": {}}
+    sr = stems_raw["sr_mono"]
+
+    for name in stems_raw["names"]:
+        y = stems_raw[f"{name}_mono"]
+        # drums → rhythm analysis; everything else → pyin melodic
+        kind = name  # 'drums', 'bass', 'other', 'vocals'
+        result = transcription.transcribe_stem(y, sr, kind, time_offset=time_offset)
+        stem_data["stems"][name] = result
+        silent_str = "  (silent/empty)" if result.get("silent") else ""
+        print(f"         {name}: {_stem_summary(result)}{silent_str}", flush=True)
+
+    return stem_data
+
+
+def _stem_summary(result: dict) -> str:
+    """One-line summary of a stem result for progress output."""
+    if result.get("silent"):
+        return f"rms={result['rms']:.4f}"
+    if result["kind"] == "drums":
+        bpm = result.get("tempo_bpm")
+        ops = result.get("onsets_per_sec", 0)
+        bpm_str = f", {bpm:.0f} BPM" if bpm is not None else ""
+        return f"{result['n_onsets']} onsets ({ops:.1f}/s{bpm_str})"
+    else:
+        n = result.get("n_events", 0)
+        top = result.get("pitch_classes", [])
+        top_str = "/".join(p["note"] for p in top[:3]) if top else "n/a"
+        return f"{n} note events, top pitch classes: {top_str}"
 
 
 if __name__ == "__main__":

@@ -231,6 +231,86 @@ def render(results: dict) -> str:
                 lines.append(f"      {conf_marker} {e['confidence']:<7}  {e['name']}")
                 lines.append(f"               {e['evidence']}")
 
+    # ── Stem separation & transcription ───────────────────────────────────────
+    stems_data = results.get("stems")
+    if stems_data:
+        lines.append("")
+        rule("STEM SEPARATION  (demucs htdemucs)")
+
+        for name in stems_data.get("names", []):
+            s = stems_data["stems"].get(name, {})
+            lines.append("")
+            lines.append(f"  ── {name.upper()} {'─' * (max(0, _WIDTH - len(name) - 7))}")
+
+            if s.get("silent"):
+                lines.append(f"     (silent / empty — RMS {s['rms']:.5f})")
+                continue
+
+            if s.get("error"):
+                lines.append(f"     (transcription error: {s['error']})")
+                continue
+
+            rms = s.get("rms", 0)
+            centroid = s.get("centroid_hz")
+            lines.append(f"     RMS: {rms:.4f}" +
+                         (f"   Centroid: {centroid:.0f} Hz" if centroid else ""))
+
+            if name == "drums":
+                n_on   = s.get("n_onsets", 0)
+                ops    = s.get("onsets_per_sec", 0.0)
+                ioi    = s.get("median_ioi_s")
+                bpm    = s.get("tempo_bpm")
+                lines.append(f"     Onsets:  {n_on}  ({ops:.1f} / sec)")
+                if ioi is not None:
+                    lines.append(f"     Median inter-onset interval: {ioi*1000:.0f} ms")
+                if bpm is not None:
+                    lines.append(f"     Beat-track tempo: {bpm:.1f} BPM")
+
+                on_times = s.get("onset_times", [])
+                if on_times:
+                    lines.append("")
+                    lines.append("     Onset times (s):")
+                    row = "       "
+                    for t in on_times:
+                        item = f"{t:.2f}  "
+                        if len(row) + len(item) > _WIDTH - 2:
+                            lines.append(row.rstrip())
+                            row = "       " + item
+                        else:
+                            row += item
+                    if row.strip():
+                        lines.append(row.rstrip())
+
+            else:
+                # Melodic stem
+                voiced_r = s.get("voiced_ratio", 0.0)
+                lines.append(f"     Voiced frames: {voiced_r*100:.1f}%")
+
+                # Pitch-class histogram
+                pc = s.get("pitch_classes", [])
+                if pc:
+                    lines.append("")
+                    lines.append("     Pitch-class histogram (duration-weighted):")
+                    for entry in pc:
+                        bv = bar(entry["weight"], 18, 1.0)
+                        lines.append(f"       {entry['note']:>3}  {bv}  {entry['weight']*100:.1f}%")
+
+                # Note events table
+                events = s.get("note_events", [])
+                if events:
+                    lines.append("")
+                    lines.append(f"     Note events ({len(events)} total):")
+                    lines.append(f"       {'Start':>7}  {'Dur':>6}  MIDI  Note")
+                    lines.append(f"       {'─'*7}  {'─'*6}  {'─'*4}  {'─'*6}")
+                    for ev in events:
+                        lines.append(
+                            f"       {ev['t_start']:>7.2f}s  "
+                            f"{ev['duration']:>5.2f}s  "
+                            f"{ev['midi']:>4}  {ev['note']}"
+                        )
+                else:
+                    lines.append("     (no note events detected above duration threshold)")
+
     lines.append("")
     lines.append("=" * _WIDTH)
     return "\n".join(lines)
