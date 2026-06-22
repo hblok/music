@@ -423,6 +423,54 @@ class TestPhase8GroupAVoices(unittest.TestCase):
         self.assertGreater(buf.peak(), 0.0)
 
 
+class TestReed(unittest.TestCase):
+    """Acceptance tests for the saxophone (reed family)."""
+
+    def _rng(self):
+        return RngContext(7).spawn("reed").rng
+
+    def _render(self, params=None):
+        entry = get_instrument("sax")
+        return entry["fn"](params or {}, self._rng())
+
+    def test_sax_in_registry(self):
+        entry = get_instrument("sax")
+        self.assertEqual(entry["family"], "reed")
+        self.assertGreater(len(entry["params"]), 0)
+
+    def test_reed_family_present(self):
+        families = {e["family"] for e in REGISTRY.values()}
+        self.assertIn("reed", families)
+
+    def test_sax_non_silent_and_finite(self):
+        buf = self._render({"notes": [(68, 1.0)]})
+        self.assertGreater(buf.peak(), 0.0)
+        self.assertTrue(np.all(np.isfinite(buf.data)))
+
+    def test_sax_single_note_shorthand(self):
+        buf = self._render({"midi": 70, "duration": 0.8})
+        self.assertGreater(buf.peak(), 0.0)
+
+    def test_sax_phrase_length_matches_total_duration(self):
+        buf = self._render({"notes": [(68, 0.5), (70, 0.5), (71, 0.5)]})
+        # ~1.5 s at 44100 Hz, within a few samples of rounding
+        self.assertAlmostEqual(len(buf) / 44100, 1.5, delta=0.01)
+
+    def test_sax_legato_and_tongued_both_render(self):
+        notes = [(68, 0.4), (70, 0.4), (68, 0.4)]
+        tongued = self._render({"notes": notes, "legato": False})
+        legato = self._render({"notes": notes, "legato": True})
+        self.assertGreater(tongued.peak(), 0.0)
+        self.assertGreater(legato.peak(), 0.0)
+
+    def test_sax_slider_buildable(self):
+        entry = get_instrument("sax")
+        for p in entry["params"]:
+            if p.kind == "float":
+                self.assertIsNotNone(p.lo, f"sax/{p.name}: lo is None")
+                self.assertIsNotNone(p.hi, f"sax/{p.name}: hi is None")
+
+
 class TestPhase8GroupAStrings(unittest.TestCase):
     """Acceptance tests for tremolo_strings, santur, oud."""
 

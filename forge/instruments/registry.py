@@ -44,6 +44,10 @@ from forge.instruments.fx import (
     riser,
     make_zap,
 )
+from forge.instruments.reed import (
+    SAX_PARAMS,
+    sax_phrase,
+)
 from forge.instruments.percussion import (
     ANVIL_PARAMS,
     CLAP_PARAMS,
@@ -161,6 +165,8 @@ REGISTRY: dict = {
     "ney":         _entry(make_ney,      NEY_PARAMS,         "voice"),
     "chant":       _entry(make_chant,    CHANT_PARAMS,       "voice"),
     "horn":        _entry(make_horn,     HORN_PARAMS,        "voice"),
+    # reed
+    "sax":         _entry(sax_phrase,    SAX_PARAMS,         "reed"),
     # bass
     "bass":        _entry(bass_note,     BASS_NOTE_PARAMS,   "bass"),
     "psy_bass":    _entry(psy_bass_note, PSY_BASS_PARAMS,    "bass"),
