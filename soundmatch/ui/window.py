@@ -20,13 +20,14 @@ import numpy as np
 
 log = logging.getLogger(__name__)
 
-from PySide6.QtCore import Qt
+from PySide6.QtCore import Qt, QObject, QThread, Signal
 from PySide6.QtWidgets import (
     QApplication,
     QDockWidget,
     QFileDialog,
     QLabel,
     QMainWindow,
+    QProgressBar,
     QStatusBar,
     QVBoxLayout,
     QWidget,
@@ -46,6 +47,36 @@ from soundmatch.ui.reference_panel import ReferencePanel
 from soundmatch.ui.scorecard_panel import ScorecardPanel
 from soundmatch.ui.stems_panel import StemsPanel
 from soundmatch.ui.variant_grid import VariantGrid
+
+
+class _SearchWorker(QObject):
+    """Runs coarse_search on a background thread."""
+
+    finished = Signal(object)       # SearchResult
+    progress = Signal(int, int)     # (done, total)
+    error = Signal(str)
+
+    def __init__(self, target, phrase, instrument_id, params, layers, seed):
+        super().__init__()
+        self._target = target
+        self._phrase = phrase
+        self._instrument_id = instrument_id
+        self._params = params
+        self._layers = layers
+        self._seed = seed
+
+    def run(self) -> None:
+        from soundmatch.core.search import coarse_search
+        try:
+            result = coarse_search(
+                self._target, self._phrase,
+                self._instrument_id, self._params, self._layers, self._seed,
+                on_progress=lambda done, total: self.progress.emit(done, total),
+            )
+            self.finished.emit(result)
+        except Exception as exc:
+            log.error("search worker error: %s", exc, exc_info=True)
+            self.error.emit(str(exc))
 
 
 class MainWindow(QMainWindow):
@@ -69,6 +100,8 @@ class MainWindow(QMainWindow):
         self._project: MatchProject = MatchProject()
         self._cand_y: np.ndarray | None = None
         self._cand_sr: int = 44100
+        self._search_worker: _SearchWorker | None = None
+        self._search_thread: QThread | None = None
 
         self.setWindowTitle("Sound-Match Studio")
         self.setObjectName("soundmatch-main-window")
@@ -177,11 +210,30 @@ class MainWindow(QMainWindow):
         self._status = QStatusBar()
         self._status_label = QLabel("Ready")
         self._status_label.setObjectName("status-label")
-        self._status.addWidget(self._status_label)
+        self._status.addWidget(self._status_label, 1)
+
+        self._progress = QProgressBar()
+        self._progress.setObjectName("main-progress")
+        self._progress.setRange(0, 0)  # indeterminate by default
+        self._progress.setMaximumWidth(180)
+        self._progress.setVisible(False)
+        self._status.addPermanentWidget(self._progress)
+
         self.setStatusBar(self._status)
 
         # Menu
         self._build_menu()
+
+    def _show_progress(self, label: str, total: int = 0) -> None:
+        """Show the progress bar. total=0 means indeterminate."""
+        self._progress.setRange(0, total)
+        self._progress.setValue(0)
+        self._progress.setVisible(True)
+        self._status_label.setText(label)
+        QApplication.processEvents()
+
+    def _hide_progress(self) -> None:
+        self._progress.setVisible(False)
 
     def _build_menu(self) -> None:
         file_menu = self.menuBar().addMenu("&File")
@@ -388,9 +440,9 @@ class MainWindow(QMainWindow):
     def _on_selection_changed(self, start_s: float, end_s: float) -> None:
         """Handle selection change: characterize the selected region."""
         log.debug("selection changed: %.2f–%.2fs", start_s, end_s)
-        self._status_label.setText("Characterizing…")
-        QApplication.processEvents()
+        self._show_progress("Characterizing…")
         self._characterize_target(start_s, end_s, stem="mix")
+        self._hide_progress()
 
     def _on_stem_chosen(self, stem_name: str) -> None:
         """Handle stem choice: re-characterize with the chosen stem."""
@@ -400,9 +452,9 @@ class MainWindow(QMainWindow):
         if y is not None:
             end_s = len(y) / sr
         log.debug("stem chosen: %s", stem_name)
-        self._status_label.setText(f"Characterizing stem '{stem_name}'…")
-        QApplication.processEvents()
+        self._show_progress(f"Characterizing stem '{stem_name}'…")
         self._characterize_target(start_s, end_s, stem=stem_name)
+        self._hide_progress()
 
     def _on_patch_changed(
         self,
@@ -416,8 +468,7 @@ class MainWindow(QMainWindow):
             self._status_label.setText("No target — load and select reference first")
             return
         log.debug("patch changed: %s seed=%d", instrument_id, seed)
-        self._status_label.setText("Rendering…")
-        QApplication.processEvents()
+        self._show_progress("Rendering…")
 
         if self._phrase is None:
             self._phrase = seed_from_metrics(self._target_metrics, bpm=138.0)
@@ -444,15 +495,17 @@ class MainWindow(QMainWindow):
         except Exception as exc:
             log.error("render error: %s", exc, exc_info=True)
             self._status_label.setText(f"Render error: {exc}")
+        finally:
+            self._hide_progress()
 
     def _on_sweep_requested(self, axis: str, values: list) -> None:
         """Handle variant sweep request from the grid."""
         if self._target_metrics is None or self._phrase is None:
             self._status_label.setText("No target — characterize first")
             return
-        log.debug("sweep requested: axis=%s values=%s", axis, values)
-        self._status_label.setText(f"Sweeping '{axis}'…")
-        QApplication.processEvents()
+        n = len(values)
+        log.info("sweep requested: axis=%s values=%s", axis, values)
+        self._show_progress(f"Sweeping '{axis}'…", total=n)
 
         try:
             specs = sweep(self._patch_editor.params, axis, values)
@@ -467,7 +520,7 @@ class MainWindow(QMainWindow):
             )
 
             audio_data: list[tuple[np.ndarray, int]] = []
-            for r in results:
+            for i, r in enumerate(results):
                 merged = dict(self._patch_editor.params)
                 merged.update(r.spec.param_overrides)
                 buf = render_phrase(
@@ -479,13 +532,17 @@ class MainWindow(QMainWindow):
                 )
                 y = buf.data.mean(axis=1) if buf.data.ndim == 2 else buf.data
                 audio_data.append((y, buf.sr))
+                self._progress.setValue(i + 1)
+                QApplication.processEvents()
 
-            log.debug("sweep done: %d variants on '%s'", len(results), axis)
+            log.info("sweep done: %d variants on '%s'", len(results), axis)
             self._variant_grid.set_results(results, audio_data=audio_data)
             self._status_label.setText(f"Swept {len(results)} variants on axis '{axis}'")
         except Exception as exc:
             log.error("sweep error: %s", exc, exc_info=True)
             self._status_label.setText(f"Sweep error: {exc}")
+        finally:
+            self._hide_progress()
 
     def _on_promote_requested(self, params: dict, layers: list) -> None:
         """Promote a variant's params back to the patch editor."""
@@ -547,38 +604,56 @@ class MainWindow(QMainWindow):
         self._stems.separate(str(self._ref_path), sr=self._service.sr)
 
     def _on_suggest_requested(self) -> None:
-        """Run a coarse param search and apply the best result."""
+        """Run coarse param search on a background thread."""
         if self._target_metrics is None or self._phrase is None:
             self._status_label.setText("No target — characterize first")
             return
+        if self._search_thread is not None and self._search_thread.isRunning():
+            log.debug("search already running")
+            return
 
-        log.debug("suggest requested")
-        from soundmatch.core.search import coarse_search
-        self._status_label.setText("Searching…")
-        QApplication.processEvents()
+        log.info("suggest requested: instrument=%s", self._patch_editor.instrument_id)
+        self._show_progress("Searching…")
 
-        try:
-            result = coarse_search(
-                self._target_metrics,
-                self._phrase,
-                self._patch_editor.instrument_id,
-                self._patch_editor.params,
-                self._patch_editor.layers,
-                self._patch_editor.seed,
-            )
-            self._patch_editor.set_patch(
-                result.instrument_id,
-                result.best_params,
-                result.best_layers,
-                result.seed,
-            )
-            log.debug("suggest done: agg=%.4f iterations=%d", result.best_score, result.iterations)
-            self._status_label.setText(
-                f"Suggest: agg={result.best_score:.4f} ({result.iterations} iterations)"
-            )
-        except Exception as exc:
-            log.error("suggest error: %s", exc, exc_info=True)
-            self._status_label.setText(f"Search error: {exc}")
+        self._search_worker = _SearchWorker(
+            self._target_metrics,
+            self._phrase,
+            self._patch_editor.instrument_id,
+            self._patch_editor.params,
+            self._patch_editor.layers,
+            self._patch_editor.seed,
+        )
+        self._search_thread = QThread(self)
+        self._search_worker.moveToThread(self._search_thread)
+        self._search_thread.started.connect(self._search_worker.run)
+        self._search_worker.progress.connect(self._on_search_progress)
+        self._search_worker.finished.connect(self._on_search_done)
+        self._search_worker.error.connect(self._on_search_error)
+        self._search_worker.finished.connect(self._search_thread.quit)
+        self._search_worker.error.connect(self._search_thread.quit)
+        self._search_thread.finished.connect(self._search_thread.deleteLater)
+        self._search_thread.start()
+
+    def _on_search_progress(self, done: int, total: int) -> None:
+        if self._progress.maximum() != total:
+            self._progress.setRange(0, total)
+        self._progress.setValue(done)
+        self._status_label.setText(f"Searching… {done}/{total}")
+
+    def _on_search_done(self, result: object) -> None:
+        self._hide_progress()
+        from soundmatch.core.search import SearchResult
+        r: SearchResult = result  # type: ignore[assignment]
+        self._patch_editor.set_patch(r.instrument_id, r.best_params, r.best_layers, r.seed)
+        log.info("suggest done: agg=%.4f iterations=%d", r.best_score, r.iterations)
+        self._status_label.setText(
+            f"Suggest: agg={r.best_score:.4f} ({r.iterations} iterations)"
+        )
+
+    def _on_search_error(self, msg: str) -> None:
+        self._hide_progress()
+        log.error("suggest failed: %s", msg)
+        self._status_label.setText(f"Search error: {msg}")
 
     def _characterize_target(self, start_s: float, end_s: float, stem: str = "other") -> None:
         """Characterize the target and update the metrics panel."""

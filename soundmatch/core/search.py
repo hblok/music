@@ -14,7 +14,7 @@ from __future__ import annotations
 import itertools
 import logging
 from dataclasses import dataclass
-from typing import Any
+from typing import Any, Callable
 
 import numpy as np
 
@@ -77,6 +77,7 @@ def coarse_search(
     grid: dict[str, list[Any]] | None = None,
     max_iterations: int = 200,
     weights: dict[str, float] | None = None,
+    on_progress: Callable[[int, int], None] | None = None,
 ) -> SearchResult:
     """Perform a coarse grid search over key parameters.
 
@@ -127,6 +128,9 @@ def coarse_search(
         indices = [int(i * step) for i in range(max_iterations)]
         combos = [combos[i] for i in indices]
 
+    log.info("coarse_search: %d combos, instrument=%s, params=%s",
+             len(combos), instrument_id, list(active_params))
+
     best_params = dict(base_params)
     best_score = float("inf")
     best_scorecard = None
@@ -152,7 +156,9 @@ def coarse_search(
                 best_scorecard = sc
         except Exception as exc:
             log.debug("search iteration failed: %s", exc)
-            continue
+        finally:
+            if on_progress is not None:
+                on_progress(iterations, len(combos))
 
     if best_scorecard is None:
         return _evaluate_single(
