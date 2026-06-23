@@ -29,7 +29,7 @@ from forge.core.resynth import ResynthModel, load_model, render, save_model  # n
 
 log = logging.getLogger(__name__)
 
-_MAX_PARTIALS = 64
+_MAX_PARTIAL_HZ = 20000.0   # capture harmonics up to ~20 kHz
 _HOP_LENGTH = 256
 _N_FFT = 2048
 _HNR_TONAL_THRESHOLD = 6.0  # dB — above this → treat as tonal
@@ -108,7 +108,8 @@ def analyze(y: np.ndarray, sr: int, *, source_name: str = "") -> ResynthModel:
     # ── Harmonic amplitude envelopes ──────────────────────────────────
     partials: list[tuple[float, list[float]]] = []
     if is_tonal and f0_est > 0:
-        n_harm = min(_MAX_PARTIALS, max(1, int(freqs[-1] / f0_est) - 1))
+        freq_ceil = min(_MAX_PARTIAL_HZ, float(freqs[-1]))
+        n_harm = max(1, int(freq_ceil / f0_est) - 1)
         for k in range(1, n_harm + 1):
             target_hz = k * f0_est
             bidx = int(np.argmin(np.abs(freqs - target_hz)))
