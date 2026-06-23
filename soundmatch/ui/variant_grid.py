@@ -271,14 +271,18 @@ class VariantGrid(QWidget):
 
     def _on_sweep(self) -> None:
         """Emit a signal requesting a sweep (handled by MainWindow)."""
-        # The MainWindow connects this to its sweep handler
         axis = self._axis_combo.currentText()
         vals_text = self._values_edit.text().strip()
         if not vals_text:
+            self._count_label.setText("Enter values first")
             return
         try:
             values = [float(v.strip()) for v in vals_text.split(",") if v.strip()]
         except ValueError:
+            self._count_label.setText("Invalid values — use comma-separated numbers")
+            return
+        if not values:
+            self._count_label.setText("Enter values first")
             return
         self.sweepRequested.emit(axis, values)
 

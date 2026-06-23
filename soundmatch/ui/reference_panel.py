@@ -105,6 +105,8 @@ class ReferencePanel(QWidget):
         self._start_s: float = 0.0
         self._end_s: float = 10.0
         self._path: Path | None = None
+        self._y_display: np.ndarray | None = None  # downsampled display copy
+        self._duration_s: float = 0.0
         self._load_thread: QThread | None = None
         self._load_worker: _AudioLoader | None = None
 
@@ -198,8 +200,8 @@ class ReferencePanel(QWidget):
         self._end_s = end_s
         self._start_spin.setText(f"{start_s:.1f} s")
         self._end_spin.setText(f"{end_s:.1f} s")
-        if self._y is not None:
-            self._waveform.set_audio(self._y, self._sr)
+        if self._y_display is not None:
+            self._waveform.set_audio(self._y_display, self._sr, duration_s=self._duration_s)
             self._waveform.set_selection(start_s, end_s)
 
     @property
@@ -228,6 +230,8 @@ class ReferencePanel(QWidget):
         log.debug("_on_audio_loaded: main thread, sr=%d, duration=%.1fs", sr, duration_s)
 
         self._y = np.asarray(y)
+        self._y_display = np.asarray(y_display)
+        self._duration_s = duration_s
         self._sr = sr
         self._end_s = min(10.0, duration_s)
         self._start_spin.setText(f"{self._start_s:.1f} s")
@@ -273,6 +277,10 @@ class ReferencePanel(QWidget):
         if self._y is None:
             return
         from forge.core.buffer import AudioBuffer
-        buf = AudioBuffer.from_mono(self._y, sr=self._sr)
+        i0 = int(self._start_s * self._sr)
+        i1 = min(int(self._end_s * self._sr), len(self._y))
+        region = self._y[i0:i1] if i1 > i0 else self._y
+        log.debug("play reference: %.2f–%.2fs (%d samples)", self._start_s, self._end_s, len(region))
+        buf = AudioBuffer.from_mono(region, sr=self._sr)
         self._service.load(buf)
         self._service.play()

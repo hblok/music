@@ -181,6 +181,7 @@ class WaveformWidget(FigureCanvas):
         super().__init__(self._fig)
         self._ax = self._fig.add_subplot(111)
         self._ax.set_visible(False)
+        self._selection_patch = None
         self.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
         self.setMinimumHeight(40)
 
@@ -201,25 +202,31 @@ class WaveformWidget(FigureCanvas):
         duration_s : Total audio duration; pass when y is downsampled.
         title      : Optional title.
         """
+        self._selection_patch = None
         self._ax.clear()
         self._ax.set_visible(True)
         draw_waveform(self._ax, y, sr, duration_s=duration_s, title=title)
         self.draw()
 
     def set_selection(self, start_s: float, end_s: float) -> None:
-        """Highlight a time region on the waveform.
+        """Highlight a time region on the waveform, replacing any previous highlight.
 
         Parameters
         ----------
         start_s: Start time in seconds.
         end_s  : End time in seconds.
         """
-        # Add a shaded region
-        self._ax.axvspan(start_s, end_s, color="#3a8ee8", alpha=0.25)
+        if self._selection_patch is not None:
+            try:
+                self._selection_patch.remove()
+            except ValueError:
+                pass
+        self._selection_patch = self._ax.axvspan(start_s, end_s, color="#3a8ee8", alpha=0.25)
         self.draw()
 
     def clear(self) -> None:
         """Clear the display."""
+        self._selection_patch = None
         self._ax.clear()
         self._ax.set_visible(False)
         self.draw()
