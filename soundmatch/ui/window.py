@@ -21,12 +21,16 @@ import numpy as np
 log = logging.getLogger(__name__)
 
 from PySide6.QtCore import Qt, QObject, QThread, Signal
+from PySide6.QtGui import QAction
 from PySide6.QtWidgets import (
     QApplication,
+    QDialog,
+    QDialogButtonBox,
     QDockWidget,
     QFileDialog,
     QLabel,
     QMainWindow,
+    QPlainTextEdit,
     QProgressBar,
     QStatusBar,
     QVBoxLayout,
@@ -118,6 +122,21 @@ class MainWindow(QMainWindow):
         self.setWindowTitle("Sound-Match Studio")
         self.setObjectName("soundmatch-main-window")
         self.resize(1200, 800)
+
+        # ── Menu bar ──────────────────────────────────────────────
+        tools_menu = self.menuBar().addMenu("&Tools")
+
+        export_act = QAction("Export Sound Brief…", self)
+        export_act.setToolTip(
+            "Analyse the selected region and export a brief for an AI to implement a new instrument"
+        )
+        export_act.triggered.connect(self._on_export_brief)
+        tools_menu.addAction(export_act)
+
+        reload_act = QAction("Reload Instruments", self)
+        reload_act.setToolTip("Re-import forge/instruments/ to pick up newly added instrument files")
+        reload_act.triggered.connect(self._on_reload_instruments)
+        tools_menu.addAction(reload_act)
 
         # Central placeholder
         central = QWidget()
@@ -717,6 +736,94 @@ class MainWindow(QMainWindow):
         log.info("applying found instrument: %s", instrument_id)
         self._patch_editor.set_patch(instrument_id, dict(params), layers, seed)  # type: ignore[arg-type]
         self._status_label.setText(f"Loaded instrument: {instrument_id}")
+
+    def _on_export_brief(self) -> None:
+        """Analyse the selected region and export a synthesis brief + JSON."""
+        y, sr = self._reference.audio_data
+        if y is None:
+            self._status_label.setText("Load a reference file first")
+            return
+
+        out_dir = QFileDialog.getExistingDirectory(
+            self, "Choose output directory for sound brief", ""
+        )
+        if not out_dir:
+            return
+
+        i0 = max(0, int(self._sel_start_s * sr))
+        i1 = min(int(self._sel_end_s * sr), len(y))
+        region = y[i0:i1] if i1 > i0 else y
+
+        source_name = self._reference.file_path.stem if self._reference.file_path else "sound"
+        chord_midi = (
+            self._target_metrics.chord.get("midi", [])
+            if self._target_metrics is not None else []
+        )
+
+        self._show_progress("Analysing…")
+        try:
+            from soundmatch.core.extract import (
+                ExtractionReport,
+                export_brief,
+                extract_synthesis_features,
+                generate_synthesis_brief,
+            )
+            from pathlib import Path
+
+            report = extract_synthesis_features(
+                region, sr, source_name=source_name, chord_midi=chord_midi,
+            )
+            json_path, brief_path = export_brief(report, Path(out_dir))
+            log.info("exported brief: %s", brief_path)
+
+            brief_text = generate_synthesis_brief(report, include_template=True)
+            self._show_brief_preview(brief_text, brief_path)
+            self._status_label.setText(f"Brief saved: {brief_path.name}")
+        except Exception as exc:
+            log.error("export brief failed: %s", exc, exc_info=True)
+            self._status_label.setText(f"Export error: {exc}")
+        finally:
+            self._hide_progress()
+
+    def _show_brief_preview(self, text: str, saved_to=None) -> None:
+        """Show a read-only preview of the generated brief."""
+        dlg = QDialog(self)
+        dlg.setWindowTitle("Sound Synthesis Brief")
+        dlg.resize(740, 620)
+        layout = QVBoxLayout(dlg)
+
+        if saved_to is not None:
+            layout.addWidget(QLabel(f"Saved to: {saved_to}"))
+
+        editor = QPlainTextEdit(dlg)
+        editor.setReadOnly(True)
+        editor.setPlainText(text)
+        editor.setFont(self.font())   # monospace if the app uses one
+        layout.addWidget(editor)
+
+        bbox = QDialogButtonBox(QDialogButtonBox.StandardButton.Close)
+        copy_btn = bbox.addButton("Copy to Clipboard", QDialogButtonBox.ButtonRole.ActionRole)
+        copy_btn.clicked.connect(
+            lambda: QApplication.clipboard().setText(text)
+        )
+        bbox.rejected.connect(dlg.reject)
+        layout.addWidget(bbox)
+
+        dlg.exec()
+
+    def _on_reload_instruments(self) -> None:
+        """Re-import forge.instruments.registry so newly added files are visible."""
+        try:
+            import importlib
+            import forge.instruments.registry as reg
+            importlib.reload(reg)
+            from forge.instruments.registry import REGISTRY
+            n = len(REGISTRY)
+            log.info("instruments reloaded: %d entries", n)
+            self._status_label.setText(f"Instruments reloaded — {n} registered")
+        except Exception as exc:
+            log.error("reload failed: %s", exc, exc_info=True)
+            self._status_label.setText(f"Reload error: {exc}")
 
     def _characterize_target(self, start_s: float, end_s: float, stem: str = "other") -> None:
         """Characterize the target and update the metrics panel."""
