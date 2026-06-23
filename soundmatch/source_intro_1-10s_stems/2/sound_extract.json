@@ -1,0 +1,54 @@
+{
+  "source_name": "source_intro_1-10s",
+  "duration_s": 0.4711791383219955,
+  "sr": 44100,
+  "percussive_ratio": 0.4306636417201113,
+  "is_percussive": false,
+  "is_tonal": false,
+  "is_noisy": false,
+  "onset_count": 3,
+  "envelope": {
+    "attack_ms": 9.795918367346939,
+    "decay_ms": 1.0,
+    "sustain_db": 0.0,
+    "release_ms": 20.0,
+    "peak_db": -2.5189539877870892
+  },
+  "harmonic": {
+    "fundamental_hz": 138.59131548843604,
+    "fundamental_note": "C#3",
+    "harmonic_amps_db": [
+      0.0,
+      -5.6793395398726085,
+      -12.403509171168208,
+      -10.736654928680352,
+      -16.853799862184054,
+      -6.717278737999868,
+      -22.427826641314876,
+      -18.36950979539826,
+      -9.866114580616765,
+      -24.609859071796564,
+      -19.78322032990718,
+      -14.52440456572771
+    ],
+    "hnr_db": -10.519118860196032
+  },
+  "spectral": {
+    "centroid_hz": 2230.544805543892,
+    "bandwidth_hz": 2707.641591647318,
+    "rolloff_hz": 4891.713509908536,
+    "tilt_db_per_oct": -7.803708757614824,
+    "formant_hz": [
+      1658.056640625,
+      3133.0810546875
+    ]
+  },
+  "modulation": {
+    "am_rate_hz": 0.0,
+    "am_depth": 0.0,
+    "fm_rate_hz": 0.0,
+    "fm_depth_cents": 0.0
+  },
+  "suggested_approach": "Textural noise layer \u2014 bandpass-filtered noise with slow LFO",
+  "suggested_template": "wind"
+}

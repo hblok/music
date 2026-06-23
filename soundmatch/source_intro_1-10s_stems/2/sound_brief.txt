@@ -1,0 +1,114 @@
+SOUND SYNTHESIS BRIEF
+============================================================
+Source:    source_intro_1-10s
+Duration:  0.47 s   SR: 44100 Hz
+
+Character: Mostly noise / texture  (percussive_ratio=43%)
+Onsets:    3
+
+ENVELOPE
+----------------------------------------
+  Attack:  10 ms
+  Decay:   1 ms
+  Sustain: 0 dB  (relative to peak)
+  Release: 20 ms
+  Peak:    -2.5 dBFS
+
+PITCH & HARMONICS
+----------------------------------------
+  Fundamental: 138.6 Hz  (C#3)
+  HNR:         -10.5 dB  (noisy)
+  Harmonics:   h1 +0 dB, h2 -6 dB, h3 -12 dB, h4 -11 dB, h5 -17 dB, h6 -7 dB, h7 -22 dB, h8 -18 dB
+
+SPECTRAL
+----------------------------------------
+  Centroid:    2231 Hz  (bright)
+  Bandwidth:   2708 Hz
+  Rolloff:     4892 Hz  (85 %)
+  Tilt:        -7.8 dB/oct
+  Formants≈    1658 Hz, 3133 Hz
+
+MODULATION
+----------------------------------------
+  No significant amplitude modulation detected.
+
+SUGGESTED SYNTHESIS APPROACH
+----------------------------------------
+  Textural noise layer — bandpass-filtered noise with slow LFO
+
+TASK FOR THE AI
+============================================================
+Implement a new Python forge instrument that reproduces this sound.
+
+Rules:
+- The function signature must be:
+      def my_instrument(params: dict, rng: np.random.Generator, **ctx) -> AudioBuffer:
+- Use ctx.get("sr", 44100) for the sample rate.
+- Use ctx.get("duration", <default_s>) for clip length if the sound is a texture.
+- Expose tuneable parameters as ParamSchema entries in REGISTRY (see template).
+- Return an AudioBuffer(data, sr) where data.shape is (N,) mono or (N, 2) stereo.
+- Register in forge/instruments/registry.py:
+      from forge.instruments.my_module import my_instrument
+      REGISTRY["my_instrument"] = {
+          "fn": my_instrument,
+          "params": [ParamSchema(name=..., kind="float", default=..., lo=..., hi=...), ...],
+          "family": "<percussion|bass|voice|strings|synth|texture|fx>",
+      }
+
+Below is the full source of the closest existing instrument as a template.
+Study it, then write your own that matches the measurements above.
+
+TEMPLATE  (wind)
+============================================================
+def wind(params: dict, rng: np.random.Generator, **ctx) -> AudioBuffer:
+    """Desert wind: two-band filtered noise with stochastic gusts and stereo pan drift.
+
+    Replicates the wind recipe used in arrakis, spice_must_flow, and all dune tracks.
+
+    Params: see WIND_PARAMS.
+    """
+    from scipy import signal as _signal
+
+    sr = ctx.get("sr", SR)
+    duration = float(params.get("duration", ctx.get("duration", 60.0)))
+    n = int(duration * sr)
+
+    # noise source — shared for both bands to maintain correlation
+    raw = rng.standard_normal(n)
+
+    # whoosh band (body of the wind)
+    whoosh_lo = float(params.get("whoosh_lo", 120.0))
+    whoosh_hi = float(params.get("whoosh_hi", 900.0))
+    sos_w = _signal.butter(4, [whoosh_lo, whoosh_hi], "bandpass", fs=sr, output="sos")
+    whoosh = _signal.sosfilt(sos_w, raw)
+    whoosh /= np.max(np.abs(whoosh)) + 1e-12
+
+    # hiss band (sand carried on the wind)
+    hiss_lo = float(params.get("hiss_lo", 2000.0))
+    hiss_hi = float(params.get("hiss_hi", 7000.0))
+    sos_h = _signal.butter(4, [hiss_lo, hiss_hi], "bandpass", fs=sr, output="sos")
+    hiss = _signal.sosfilt(sos_h, raw)
+    hiss /= np.max(np.abs(hiss)) + 1e-12
+    hiss_level = float(params.get("hiss_level", 0.30))
+
+    # gust envelopes
+    gust_rate = float(params.get("gust_rate", 0.22))
+    gust_power = float(params.get("gust_power", 2.2))
+    swell_rate = float(params.get("swell_rate", 0.07))
+    gust = slow_noise(duration, gust_rate, rng=rng, power=gust_power, sr=sr)
+    gust2 = slow_noise(duration, swell_rate, rng=rng, power=1.5, sr=sr)
+    wind_env = 0.25 + 0.75 * (0.6 * gust + 0.4 * gust2)
+
+    # stereo pan drift
+    pan_rate = float(params.get("pan_rate", 0.05))
+    pan_lo = float(params.get("pan_lo", 0.25))
+    pan_hi = float(params.get("pan_hi", 0.75))
+    pan = slow_noise(duration, pan_rate, lo=pan_lo, hi=pan_hi, rng=rng, sr=sr)
+
+    ang = pan * np.pi / 2.0
+    ang_inv = (1.0 - pan) * np.pi / 2.0
+    L = wind_env * (whoosh * np.cos(ang) + hiss_level * hiss * gust * np.cos(ang_inv))
+    R = wind_env * (whoosh * np.sin(ang) + hiss_level * hiss * gust * np.sin(ang_inv))
+
+    return AudioBuffer.from_stereo(L, R, sr=sr)
+
