@@ -138,6 +138,16 @@ class MainWindow(QMainWindow):
         reload_act.triggered.connect(self._on_reload_instruments)
         tools_menu.addAction(reload_act)
 
+        tools_menu.addSeparator()
+
+        resynth_act = QAction("Resynthesize Region…", self)
+        resynth_act.setToolTip(
+            "Reconstruct the selected region from scratch using additive synthesis "
+            "and spectrally-shaped noise — no original bytes replayed"
+        )
+        resynth_act.triggered.connect(self._on_resynthesize)
+        tools_menu.addAction(resynth_act)
+
         # Central placeholder
         central = QWidget()
         central.setObjectName("central-widget")
@@ -736,6 +746,28 @@ class MainWindow(QMainWindow):
         log.info("applying found instrument: %s", instrument_id)
         self._patch_editor.set_patch(instrument_id, dict(params), layers, seed)  # type: ignore[arg-type]
         self._status_label.setText(f"Loaded instrument: {instrument_id}")
+
+    def _on_resynthesize(self) -> None:
+        """Analyse the selected region and open the Spectral Resynthesis dialog."""
+        y, sr = self._reference.audio_data
+        if y is None:
+            self._status_label.setText("Load a reference file first")
+            return
+
+        i0 = max(0, int(self._sel_start_s * sr))
+        i1 = min(int(self._sel_end_s * sr), len(y))
+        region = y[i0:i1] if i1 > i0 else y
+
+        source_name = self._reference.file_path.stem if self._reference.file_path else "sound"
+
+        from soundmatch.ui.resynth_dialog import ResynthDialog
+        dlg = ResynthDialog(region, sr, source_name=source_name, parent=self)
+        def _on_resynth_ready(audio: np.ndarray, out_sr: int) -> None:
+            self._ab_viewer.set_candidate(audio, out_sr)
+            self._status_label.setText("Resynthesis → A/B Viewer")
+
+        dlg.resynthReady.connect(_on_resynth_ready)
+        dlg.exec()
 
     def _on_export_brief(self) -> None:
         """Analyse the selected region and export a synthesis brief + JSON."""
