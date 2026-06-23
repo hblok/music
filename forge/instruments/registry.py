@@ -29,6 +29,7 @@ from forge.instruments.fx import (
     EXPLOSION_PARAMS,
     HEART_PARAMS,
     MACHINE_CHUG_PARAMS,
+    NOISE_STAB_PARAMS,
     REV_CYMBAL_PARAMS,
     RISER_PARAMS,
     SUB_BOOM_PARAMS,
@@ -38,6 +39,7 @@ from forge.instruments.fx import (
     heart,
     make_boom,
     make_machine_chug,
+    make_noise_stab,
     make_sub_boom,
     make_thopter,
     rev_cymbal,
@@ -193,6 +195,7 @@ REGISTRY: dict = {
     "sub_boom":      _entry(make_sub_boom,    SUB_BOOM_PARAMS,     "fx"),
     "machine_chug":  _entry(make_machine_chug,MACHINE_CHUG_PARAMS, "fx"),
     "thopter":       _entry(make_thopter,     THOPTER_PARAMS,      "fx"),
+    "noise_stab":    _entry(make_noise_stab,  NOISE_STAB_PARAMS,   "fx"),
 }
 
 

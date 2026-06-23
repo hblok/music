@@ -1,4 +1,4 @@
-"""forge.instruments.fx — zap, riser, explosion, heartbeat, crash, rev cymbal."""
+"""forge.instruments.fx — zap, riser, explosion, heartbeat, crash, rev cymbal, noise_stab."""
 
 from __future__ import annotations
 
@@ -441,3 +441,75 @@ def make_thopter(params: dict, rng: np.random.Generator, **ctx) -> AudioBuffer:
     buf.data[:, 0] = body * np.cos(u * np.pi / 2.0) * gain  # L fades
     buf.data[:, 1] = body * np.sin(u * np.pi / 2.0) * gain  # R rises
     return buf
+
+
+# ---------------------------------------------------------------- Noise stab
+# Derived from soundmatch sound brief: source_intro_1-10s stem 2.
+# Centroid 2231 Hz, bandwidth 2708 Hz, formants at 1658 / 3133 Hz,
+# HNR −10.5 dB (predominantly noise), attack 10 ms, release 20 ms.
+
+NOISE_STAB_PARAMS = [
+    ParamSchema("duration",  "float", 0.47,   lo=0.05, hi=4.0,    unit="s"),
+    ParamSchema("centroid",  "float", 2231.0, lo=300.0, hi=8000.0, unit="Hz"),
+    ParamSchema("bandwidth", "float", 2708.0, lo=200.0, hi=8000.0, unit="Hz"),
+    ParamSchema("formant1",  "float", 1658.0, lo=200.0, hi=6000.0, unit="Hz"),
+    ParamSchema("formant2",  "float", 3133.0, lo=500.0, hi=12000.0, unit="Hz"),
+    ParamSchema("formant_mix", "float", 0.5,  lo=0.0,  hi=2.0),
+    ParamSchema("attack_ms", "float", 10.0,   lo=1.0,  hi=200.0,  unit="ms"),
+    ParamSchema("release_ms","float", 20.0,   lo=1.0,  hi=500.0,  unit="ms"),
+]
+
+
+def make_noise_stab(params: dict, rng: np.random.Generator, **ctx) -> AudioBuffer:
+    """Mid-bright noise stab with two formant peaks.
+
+    Bandpass-shaped white noise coloured by two iirpeak formant filters,
+    with a fast attack/release envelope.  Derived from soundmatch analysis
+    of source_intro_1-10s stem 2.
+    """
+    from scipy import signal as _signal
+
+    sr = ctx.get("sr", SR)
+    duration   = float(params.get("duration",    0.47))
+    centroid   = float(params.get("centroid",    2231.0))
+    bw_hz      = float(params.get("bandwidth",   2708.0))
+    f1         = float(params.get("formant1",    1658.0))
+    f2         = float(params.get("formant2",    3133.0))
+    fmix       = float(params.get("formant_mix", 0.5))
+    attack_ms  = float(params.get("attack_ms",   10.0))
+    release_ms = float(params.get("release_ms",  20.0))
+
+    n = int(duration * sr)
+
+    # Bandpass noise around the measured centroid ± ½ bandwidth
+    lo = max(80.0, centroid - bw_hz * 0.5)
+    hi = min(sr * 0.45, centroid + bw_hz * 0.5)
+    noise = rng.standard_normal(n)
+    sos_bp = _signal.butter(2, [lo, hi], "bandpass", fs=sr, output="sos")
+    sig = _signal.sosfilt(sos_bp, noise)
+
+    # Formant colouring — add resonant peaks at measured formant frequencies
+    for f_hz in (f1, f2):
+        b, a = _signal.iirpeak(f_hz, Q=4.0, fs=sr)
+        sig = sig + fmix * _signal.lfilter(b, a, sig)
+
+    # Normalise before envelope so the env shape is clean
+    peak = np.max(np.abs(sig))
+    if peak > 1e-8:
+        sig = sig / peak
+
+    # Attack / release envelope
+    attack_n  = max(1, int(attack_ms  / 1000.0 * sr))
+    release_n = max(1, int(release_ms / 1000.0 * sr))
+    env = np.ones(n)
+    env[:attack_n] = np.linspace(0.0, 1.0, attack_n)
+    if release_n < n:
+        env[-release_n:] = np.linspace(1.0, 0.0, release_n)
+
+    sig = sig * env
+
+    peak2 = np.max(np.abs(sig))
+    if peak2 > 1e-8:
+        sig = sig / peak2 * 0.7
+
+    return AudioBuffer.from_mono(sig.astype(np.float32), sr=sr)
