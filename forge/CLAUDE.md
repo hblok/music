@@ -257,3 +257,15 @@ tracker GUI.  Key contracts:
 2. Add a `<NAME>_PARAMS = [ParamSchema(...), ...]` list.
 3. Register it in `instruments/registry.py` under `REGISTRY`.
 4. Add at least one test in `forge/tests/test_instruments.py`.
+
+## Style
+
+Follow the repo-level Python style guide in `../CLAUDE.md`.
+
+Additional forge specifics:
+- `forge.document.*` must stay free of Qt and DSP imports — headless
+  testability is a hard requirement.
+- The UI must only import from `forge.control` — never from `core`,
+  `instruments`, or any engine module directly.
+- `forge/tests/` only — never add tests outside this directory for forge
+  code.

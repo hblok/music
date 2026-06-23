@@ -105,3 +105,13 @@ Saved to `<input_stem>_inspector/` next to the audio file:
 - Add a rendering block in `report.py` and optionally a plot in `plots.py`.
 - The `results` dict passed to `report.render()` and `plots.save_all()` is the
   single source of truth — everything flows through it.
+
+## Style
+
+Follow the repo-level Python style guide in `../CLAUDE.md`.
+
+Additional inspector specifics:
+- inspector has **no tests directory** — it is validated via soundmatch
+  integration tests that call into `inspector.metrics` and the CLI.
+- Keep `separation.py` isolated: it is the only file allowed to import
+  `demucs` or `torch`, and it must degrade gracefully if they are absent.
