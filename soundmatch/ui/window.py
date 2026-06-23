@@ -158,6 +158,7 @@ class MainWindow(QMainWindow):
         self._patch_editor.setObjectName("patch-editor")
         self._patch_editor.patchChanged.connect(self._on_patch_changed)
         self._patch_editor.suggestRequested.connect(self._on_suggest_requested)
+        self._patch_editor.noteOverride.connect(self._on_note_override)
         patch_dock = QDockWidget("Patch Editor", self)
         patch_dock.setObjectName("patch-editor-dock")
         patch_dock.setWidget(self._patch_editor)
@@ -456,6 +457,25 @@ class MainWindow(QMainWindow):
         self._characterize_target(start_s, end_s, stem=stem_name)
         self._hide_progress()
 
+    def _on_note_override(self, midi: int) -> None:
+        """Apply a root note override to the current phrase and re-render."""
+        if self._phrase is None:
+            return
+        if midi == -1:
+            return  # "auto" selected — nothing to do until next re-characterize
+        import dataclasses
+        from soundmatch.core.phrase import Note
+        new_notes = [Note(t=n.t, midi=[midi]) for n in self._phrase.notes]
+        self._phrase = dataclasses.replace(self._phrase, notes=new_notes)
+        from soundmatch.ui.patch_editor import midi_to_note_name
+        log.info("note override: %s (midi=%d)", midi_to_note_name(midi), midi)
+        self._on_patch_changed(
+            self._patch_editor.instrument_id,
+            self._patch_editor.params,
+            self._patch_editor.layers,
+            self._patch_editor.seed,
+        )
+
     def _on_patch_changed(
         self,
         instrument_id: str,
@@ -681,6 +701,10 @@ class MainWindow(QMainWindow):
             self._project.stem = stem
             self._project.target_metrics = m
             self._project.phrase = self._phrase
+
+            # Show phrase note names in the patch editor
+            phrase_midi = list({n for note in self._phrase.notes for n in note.midi})
+            self._patch_editor.set_phrase_notes(sorted(phrase_midi))
 
             log.debug("characterize done: perc=%.1f%% cent=%.0fHz", m.percussive_ratio, m.centroid_hz)
             self._status_label.setText(
