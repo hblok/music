@@ -65,6 +65,7 @@ class PlaybackService:
         self._block_size = block_size
         self._on_position = on_position
         self._buf: AudioBuffer | None = None
+        self._loop: bool = False
         self._stream: "_sd.OutputStream | None" = None  # type: ignore[name-defined]
         self._lock = threading.Lock()
         self.mixer: CallbackMixer | None = mixer
@@ -98,8 +99,9 @@ class PlaybackService:
     # ------------------------------------------------------------------
     # Transport
 
-    def play(self) -> None:
+    def play(self, *, loop: bool = False) -> None:
         """Start playback.  Opens the stream if not already open."""
+        self._loop = loop
         self.clock.play()
         if _SD_AVAILABLE and (self._stream is None or not self._stream.active):
             self._open_stream()
@@ -182,9 +184,13 @@ class PlaybackService:
 
         n = len(buf)
         if pos >= n:
-            outdata[:] = 0.0
-            self.clock.pause()
-            return
+            if self._loop:
+                self.clock.seek(0)
+                pos = 0
+            else:
+                outdata[:] = 0.0
+                self.clock.pause()
+                return
 
         avail = min(frames, n - pos)
         outdata[:avail] = buf.data[pos : pos + avail].astype(np.float32)
