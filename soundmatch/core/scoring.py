@@ -168,6 +168,7 @@ class Scorecard:
             "median_ioi_s": self.median_ioi_s.to_dict(),
             "band_decay_ms": {k: v.to_dict() for k, v in self.band_decay_ms.items()},
             "weights": dict(self._weights),
+            "aggregate": self.aggregate(),
         }
 
     @classmethod

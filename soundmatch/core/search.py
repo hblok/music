@@ -16,6 +16,8 @@ import logging
 from dataclasses import dataclass
 from typing import Any
 
+import numpy as np
+
 log = logging.getLogger(__name__)
 
 from inspector.metrics import Metrics, characterize
@@ -138,7 +140,7 @@ def coarse_search(
         try:
             buf = render_phrase(phrase, instrument_id, candidate_params, layers, seed, sr)
             y = buf.data.mean(axis=1) if buf.data.ndim == 2 else buf.data
-            y = __import__("numpy").ascontiguousarray(y)
+            y = np.ascontiguousarray(y)
             cand_m = characterize(y, sr)
             sc = diff(target, cand_m, weights=weights)
             agg = sc.aggregate()

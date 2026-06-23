@@ -194,6 +194,21 @@ class ReferencePanel(QWidget):
         self._load_thread = thread
         thread.start()
 
+    def clear(self) -> None:
+        """Reset the panel to its initial (no file loaded) state."""
+        self._y = None
+        self._y_display = None
+        self._duration_s = 0.0
+        self._sr = self._target_sr
+        self._start_s = 0.0
+        self._end_s = 10.0
+        self._path = None
+        self._file_label.setText("No file loaded")
+        self._start_spin.setText("0.0 s")
+        self._end_spin.setText("10.0 s")
+        self._waveform.clear()
+        self._spectrogram.clear()
+
     def set_selection(self, start_s: float, end_s: float) -> None:
         """Programmatically set the time selection."""
         self._start_s = start_s

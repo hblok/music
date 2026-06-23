@@ -38,7 +38,6 @@ from soundmatch.core.candidate import render_phrase
 from soundmatch.core.phrase import Phrase, seed_from_metrics
 from soundmatch.core.project import MatchProject
 from soundmatch.core.scoring import Scorecard, diff
-from soundmatch.core.target import Target
 from soundmatch.core.variants import render_and_score, sweep
 from soundmatch.ui.ab_viewer import ABViewer
 from soundmatch.ui.metrics_panel import MetricsPanel
@@ -64,7 +63,6 @@ class MainWindow(QMainWindow):
     ) -> None:
         super().__init__(parent)
         self._service = service
-        self._target: Target | None = None
         self._ref_path: Path | None = None
         self._target_metrics: Metrics | None = None
         self._phrase: Phrase | None = None
@@ -208,15 +206,11 @@ class MainWindow(QMainWindow):
     def _on_new_project(self) -> None:
         """Reset the project and all panels."""
         self._project = MatchProject()
-        self._target = None
         self._ref_path = None
         self._target_metrics = None
         self._phrase = None
         self._cand_y = None
-        self._reference._y = None
-        self._reference._sr = 44100
-        self._reference._waveform.clear()
-        self._reference._spectrogram.clear()
+        self._reference.clear()
         self._stems.set_stems({}, sr=44100)
         self._metrics.clear()
         self._scorecard.clear()
@@ -527,6 +521,10 @@ class MainWindow(QMainWindow):
         if not stems_dict or self._ref_path is None:
             return
         stems_dir = self._ref_path.parent / f"{self._ref_path.stem}_stems"
+        # Already loaded from this directory — don't re-save
+        if self._project.stems_dir == stems_dir and stems_dir.is_dir():
+            log.debug("stems already on disk at %s, skipping re-save", stems_dir)
+            return
         try:
             stems_dir.mkdir(exist_ok=True)
             for name, audio in stems_dict.items():
@@ -618,9 +616,13 @@ class MainWindow(QMainWindow):
             self._status_label.setText(f"Characterization error: {exc}")
 
     def _target_y_for_ab(self) -> np.ndarray | None:
-        """Get the target audio for the A/B viewer."""
+        """Get the selected region of the reference audio for the A/B viewer."""
         y, sr = self._reference.audio_data
-        return y
+        if y is None:
+            return None
+        i0 = int(self._reference._start_s * sr)
+        i1 = min(int(self._reference._end_s * sr), len(y))
+        return y[i0:i1] if i1 > i0 else y
 
     # ── Public properties ──────────────────────────────────────────
 
