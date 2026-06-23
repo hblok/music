@@ -48,6 +48,10 @@ from forge.instruments.reed import (
     SAX_PARAMS,
     sax_phrase,
 )
+from forge.instruments.resynth_instrument import (
+    RESYNTH_NOTE_PARAMS,
+    make_resynth_note,
+)
 from forge.instruments.synth import (
     SYNTH_BRASS_PARAMS,
     synth_brass,
@@ -171,6 +175,8 @@ REGISTRY: dict = {
     "horn":        _entry(make_horn,     HORN_PARAMS,        "voice"),
     # reed
     "sax":         _entry(sax_phrase,    SAX_PARAMS,         "reed"),
+    # resynth
+    "resynth_note": _entry(make_resynth_note, RESYNTH_NOTE_PARAMS, "resynth"),
     # synth
     "synth_brass": _entry(synth_brass,   SYNTH_BRASS_PARAMS, "synth"),
     # bass
