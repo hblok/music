@@ -110,6 +110,9 @@ class MainWindow(QMainWindow):
         self._cand_sr: int = 44100
         self._search_worker: _SearchWorker | None = None
         self._search_thread: QThread | None = None
+        # Current time selection in original-file coordinates
+        self._sel_start_s: float = 0.0
+        self._sel_end_s: float = 10.0
 
         self.setWindowTitle("Sound-Match Studio")
         self.setObjectName("soundmatch-main-window")
@@ -447,22 +450,20 @@ class MainWindow(QMainWindow):
             self._status_label.setText(f"Loading: {self._ref_path.name}…")
 
     def _on_selection_changed(self, start_s: float, end_s: float) -> None:
-        """Handle selection change: characterize the selected region."""
+        """Handle selection change: propagate to stems and re-characterize."""
         log.debug("selection changed: %.2f–%.2fs", start_s, end_s)
+        self._sel_start_s = start_s
+        self._sel_end_s = end_s
+        self._stems.set_selection(start_s, end_s)
         self._show_progress("Characterizing…")
         self._characterize_target(start_s, end_s, stem="mix")
         self._hide_progress()
 
     def _on_stem_chosen(self, stem_name: str) -> None:
-        """Handle stem choice: re-characterize with the chosen stem."""
-        start_s = 0.0
-        end_s = 10.0
-        y, sr = self._reference.audio_data
-        if y is not None:
-            end_s = len(y) / sr
-        log.debug("stem chosen: %s", stem_name)
+        """Handle stem choice: re-characterize the selected region of this stem."""
+        log.debug("stem chosen: %s (%.2f–%.2fs)", stem_name, self._sel_start_s, self._sel_end_s)
         self._show_progress(f"Characterizing stem '{stem_name}'…")
-        self._characterize_target(start_s, end_s, stem=stem_name)
+        self._characterize_target(self._sel_start_s, self._sel_end_s, stem=stem_name)
         self._hide_progress()
 
     def _on_note_override(self, midi: int) -> None:
@@ -627,9 +628,14 @@ class MainWindow(QMainWindow):
             log.warning("separate requested but no reference file is loaded")
             self._status_label.setText("Load a reference file first")
             return
-        log.info("separate requested: %s", self._ref_path)
+        log.info("separate requested: %s (%.2f–%.2fs)", self._ref_path, self._sel_start_s, self._sel_end_s)
         self._status_label.setText("Separating stems…")
-        self._stems.separate(str(self._ref_path), sr=self._service.sr)
+        self._stems.separate(
+            str(self._ref_path),
+            start_s=self._sel_start_s,
+            end_s=self._sel_end_s,
+            sr=self._service.sr,
+        )
 
     def _on_suggest_requested(self) -> None:
         """Run coarse param search on a background thread."""
@@ -698,8 +704,11 @@ class MainWindow(QMainWindow):
                 i1 = min(int(end_s * sr), len(y))
                 m = characterize(y[i0:i1], sr)
             else:
-                stem_audio = self._stems.get_stem_audio(stem)
-                m = characterize(stem_audio if stem_audio is not None else y, sr)
+                # Slice to the selection within stem coordinates
+                stem_audio = self._stems.get_stem_audio_for_selection(stem, start_s, end_s)
+                if stem_audio is None or len(stem_audio) == 0:
+                    stem_audio = y[int(start_s * sr):min(int(end_s * sr), len(y))]
+                m = characterize(stem_audio, sr)
 
             self._target_metrics = m
             self._metrics.set_metrics(m)
