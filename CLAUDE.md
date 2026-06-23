@@ -97,8 +97,7 @@ python3 -m inspector.analyse <file.mp3> [--plots] [--separate]
 
 ## Conventions shared across the whole repo
 
-- **Python 3.12**, numpy + scipy, stdlib `wave`, PySide6 (GUI only).
-- `soundfile`/`pydub` are NOT installed.
+- **Python 3.12**, numpy + scipy, stdlib `wave`, PySide6 (GUI only). `soundfile` and `pydub` are also available.
 - **No samples** — everything is synthesized.
 - All randomness: seeded `np.random.default_rng` (legacy) or forge's
   `RngContext` (hierarchical SeedSequence, process-stable CRC32 key hashing).

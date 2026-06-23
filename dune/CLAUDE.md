@@ -7,8 +7,8 @@ tracks.
 
 ## Stack & constraints
 
-- **numpy + scipy only** (scipy ≥ 1.17 available). WAV output via the stdlib
-  `wave` module — `soundfile`/`pydub` are NOT installed; do not import them.
+- **numpy + scipy** (scipy ≥ 1.17 available). WAV output via the stdlib
+  `wave` module or `soundfile`/`pydub` (both available).
   `generate_ambient.py` predates scipy being installed and is numpy-only
   (FFT-based filtering instead of Butterworth).
 - Everything is synthesized: **no samples, no external audio assets**.
