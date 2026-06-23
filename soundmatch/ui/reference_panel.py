@@ -126,9 +126,10 @@ class ReferencePanel(QWidget):
         top.addWidget(self._file_label, stretch=1)
         layout.addLayout(top)
 
-        # Waveform display
+        # Waveform display (drag to select a region)
         self._waveform = WaveformWidget(self)
         self._waveform.setObjectName("reference-waveform")
+        self._waveform.selectionChanged.connect(self._on_waveform_selection)
         layout.addWidget(self._waveform, stretch=1)
 
         # Spectrogram display
@@ -136,19 +137,22 @@ class ReferencePanel(QWidget):
         self._spectrogram.setObjectName("reference-spectrogram")
         layout.addWidget(self._spectrogram, stretch=2)
 
-        # Selection controls
+        # Selection readout + re-characterize button
         sel_layout = QHBoxLayout()
-        self._start_label = QLabel("Start:")
-        self._start_spin = QLabel("0.0 s")
-        self._end_label = QLabel("End:")
-        self._end_spin = QLabel("10.0 s")
-        self._apply_btn = QPushButton("Set Selection")
+        self._start_label = QLabel("Sel:")
+        self._start_spin = QLabel("0.00 s")
+        self._start_spin.setObjectName("sel-start-label")
+        sep_label = QLabel("–")
+        self._end_spin = QLabel("10.00 s")
+        self._end_spin.setObjectName("sel-end-label")
+        self._apply_btn = QPushButton("Re-characterize")
         self._apply_btn.setObjectName("apply-selection-btn")
+        self._apply_btn.setToolTip("Re-run target characterization on the current selection")
         self._apply_btn.clicked.connect(self._on_apply_selection)
 
         sel_layout.addWidget(self._start_label)
         sel_layout.addWidget(self._start_spin)
-        sel_layout.addWidget(self._end_label)
+        sel_layout.addWidget(sep_label)
         sel_layout.addWidget(self._end_spin)
         sel_layout.addStretch()
         sel_layout.addWidget(self._apply_btn)
@@ -213,11 +217,20 @@ class ReferencePanel(QWidget):
         """Programmatically set the time selection."""
         self._start_s = start_s
         self._end_s = end_s
-        self._start_spin.setText(f"{start_s:.1f} s")
-        self._end_spin.setText(f"{end_s:.1f} s")
+        self._start_spin.setText(f"{start_s:.2f} s")
+        self._end_spin.setText(f"{end_s:.2f} s")
         if self._y_display is not None:
             self._waveform.set_audio(self._y_display, self._sr, duration_s=self._duration_s)
             self._waveform.set_selection(start_s, end_s)
+
+    def _on_waveform_selection(self, start_s: float, end_s: float) -> None:
+        """Called when the user finishes a drag selection on the waveform."""
+        self._start_s = start_s
+        self._end_s = end_s
+        self._start_spin.setText(f"{start_s:.2f} s")
+        self._end_spin.setText(f"{end_s:.2f} s")
+        log.debug("waveform drag selection: %.2f–%.2fs", start_s, end_s)
+        self.selectionChanged.emit(start_s, end_s)
 
     @property
     def audio_data(self) -> tuple[np.ndarray | None, int]:
@@ -249,8 +262,8 @@ class ReferencePanel(QWidget):
         self._duration_s = duration_s
         self._sr = sr
         self._end_s = min(10.0, duration_s)
-        self._start_spin.setText(f"{self._start_s:.1f} s")
-        self._end_spin.setText(f"{self._end_s:.1f} s")
+        self._start_spin.setText(f"{self._start_s:.2f} s")
+        self._end_spin.setText(f"{self._end_s:.2f} s")
 
         if self._path is not None:
             self._file_label.setText(self._path.name)
