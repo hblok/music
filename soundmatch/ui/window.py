@@ -68,10 +68,18 @@ class _SearchWorker(QObject):
     def run(self) -> None:
         from soundmatch.core.search import coarse_search
         try:
+            # Throttle: emit at most ~20 progress updates so the event queue
+            # doesn't flood before the main thread has time to paint any of them.
+            _last_emitted = [-1]
+            def _progress(done: int, total: int) -> None:
+                step = max(1, total // 20)
+                if done - _last_emitted[0] >= step or done >= total:
+                    _last_emitted[0] = done
+                    self.progress.emit(done, total)
             result = coarse_search(
                 self._target, self._phrase,
                 self._instrument_id, self._params, self._layers, self._seed,
-                on_progress=lambda done, total: self.progress.emit(done, total),
+                on_progress=_progress,
             )
             self.finished.emit(result)
         except Exception as exc:
@@ -633,7 +641,9 @@ class MainWindow(QMainWindow):
             return
 
         log.info("suggest requested: instrument=%s", self._patch_editor.instrument_id)
-        self._show_progress("Searching…")
+        # Start in determinate mode (max_iterations default=200) so the bar
+        # shows at 0%, not as a solid indeterminate block.
+        self._show_progress("Searching…", total=200)
 
         self._search_worker = _SearchWorker(
             self._target_metrics,
