@@ -45,6 +45,8 @@ class PatchEditor(QWidget):
             Emitted (debounced) whenever any patch parameter changes.
         suggestRequested():
             Emitted when "💡 Suggest" is clicked.
+        findInstrumentRequested():
+            Emitted when "🔍 Find" is clicked — triggers cross-instrument search.
         noteOverride(midi):
             Emitted when the user changes the root note override.
             midi == -1 means "clear override, derive from chord detection".
@@ -52,6 +54,7 @@ class PatchEditor(QWidget):
 
     patchChanged = Signal(str, dict, list, int)
     suggestRequested = Signal()
+    findInstrumentRequested = Signal()
     noteOverride = Signal(int)
 
     def __init__(self, parent: QWidget | None = None) -> None:
@@ -157,9 +160,15 @@ class PatchEditor(QWidget):
 
         suggest_btn = QPushButton("💡 Suggest")
         suggest_btn.setObjectName("suggest-btn")
-        suggest_btn.setToolTip("Run a coarse param search to find a good starting patch")
+        suggest_btn.setToolTip("Tune params of the current instrument to better match the target")
         suggest_btn.clicked.connect(self.suggestRequested.emit)
         seed_row.addWidget(suggest_btn)
+
+        find_btn = QPushButton("🔍 Find")
+        find_btn.setObjectName("find-instrument-btn")
+        find_btn.setToolTip("Try every instrument and rank by how well it matches the target")
+        find_btn.clicked.connect(self.findInstrumentRequested.emit)
+        seed_row.addWidget(find_btn)
 
         seed_row.addStretch()
         layout.addLayout(seed_row)

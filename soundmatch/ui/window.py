@@ -41,6 +41,7 @@ from soundmatch.core.project import MatchProject
 from soundmatch.core.scoring import Scorecard, diff
 from soundmatch.core.variants import render_and_score, sweep
 from soundmatch.ui.ab_viewer import ABViewer
+from soundmatch.ui.instrument_search_dialog import InstrumentSearchDialog
 from soundmatch.ui.metrics_panel import MetricsPanel
 from soundmatch.ui.patch_editor import PatchEditor
 from soundmatch.ui.reference_panel import ReferencePanel
@@ -169,6 +170,7 @@ class MainWindow(QMainWindow):
         self._patch_editor.setObjectName("patch-editor")
         self._patch_editor.patchChanged.connect(self._on_patch_changed)
         self._patch_editor.suggestRequested.connect(self._on_suggest_requested)
+        self._patch_editor.findInstrumentRequested.connect(self._on_find_instrument_requested)
         self._patch_editor.noteOverride.connect(self._on_note_override)
         patch_dock = QDockWidget("Patch Editor", self)
         patch_dock.setObjectName("patch-editor-dock")
@@ -690,6 +692,31 @@ class MainWindow(QMainWindow):
         self._hide_progress()
         log.error("suggest failed: %s", msg)
         self._status_label.setText(f"Search error: {msg}")
+
+    def _on_find_instrument_requested(self) -> None:
+        """Open the cross-instrument ranking dialog."""
+        if self._target_metrics is None or self._phrase is None:
+            self._status_label.setText("No target — characterize first")
+            return
+
+        log.info("find instrument requested")
+        dialog = InstrumentSearchDialog(
+            self._target_metrics,
+            self._phrase,
+            self._patch_editor.seed,
+            sr=self._service.sr,
+            parent=self,
+        )
+        dialog.instrumentChosen.connect(self._on_instrument_found)
+        dialog.show()
+
+    def _on_instrument_found(self, instrument_id: str, params: object) -> None:
+        """Apply an instrument from the search dialog to the patch editor."""
+        layers = self._patch_editor.layers
+        seed = self._patch_editor.seed
+        log.info("applying found instrument: %s", instrument_id)
+        self._patch_editor.set_patch(instrument_id, dict(params), layers, seed)  # type: ignore[arg-type]
+        self._status_label.setText(f"Loaded instrument: {instrument_id}")
 
     def _characterize_target(self, start_s: float, end_s: float, stem: str = "other") -> None:
         """Characterize the target and update the metrics panel."""

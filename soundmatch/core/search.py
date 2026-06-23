@@ -1,12 +1,15 @@
-"""soundmatch.core.search — coarse param search minimizing Scorecard.aggregate.
+"""soundmatch.core.search — coarse param search + cross-instrument ranking.
 
-Given a target Metrics, a Phrase, and an instrument, perform a coarse grid
-search over key parameters to find the starting patch that minimizes the
-aggregate distance to the target.  Reuses ``render_phrase`` / ``characterize``
-/ ``diff`` — never re-implemented.
+Two public functions:
 
-Runs on a worker thread in the UI; results are returned as the best
-``(instrument_id, params, layers, seed)`` tuple.
+``coarse_search``
+    Given a target Metrics, Phrase, and a specific instrument, grid-search
+    over key params and return the best-scoring patch.
+
+``instrument_search``
+    Try every registered instrument with a quick coarse_search, rank by
+    aggregate distance, and return the sorted list.  Use this to discover
+    which instrument family best matches a target sound.
 """
 
 from __future__ import annotations
@@ -212,3 +215,98 @@ def _param_exists_in_registry(instrument_id: str, param_name: str) -> bool:
         return False
     param_names = [p.name for p in entry.get("params", [])]
     return param_name in param_names
+
+
+# ── Cross-instrument search ───────────────────────────────────────────────────
+
+
+@dataclass
+class InstrumentRanking:
+    """One entry in an instrument_search result.
+
+    Attributes:
+        instrument_id : Registry key.
+        family        : Instrument family (percussion, voice, …).
+        score         : Aggregate distance from the target (lower = better).
+        params        : Best parameter dict found for this instrument.
+        seed          : Seed used during evaluation.
+    """
+
+    instrument_id: str
+    family: str
+    score: float
+    params: dict[str, Any]
+    seed: int
+
+
+def instrument_search(
+    target: Metrics,
+    phrase: Phrase,
+    seed: int,
+    *,
+    max_per_instrument: int = 20,
+    sr: int = 44100,
+    on_result: Callable[[InstrumentRanking], None] | None = None,
+    on_progress: Callable[[int, int], None] | None = None,
+) -> list[InstrumentRanking]:
+    """Try every registered instrument and rank by how well it matches *target*.
+
+    For each instrument a quick ``coarse_search`` (capped at
+    *max_per_instrument* iterations) finds the best-scoring parameter set.
+    Results are returned sorted by score (ascending — lowest = best match).
+
+    Parameters
+    ----------
+    target               : Target Metrics to match against.
+    phrase               : Phrase to render for each candidate.
+    seed                 : Master seed for deterministic rendering.
+    max_per_instrument   : Maximum coarse_search iterations per instrument.
+    sr                   : Sample rate.
+    on_result            : Called once per instrument as results arrive.
+                           Useful for streaming results to a UI.
+    on_progress          : Called as ``(done, total)`` once per instrument.
+
+    Returns
+    -------
+    List of :class:`InstrumentRanking` sorted by score (best first).
+    """
+    from forge.instruments.registry import REGISTRY
+
+    instrument_ids = list(REGISTRY.keys())
+    total = len(instrument_ids)
+    rankings: list[InstrumentRanking] = []
+
+    log.info("instrument_search: evaluating %d instruments (max %d iters each)",
+             total, max_per_instrument)
+
+    for i, iid in enumerate(instrument_ids):
+        entry = REGISTRY[iid]
+        family = entry.get("family", "?")
+        defaults = {s.name: s.default for s in entry.get("params", [])}
+        try:
+            r = coarse_search(
+                target, phrase, iid, defaults, [], seed,
+                sr=sr, max_iterations=max_per_instrument,
+            )
+            ranking = InstrumentRanking(
+                instrument_id=iid,
+                family=family,
+                score=r.best_score,
+                params=r.best_params,
+                seed=seed,
+            )
+            rankings.append(ranking)
+            log.debug("instrument_search: %s score=%.4f", iid, r.best_score)
+            if on_result is not None:
+                on_result(ranking)
+        except Exception as exc:
+            log.debug("instrument_search: %s failed: %s", iid, exc)
+        finally:
+            if on_progress is not None:
+                on_progress(i + 1, total)
+
+    rankings.sort(key=lambda r: r.score)
+    log.info("instrument_search done: best=%s score=%.4f",
+             rankings[0].instrument_id if rankings else "—",
+             rankings[0].score if rankings else float("inf"))
+    return rankings
