@@ -9,6 +9,7 @@ characterization uses the correct slice in stem-relative coordinates.
 from __future__ import annotations
 
 import logging
+import math
 import time
 from pathlib import Path
 from typing import Any
@@ -149,8 +150,9 @@ class StemRow(QWidget):
         """Set playback slice in stem-relative time coordinates."""
         if self._mono is None:
             return
+        n = len(self._mono)
         self._play_i0 = max(0, int(eff_start_s * self._sr))
-        self._play_i1 = min(int(eff_end_s * self._sr), len(self._mono))
+        self._play_i1 = n if math.isinf(eff_end_s) else min(int(eff_end_s * self._sr), n)
         self._waveform.set_selection(eff_start_s, eff_end_s)
 
     # ── Private ───────────────────────────────────────────────────────
