@@ -245,8 +245,8 @@ class TestPatchEditor(unittest.TestCase):
         w = PatchEditor()
         w._on_add_layer()
         self.assertEqual(len(w.layers), 1)
-        row = w._layer_rows[0]
-        w._on_remove_layer(row)
+        w._switch_to(0)  # activate the layer so _on_remove_active knows which to remove
+        w._on_remove_active()
         self.assertEqual(len(w.layers), 0)
 
     def test_set_patch(self):
