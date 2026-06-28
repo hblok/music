@@ -52,15 +52,13 @@ def export_snippet(
     path         : Output ``.py`` path.
     sr           : Sample rate.
     """
-    layers_literal = []
-    for inst_id, inst_params in layers:
-        layers_literal.append(f'    ("{inst_id}", {inst_params!r}),')
-    layers_str = "\n".join(layers_literal) if layers_literal else "    # (no layers)"
-
-    notes_str = ""
-    for note in phrase.notes:
-        notes_str += f"    Note(t={note.t!r}, midi={note.midi!r}),\n"
-    notes_str = notes_str.rstrip()
+    layers_str = (
+        "\n".join(f'    ("{iid}", {p!r}),' for iid, p in layers)
+        or "    # (no layers)"
+    )
+    notes_str = "\n".join(
+        f"    Note(t={n.t!r}, midi={n.midi!r})," for n in phrase.notes
+    )
 
     snippet = textwrap.dedent(f"""\
         #!/usr/bin/env python3

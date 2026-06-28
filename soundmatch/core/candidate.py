@@ -70,7 +70,7 @@ def render_phrase(
             note_params["midi"] = note.midi[0] if len(note.midi) >= 1 else 60
             note_params["duration"] = phrase.length_s  # let envelope shape it
             # For phrase-level instruments, pass notes list
-            if "notes" in _get_param_names(inst_id):
+            if "notes" in get_instrument_param_names(inst_id):
                 note_params["notes"] = [(m, 0.3) for m in note.midi]
                 note_params.pop("midi", None)
                 note_params.pop("duration", None)
@@ -98,8 +98,8 @@ def render_phrase(
     return result
 
 
-def _get_param_names(instrument_id: str) -> list[str]:
-    """Get parameter names for an instrument from the registry."""
+def get_instrument_param_names(instrument_id: str) -> list[str]:
+    """Return parameter names for an instrument from the registry."""
     from forge.instruments.registry import REGISTRY
     entry = REGISTRY.get(instrument_id)
     if entry is None:

@@ -126,7 +126,6 @@ def sweep(
     if values is None:
         return []
 
-    base_val = base_params.get(axis)
     specs = []
     for val in values:
         overrides = {axis: val}

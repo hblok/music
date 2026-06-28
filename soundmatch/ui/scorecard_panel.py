@@ -158,7 +158,6 @@ class ScorecardPanel(QWidget):
             for c, item in enumerate(items):
                 if is_worst:
                     item.setForeground(Qt.GlobalColor.red)
-                    item.setFont(item.font())  # ensure font is set
                 self._table.setItem(r, c, item)
 
         self._table.resizeColumnsToContents()

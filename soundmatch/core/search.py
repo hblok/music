@@ -24,7 +24,7 @@ import numpy as np
 log = logging.getLogger(__name__)
 
 from inspector.metrics import Metrics, characterize
-from soundmatch.core.candidate import render_phrase
+from soundmatch.core.candidate import get_instrument_param_names, render_phrase
 from soundmatch.core.phrase import Phrase
 from soundmatch.core.scoring import Scorecard, diff
 
@@ -110,7 +110,7 @@ def coarse_search(
     param_values: list[list[Any]] = []
     for pname, values in search_grid.items():
         # Only include params that the instrument actually uses
-        if pname in base_params or _param_exists_in_registry(instrument_id, pname):
+        if pname in base_params or pname in get_instrument_param_names(instrument_id):
             active_params.append(pname)
             param_values.append(values[:4])  # cap at 4 values per param
 
@@ -205,16 +205,6 @@ def _evaluate_single(
         instrument_id=instrument_id,
         seed=seed,
     )
-
-
-def _param_exists_in_registry(instrument_id: str, param_name: str) -> bool:
-    """Check if a param name exists in the instrument's schema."""
-    from forge.instruments.registry import REGISTRY
-    entry = REGISTRY.get(instrument_id)
-    if entry is None:
-        return False
-    param_names = [p.name for p in entry.get("params", [])]
-    return param_name in param_names
 
 
 # ── Cross-instrument search ───────────────────────────────────────────────────

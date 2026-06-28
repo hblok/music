@@ -53,7 +53,7 @@ class MetricDelta:
 
     @classmethod
     def from_dict(cls, d: dict[str, float]) -> MetricDelta:
-        return cls(target=d["target"], candidate=d["candidate"], delta=d["delta"])
+        return cls(**d)
 
 
 @dataclass
@@ -79,40 +79,34 @@ class Scorecard:
     band_decay_ms: dict[str, MetricDelta]
     _weights: dict[str, float] = field(default_factory=lambda: dict(_DEFAULT_WEIGHTS))
 
-    def aggregate(self) -> float:
-        """Weighted normalized distance (0 = perfect match, 1 = worst)."""
-        contributions: list[float] = []
-        weight_sum = 0.0
-
-        # Scalar metrics
+    def _weighted_scores(self) -> dict[str, float]:
+        """Weighted normalized score per metric axis (0=perfect, w=worst)."""
+        scores: dict[str, float] = {}
         for name in ("percussive_ratio", "centroid_hz", "onset_count",
                       "onset_density", "median_ioi_s"):
             md: MetricDelta = getattr(self, name)
             w = self._weights.get(name, 1.0)
             scale = _NORM_SCALES.get(name, 1.0)
-            norm_delta = min(abs(md.delta) / scale, 1.0)
-            contributions.append(w * norm_delta)
-            weight_sum += w
-
-        # band_balance: average of per-band normalized deltas
+            scores[name] = w * min(abs(md.delta) / scale, 1.0)
         if self.band_balance:
             w = self._weights.get("band_balance", 1.0)
             scale = _NORM_SCALES.get("band_balance", 1.0)
-            band_deltas = [min(abs(v.delta) / scale, 1.0) for v in self.band_balance.values()]
-            contributions.append(w * (sum(band_deltas) / len(band_deltas)))
-            weight_sum += w
-
-        # band_decay_ms: average of per-band normalized deltas
+            vals = [min(abs(v.delta) / scale, 1.0) for v in self.band_balance.values()]
+            scores["band_balance"] = w * (sum(vals) / len(vals))
         if self.band_decay_ms:
             w = self._weights.get("band_decay_ms", 1.0)
             scale = _NORM_SCALES.get("band_decay_ms", 1.0)
-            decay_deltas = [min(abs(v.delta) / scale, 1.0) for v in self.band_decay_ms.values()]
-            contributions.append(w * (sum(decay_deltas) / len(decay_deltas)))
-            weight_sum += w
+            vals = [min(abs(v.delta) / scale, 1.0) for v in self.band_decay_ms.values()]
+            scores["band_decay_ms"] = w * (sum(vals) / len(vals))
+        return scores
 
+    def aggregate(self) -> float:
+        """Weighted normalized distance (0 = perfect match, 1 = worst)."""
+        scores = self._weighted_scores()
+        weight_sum = sum(self._weights.get(n, 1.0) for n in scores)
         if weight_sum < 1e-12:
             return 0.0
-        return sum(contributions) / weight_sum
+        return sum(scores.values()) / weight_sum
 
     def worst(self) -> str:
         """Name of the metric with the largest weighted normalized Δ.
@@ -121,41 +115,8 @@ class Scorecard:
         ``"band_balance"``, ``"onset_count"``, ``"onset_density"``,
         ``"median_ioi_s"``, ``"band_decay_ms"``.
         """
-        worst_name = "percussive_ratio"
-        worst_val = -1.0
-
-        for name in ("percussive_ratio", "centroid_hz", "onset_count",
-                      "onset_density", "median_ioi_s"):
-            md: MetricDelta = getattr(self, name)
-            w = self._weights.get(name, 1.0)
-            scale = _NORM_SCALES.get(name, 1.0)
-            norm_delta = min(abs(md.delta) / scale, 1.0)
-            weighted = w * norm_delta
-            if weighted > worst_val:
-                worst_val = weighted
-                worst_name = name
-
-        # band_balance aggregate
-        if self.band_balance:
-            w = self._weights.get("band_balance", 1.0)
-            scale = _NORM_SCALES.get("band_balance", 1.0)
-            band_deltas = [min(abs(v.delta) / scale, 1.0) for v in self.band_balance.values()]
-            weighted = w * (sum(band_deltas) / len(band_deltas))
-            if weighted > worst_val:
-                worst_val = weighted
-                worst_name = "band_balance"
-
-        # band_decay_ms aggregate
-        if self.band_decay_ms:
-            w = self._weights.get("band_decay_ms", 1.0)
-            scale = _NORM_SCALES.get("band_decay_ms", 1.0)
-            decay_deltas = [min(abs(v.delta) / scale, 1.0) for v in self.band_decay_ms.values()]
-            weighted = w * (sum(decay_deltas) / len(decay_deltas))
-            if weighted > worst_val:
-                worst_val = weighted
-                worst_name = "band_decay_ms"
-
-        return worst_name
+        scores = self._weighted_scores()
+        return max(scores, key=scores.__getitem__) if scores else "percussive_ratio"
 
     def to_dict(self) -> dict[str, Any]:
         """Serialize for project save."""

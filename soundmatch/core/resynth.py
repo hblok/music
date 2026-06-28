@@ -90,11 +90,9 @@ def analyze(y: np.ndarray, sr: int, *, source_name: str = "") -> ResynthModel:
         is_tonal = hnr_db >= _HNR_TONAL_THRESHOLD
 
     # ── Noise spectral shape from full spectrum ───────────────────────
-    # Use the full signal (not y - y_harm) so high-frequency harmonics and
-    # energy above the additive model's partial range are preserved in the
-    # noise component's spectral colour.
-    D_full = librosa.stft(y, n_fft=_N_FFT, hop_length=_HOP_LENGTH)
-    spectral_shape = np.median(np.abs(D_full), axis=1)   # (n_bins,)
+    # Use D (full signal) so high-frequency harmonics and energy above the
+    # additive model's partial range are preserved in the noise colour.
+    spectral_shape = np.median(np.abs(D), axis=1)   # (n_bins,)
     peak_shape = spectral_shape.max()
     if peak_shape > 1e-10:
         spectral_shape = spectral_shape / peak_shape

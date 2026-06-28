@@ -466,8 +466,7 @@ class MainWindow(QMainWindow):
 
     def _on_reference_file_loaded(self, path: object) -> None:
         """Keep self._ref_path in sync whenever the reference panel finishes loading."""
-        from pathlib import Path as _Path
-        self._ref_path = _Path(str(path))
+        self._ref_path = Path(str(path))
         log.debug("ref_path synced: %s", self._ref_path)
 
     def _on_open_reference(self) -> None:
@@ -794,13 +793,7 @@ class MainWindow(QMainWindow):
 
         self._show_progress("Analysing…")
         try:
-            from soundmatch.core.extract import (
-                ExtractionReport,
-                export_brief,
-                extract_synthesis_features,
-                generate_synthesis_brief,
-            )
-            from pathlib import Path
+            from soundmatch.core.extract import export_brief, extract_synthesis_features
 
             report = extract_synthesis_features(
                 region, sr, source_name=source_name, chord_midi=chord_midi,
@@ -808,7 +801,7 @@ class MainWindow(QMainWindow):
             json_path, brief_path = export_brief(report, Path(out_dir))
             log.info("exported brief: %s", brief_path)
 
-            brief_text = generate_synthesis_brief(report, include_template=True)
+            brief_text = brief_path.read_text(encoding="utf-8")
             self._show_brief_preview(brief_text, brief_path)
             self._status_label.setText(f"Brief saved: {brief_path.name}")
         except Exception as exc:
