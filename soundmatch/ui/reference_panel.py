@@ -164,14 +164,27 @@ class ReferencePanel(QWidget):
         self._play_btn.clicked.connect(self._on_play)
         layout.addWidget(self._play_btn)
 
-    def load_audio(self, path: Path, sr: int | None = None) -> None:
+    def load_audio(
+        self,
+        path: Path,
+        sr: int | None = None,
+        *,
+        start_s: float | None = None,
+        end_s: float | None = None,
+    ) -> None:
         """Load an audio file in the background and display it when ready.
 
         Parameters
         ----------
-        path: Path to the audio file.
-        sr  : Target sample rate (defaults to the service sample rate).
+        path   : Path to the audio file.
+        sr     : Target sample rate (defaults to the service sample rate).
+        start_s: If given, restore this selection start after loading.
+        end_s  : If given, restore this selection end after loading.
         """
+        if start_s is not None:
+            self._start_s = start_s
+        if end_s is not None:
+            self._end_s = end_s
         target_sr = sr if sr is not None else self._target_sr
         self._path = path
         self._file_label.setText(f"Loading {path.name}…")
@@ -261,7 +274,9 @@ class ReferencePanel(QWidget):
         self._y_display = np.asarray(y_display)
         self._duration_s = duration_s
         self._sr = sr
-        self._end_s = min(10.0, duration_s)
+        # Clamp to actual duration; if no selection was pre-set, default to 10 s.
+        if self._end_s <= self._start_s or self._end_s > duration_s:
+            self._end_s = min(10.0, duration_s)
         self._start_spin.setText(f"{self._start_s:.2f} s")
         self._end_spin.setText(f"{self._end_s:.2f} s")
 

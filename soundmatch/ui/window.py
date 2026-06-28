@@ -330,10 +330,18 @@ class MainWindow(QMainWindow):
 
         self._project = proj
 
+        # Restore selection state
+        self._sel_start_s = proj.start_s
+        self._sel_end_s = proj.end_s
+
         # Restore UI state from project
         if proj.reference_path and proj.reference_path.exists():
             self._ref_path = proj.reference_path
-            self._reference.load_audio(proj.reference_path)
+            self._reference.load_audio(
+                proj.reference_path,
+                start_s=proj.start_s,
+                end_s=proj.end_s,
+            )
             self._status_label.setText(f"Loading: {proj.reference_path.name}…")
         else:
             self._status_label.setText(f"Project opened (reference not found)")
@@ -377,6 +385,8 @@ class MainWindow(QMainWindow):
         proj = self._project
         if self._ref_path is not None:
             proj.reference_path = self._ref_path
+        proj.start_s = self._sel_start_s
+        proj.end_s = self._sel_end_s
         if self._target_metrics is not None:
             proj.target_metrics = self._target_metrics
         if self._phrase is not None:
