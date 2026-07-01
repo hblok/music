@@ -91,3 +91,16 @@ darbuka hits, with BPM exposed as a parameter the game engine can write to.
 - **Palace / interior** — move away from Phrygian dominant; try Hijaz Kar
   (D Eb F# G Ab B C) for a more ornate, interior-world sound; ney flute
   rather than duduk timbre; more reverb, less wind.
+
+Shortlisted next (full write-ups in `more_ideas.md`):
+
+- **Kwisatz Haderach** (B1) — 10-min album closer, ~146 BPM; cycles each psy
+  track's signature groove as "visions of possible futures", fuses all three
+  engines in the final drop (40+ layers); ends on the original arrakis wind.
+- **Spice Agony (Reverend Mother Mix)** (B2) — downtempo dub-psy, ~85 BPM;
+  half-time kick, tape-echo skanks, one 303 note per bar with full-bar sweeps.
+- **Litany Against Fear** (B4) — beatless psy, 6 min; sleeper 303 at 1/8
+  speed, chant as formant drones, whispered-noise texture, one bar of true
+  silence, then the D drone alone for 40 s.
+- **Gurney's Song** (C2) — solo baliset piece; 9-string Karplus-Strong
+  courses, strummed chords, body-resonance IR, rubato from `slow_noise`.
