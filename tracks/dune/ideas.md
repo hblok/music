@@ -94,9 +94,7 @@ darbuka hits, with BPM exposed as a parameter the game engine can write to.
 
 Shortlisted next (full write-ups in `more_ideas.md`):
 
-- **Kwisatz Haderach** (B1) — 10-min album closer, ~146 BPM; cycles each psy
-  track's signature groove as "visions of possible futures", fuses all three
-  engines in the final drop (40+ layers); ends on the original arrakis wind.
+- ~~**Kwisatz Haderach** (B1)~~ — DONE (`generate_kwisatz_haderach.py`).
 - **Spice Agony (Reverend Mother Mix)** (B2) — downtempo dub-psy, ~85 BPM;
   half-time kick, tape-echo skanks, one 303 note per bar with full-bar sweeps.
 - **Litany Against Fear** (B4) — beatless psy, 6 min; sleeper 303 at 1/8
