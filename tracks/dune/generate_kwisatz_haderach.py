@@ -50,6 +50,18 @@ original arrakis wind — the first sound of the album is also the last.
 Output: /workspace/music/kwisatz_haderach.wav (stereo, 44100 Hz, 16-bit).
 """
 
+"""
+The track contains the whole album, as the brainstorm asked:
+
+    Three visions of possible futures, each quoting a psy track's actual engine and riffs: Water of Life (its trance kick, rolling K-b-b-b bass, RIFF_DARK, Theme W), Sleeper (its brighter kick, the sliding-303 RIFF_SYNC, psy clap, Theme S), Arrakeen (the room-shake kick stack + sub-boom + sidechain pump, oud war riff, snare march, THEME_WAR on the horn). The night_pursuit tick + a heartbeat interrupt each vision.
+    THE FUSION (104 bars): all three engines at once — both basses pumped against the arrakeen kick, water/sleeper 303 riffs in 2-bar call-and-response panned L/R, then the 12-voice choir, two mini-dips, Theme A over the machine, a false ending, and a last wave where Theme A (duduk + ney) and THEME_WAR (horn) sound together over an 8th-note kick sprint.
+    The ending: one stab at bar 292, every layer silenced except the original arrakis wind, which plays the album out alone for 45 s.
+
+The built-in balance check passed: visions escalate 0.228 → 0.232 → 0.290 RMS, interrupts drop to ~0.09, the fusion holds ~0.30 with breathing dips, and the last wave is the loudest section (0.315) — no headroom theft, verified in the script's own printout.
+
+Skipped: the 40+ layer count from the brainstorm — it landed at 33 committed layers with ~25 simultaneous at the climax; density is there, the number was never the point.
+"""
+
 import os
 import wave
 import numpy as np
