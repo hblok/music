@@ -132,6 +132,7 @@ sparseness is the identity; resist stacking.
    fits the Frankfurt scene and the story; my recommendation), vs
    *Wendepunkt* ("turning point"), vs English *Unwritten*. The
    filename follows the answer.
+   Answer: Ungeschrieben is fine.
 
 2. **The spoken word**: the blueprint's concept-carrier is a dry
    spoken sci-fi line. Options: (a) synthesize OUR OWN line with the
@@ -141,14 +142,19 @@ sparseness is the identity; resist stacking.
    alone, (c) a whispered-texture almost-voice. If (a): which
    language, and female or male voice? Note this would be the first
    voice in the trance/ tracks — easy to drop later if it cheapens it.
+   Answer: Very exited by this. And yes "Die Zukunft ist ungeschrieben" can work - although, a suspect it might be difficult to fit it into a bar. It doesn't carry much rhythm in itself. Also, yes, a knob which can silence the voice in case it doesn't work at all would be welcome - make sure the is clearly documented in the code.
+   Furthermore, if I'm reading the structure map correct, the spoken words are repeated at least three times. It could be, that that's too much. In very many trance and techno tracks, such samples or words were dropped in only once, as a single sample, and that's it. (Very often, these tended to be samples from movie). I suspect, our line is more similar to that, rather than a repeating element.
 
 3. **The withheld thesis** (doctrine deviation): confirm replacing the
    early hook statement with the single drowned ghost foreshadow, and
    the check flipping to "zero full statements before reveal 1". I
    recommend yes — the reveal IS this form.
+   Answer: Yes, sounds good.
 
 4. **Sequence resonance**: era-authentic moderate resonance (Q ~2–2.5,
    swept, guardrailed as above — my recommendation) vs staying fully
    inside the conservative warmth recipe (Q 1.2)? The resonant sweep is
    a big part of the 1992 sound; the guardrails should keep it round
    rather than acid.
+   Answer: Yes, era-authentic sounds good.
+   
