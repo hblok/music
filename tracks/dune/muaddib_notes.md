@@ -152,21 +152,21 @@ silence); drone low; standalone script, seeded, WAV to
    being acclaimed is the natural anthem) vs "Shai-Hulud" (a-i-u-u,
    darker — the song becomes about the worm, and the crowd part reads
    as awe rather than acclaim)? I recommend Muad'Dib.
-   + User answer:
+   + User answer: Yes, Muad'Dib is good.
 
 2. **Kick**: none (war drums + doum carry the low end — organic
    anthem, my recommendation) vs a soft 4-on-the-floor kick in
    choruses 3–4 only (pushes it toward the psy tracks, bigger but
    less "sung")?
-   + User answer:
+   + User answer: Let's try a kick - makes it more powerful!
 
 3. **Groove feel**: straight-4/4 ayyub gallop at 124 (recommended —
    fits the existing grid machinery) vs a true 12/8 triplet gallop
    (kanly's hoofbeat feel, more distinctive, but every pattern and
    the bar grid change)?
-   + User answer:
+   + User answer: let's go 4/4.
 
 4. **The Sihaya quote in the bridge** (Chani answering the lone call
    with their private hook): keep, or keep the bridge purely this
    song's material?
-   + User answer:
+   + User answer: let's keep the bridge simple, not any new hook there.
