@@ -10,7 +10,11 @@ Baliset = 9-string, 3 courses x 3 strings: triple-course Karplus-Strong
 (the oud recipe extended), body resonance via a two-mode IR (110/220 Hz),
 strummed chords with staggered onsets, rubato from correlated slow noise.
 
-Output: /workspace/music/gurneys_song.wav  (~4:45, D Phrygian dominant)
+v2 (user feedback): one continuous cursor — no dead seams between
+sections; tuning intro cut to a breath; the arpeggio figure and the
+descant get real development instead of four bars each.
+
+Output: /workspace/music/gurneys_song_v2.wav  (~4:15, D Phrygian dominant)
 """
 
 import wave
@@ -19,7 +23,7 @@ import numpy as np
 from scipy import signal
 
 SR = 44100
-DURATION = 285.0
+DURATION = 258.0
 N = int(SR * DURATION)
 t = np.arange(N) / SR
 
@@ -92,7 +96,7 @@ CACHE = {}
 
 def baliset_note(m, dur=2.5, kind="pluck"):
     """Triple-course baliset pluck; 'harm' = flageolet (octave harmonic)."""
-    dur = float(np.clip(dur, 1.2, 4.0))
+    dur = float(np.clip(dur, 1.2, 8.0))
     key = (m, round(dur * 2) / 2, kind)
     if key in CACHE:
         return CACHE[key]
@@ -184,12 +188,14 @@ THEME = [(62, 2), (66, 1), (63, 1), (62, 2), (60, 2), (62, 3),
 CHORDS = {"D": [38, 50, 57, 62, 66],
           "Eb": [39, 51, 58, 63, 67],
           "Cm": [36, 48, 55, 60, 63],
-          "Gm": [43, 50, 58, 62]}
+          "Gm": [43, 50, 58, 62, 67]}
 PROG = ["D", "D", "Eb", "D", "D", "Cm", "D", "D",
         "Eb", "Eb", "D", "Gm", "Cm", "Eb", "D", "D"]
 
 DESCANT = [(74, 4), (75, 4), (74, 4), (78, 4),
            (75, 4), (81, 4), (79, 4), (74, 4)]  # chorus 2 top line
+DESCANT2 = [(81, 3), (79, 1), (78, 2), (75, 2),
+            (78, 2), (74, 2), (75, 2), (74, 2)]  # the answer, falling
 
 
 def play_theme(perf, up=0, gain=0.5, thumb=None, thumb_step=2, ring=1.8):
@@ -208,8 +214,8 @@ def play_theme(perf, up=0, gain=0.5, thumb=None, thumb_step=2, ring=1.8):
         prev = m
 
 
-def play_chorus(perf, g=(0.55, 0.40, 0.30)):
-    for i, name in enumerate(PROG):
+def play_chorus(perf, g=(0.55, 0.40, 0.30), prog=PROG):
+    for i, name in enumerate(prog):
         ch = CHORDS[name]
         strum(ch, perf.note(1), g[0] * rng.uniform(0.9, 1.1))
         strum(ch, perf.note(0.5), g[1] * rng.uniform(0.85, 1.1))
@@ -229,69 +235,87 @@ def section(t0, name):
 
 print("performing...")
 
-# -- tuning: he settles (0:00)
-section(0.0, "tuning: he settles")
-for tt0, m in [(1.2, 50), (3.0, 50), (5.2, 45), (7.5, 38)]:
-    pluck(m, tt0 + rng.uniform(-0.1, 0.1), 0.42, dur=2.2)
-add_squeak(9.4)
-pluck(57, 9.55, 0.45, dur=2.5)                       # the slide lands
-pluck(62, 12.0 + rng.uniform(-0.1, 0.1), 0.36, kind="harm", dur=3.0)
-pluck(62, 16.0 + rng.uniform(-0.1, 0.1), 0.42, dur=2.5)
-pluck(66, 18.4 + rng.uniform(-0.1, 0.1), 0.38, dur=2.8)  # tries the interval
+# One cursor threads the whole piece — sections start where the last one
+# ends, chords ring across every seam, pickup runs bridge the joints.
+# v1 feedback: fixed section clocks left dead gaps ("ten pieces").
+P = Perf(1.5)
 
-# -- verse 1: the theme, low, over a thumb pedal (0:25)
-section(25.0, "verse 1: the theme, low")
-p = Perf(25.0)
-for k in range(4):                                   # 8-beat thumb intro
-    pluck(38, p.note(2), 0.30, dur=1.8)
-play_theme(p, up=0, gain=0.58, thumb=[38], thumb_step=2)
-for m, nb in [(62, 4), (60, 2), (63, 2), (62, 6)]:   # soft echo of the tail
-    pluck(m, p.note(nb, rit=1.15), 0.36, dur=nb * p.spb + 1.5)
+# -- settle: a breath, then straight into it (the long tuning intro is gone)
+section(0.0, "settle")
+pluck(50, P.note(2), 0.40, dur=2.2)
+pluck(38, P.note(2), 0.42, dur=2.5)
+pluck(62, P.note(2), 0.36, kind="harm", dur=3.0)
+pluck(38, P.note(2), 0.32, dur=2.0)                  # the thumb pulse begins
 
-# -- chorus 1: strummed (1:25)
-section(85.0, "chorus 1: strummed")
-p = Perf(85.0)
-play_chorus(p)
-strum(CHORDS["D"], p.note(2, rit=1.3), 0.45, dur=3.5)  # let it ring
+# -- verse 1: the theme, low, over the thumb pedal
+section(P.cur, "verse 1: the theme, low")
+play_theme(P, up=0, gain=0.58, thumb=[38], thumb_step=2)
+for i, m in enumerate([60, 62, 63, 66]):             # pickup run, no gap
+    pluck(m, P.note(0.5), 0.40 + 0.03 * i, dur=1.5)
 
-# -- verse 2: octave up, walking thumb (2:05)
-section(125.0, "verse 2: octave up")
-p = Perf(125.0)
-play_theme(p, up=12, gain=0.55, thumb=[38, 45], thumb_step=1)
-for m, nb in [(74, 4), (72, 2), (75, 2), (74, 4)]:
-    pluck(m, p.note(nb, rit=1.2), 0.36, dur=nb * p.spb + 1.5)
-    pluck(38, p.note(0), 0.26, dur=1.6)
+# -- chorus 1: strummed
+section(P.cur, "chorus 1: strummed")
+play_chorus(P)
+strum(CHORDS["D"], P.note(2, rit=1.1), 0.45, dur=3.5)  # rings into verse 2
 
-# -- bridge: harmonics, the quietest point (2:55)
-section(175.0, "bridge: harmonics")
-p = Perf(175.0, tempo=60.0)
-for m in [62, 63, 67, 62]:
-    pluck(m, p.note(3, rit=1.1), 0.36, kind="harm", dur=3.0)
-for name in ["Eb", "Cm"]:                            # free arpeggios
-    for _ in range(2):
-        for m in CHORDS[name]:
-            pluck(m, p.note(0.5), 0.38 * rng.uniform(0.8, 1.1), dur=2.2)
-    p.note(1)                                        # breath between chords
-pluck(62, p.note(2), 0.34, kind="harm", dur=3.0)
+# -- verse 2: octave up, walking thumb
+section(P.cur, "verse 2: octave up")
+play_theme(P, up=12, gain=0.55, thumb=[38, 45], thumb_step=1)
 
-# -- chorus 2: the biggest strums, melody on top (3:30)
-section(210.0, "chorus 2: full voice")
-p = Perf(210.0)
-play_chorus(p, g=(0.70, 0.50, 0.38))
-pd = Perf(210.0)                                     # descant rides on top
+# -- development: the arpeggio garden (v1's 4-bar bridge, given room)
+section(P.cur, "development: arpeggios")
+
+
+def arp_bar(name, gain):
+    ch = CHORDS[name]
+    for m in ch + ch[-2:0:-1]:                       # up and down, 8 eighths
+        pluck(m, P.note(0.5), gain * rng.uniform(0.8, 1.05), dur=1.8)
+
+
+for name in ["Eb", "Cm", "Gm", "D"]:                 # A: the figure alone
+    arp_bar(name, 0.34)
+Pm = Perf(P.cur)                                     # B: the theme over it
+Pm.note(4)                                           # melody waits one bar
+for m, nb in THEME[:6]:                              # phrase 1, low
+    pluck(m, Pm.note(nb), 0.55, dur=nb * Pm.spb + 1.5)
+for m, nb in THEME[6:12]:                            # phrase 2, octave up
+    pluck(m + 12, Pm.note(nb), 0.50, dur=nb * Pm.spb + 1.5)
+for name in ["D", "Eb", "Cm", "D", "Gm", "Eb", "Cm", "D"]:
+    arp_bar(name, 0.36)
+for i, (name, m_top) in enumerate(zip(["Eb", "Gm", "Cm", "D"],
+                                      [74, 75, 78, 74])):
+    pluck(m_top, P.cur, 0.46, dur=3.5)               # C: descant seeds on top
+    arp_bar(name, 0.37 + 0.03 * i)
+
+# -- chorus 2: full voice — the descant states, then answers
+section(P.cur, "chorus 2: descant")
+t_c2 = P.cur
+play_chorus(P, g=(0.70, 0.50, 0.38))
+pd = Perf(t_c2)
 for m, nb in DESCANT:
-    pluck(m, pd.note(nb), 0.42 * rng.uniform(0.85, 1.05),
+    pluck(m, pd.note(nb), 0.45 * rng.uniform(0.85, 1.05),
+          dur=nb * pd.spb + 1.5)
+t_c2b = P.cur
+play_chorus(P, g=(0.70, 0.50, 0.38), prog=PROG[8:])  # half again
+pd = Perf(t_c2b)
+for m, nb in DESCANT2:
+    pluck(m, pd.note(nb), 0.46 * rng.uniform(0.85, 1.05),
           dur=nb * pd.spb + 1.5)
 
-# -- coda: the theme fragments, one last chord (4:10)
-section(250.0, "coda: the last chord")
-p = Perf(250.0, tempo=60.0)
-frag = [(62, 2), (66, 1), (63, 1), (62, 2), (60, 2), (62, 3)]
+# -- arpeggios return, falling away
+section(P.cur, "arpeggios return")
+for i, name in enumerate(["D", "Eb", "Cm", "D"]):
+    arp_bar(name, 0.40 - 0.03 * i)
+
+# -- coda: the theme fragments, one last chord
+section(P.cur, "coda: the last chord")
+P.spb = 60.0 / 58.0                                  # the song leans back
+frag = THEME[:6]
 for j, (m, nb) in enumerate(frag):
     rit = 1.0 + 0.8 * j / (len(frag) - 1)            # the big ritardando
-    pluck(m, p.note(nb, rit), 0.42 * (1 - 0.03 * j), dur=nb * p.spb + 2.0)
-t_final = p.note(4)
-strum(CHORDS["D"], t_final, 0.70, dur=4.0, stag=0.06)  # slow, deliberate
+    pluck(m, P.note(nb, rit), 0.44 - 0.02 * j, dur=nb * P.spb + 2.0)
+t_final = P.note(4)
+strum(CHORDS["D"], t_final, 0.70, dur=7.0, stag=0.06)  # slow, deliberate
 # hand mute: palm lands on the strings
 n_mute = int(0.08 * SR)
 tm = np.arange(n_mute) / SR
@@ -300,7 +324,7 @@ mute = (np.sin(2 * np.pi * 110 * tm) * np.exp(-tm / 0.02) +
 sos_m = signal.butter(2, 500, "low", fs=SR, output="sos")
 mute = signal.sosfilt(sos_m, mute)
 mute /= np.max(np.abs(mute)) + 1e-12
-t_mute = t_final + 7.0
+t_mute = t_final + 6.5
 add_at(inst_L, mute, t_mute, 0.18)
 add_at(inst_R, mute, t_mute, 0.18)
 inst_L[int((t_mute + 0.06) * SR):] = 0.0             # strings stop dead
@@ -347,7 +371,7 @@ fade(mix_R)
 
 # ------------------------------------------------------------------ write
 
-out_path = "/workspace/music/gurneys_song.wav"
+out_path = "/workspace/music/gurneys_song_v2.wav"
 stereo = np.empty(2 * N, dtype=np.int16)
 stereo[0::2] = (np.clip(mix_L, -1, 1) * 32767).astype(np.int16)
 stereo[1::2] = (np.clip(mix_R, -1, 1) * 32767).astype(np.int16)
