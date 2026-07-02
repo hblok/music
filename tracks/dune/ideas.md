@@ -100,5 +100,5 @@ Shortlisted next (full write-ups in `more_ideas.md`):
 - **Litany Against Fear** (B4) — beatless psy, 6 min; sleeper 303 at 1/8
   speed, chant as formant drones, whispered-noise texture, one bar of true
   silence, then the D drone alone for 40 s.
-- **Gurney's Song** (C2) — solo baliset piece; 9-string Karplus-Strong
-  courses, strummed chords, body-resonance IR, rubato from `slow_noise`.
+- ~~**Gurney's Song** (C2)~~ — DONE (`generate_gurneys_song.py`, design
+  notes in `gurneys_song_notes.md`).
