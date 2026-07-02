@@ -106,12 +106,15 @@ melodics through the long dark hall — never reverb the drums.
    (recommended — keeps the lead scarce until chorus 2 so the fusion
    pays off) vs a new quiet verse-lead voice (one more timbre, against
    the one-instrument-set rule)?
+   Answer: Yes, let's keep the verse in low register.
 
 2. **The thesis**: solo piano refrain at 0:00 before any drums
    (recommended — the sihaya move, maximal contrast with the dry kick
    entry) vs refrain over a bare kick (more club-typical, less
    "song")?
+   Answer: Yes, start with solo piano.
 
 3. **Length**: the sketch lands ~5:30 with the deconstruction+outro at
    full v2 length. Trim the deconstruction to 16 bars to land ~5:15,
    or keep the long unwind (recommended — the slow peel is very Eye Q)?
+   Answer: Yes, keep the long unwind. Again, length is not a goal nor restriction. If we need more time, we take more time.

@@ -1,8 +1,6 @@
-# Lost v5 — design notes (the song treatment)
+# Lost v6 — design notes (the song treatment)
 
-Composition document for review before writing `lost_v5.py`.
-(Naming: `lost_v4.py` already renders `lost_v5.wav`, so this script
-renders **`lost_v6.wav`** — the script/WAV offset carries forward.)
+Composition document for review before writing `lost_v6.py`.
 
 The emotional-trance journey — love, confusion, loss, dread, sadness,
 hope — retold as a **song**. v4 already has the cohesion trinity (one
@@ -49,14 +47,14 @@ meaning".
    the most broken fragment of the tune; HOPE answers it with the
    fusion.
 
-## What v5 fixes over v4
+## What v6 fixes over v4
 
 1. **Thesis early**: solo piano states the refrain once in the first
    ~10 s (half-voice, wet) before the kick — replaces the 30 s
    settle-in. The outro bookends it: after the groove strips, solo
    piano plays the refrain once more, one ringing chord, fade.
 2. **Refrain identity**: v4 "states the theme in every section" but
-   varies it freely; v5 keeps drop statements *identical* (target ≥ 10
+   varies it freely; v6 keeps drop statements *identical* (target ≥ 10
    statements) and pushes all variation into the verses and breaks.
 3. **Seam devices**: pickup / ringing chord / fill / reverse cymbal at
    every boundary; the composed drop-silence beat only before HOPE.
@@ -99,11 +97,14 @@ v4. **No new timbres, no acid, no Dune palette, no vocals.**
    above, or rename to plain verse/chorus/bridge? I recommend keeping
    the emotion names — they're the story, the song form is the
    skeleton.
+   Answer: Yes, keep the emotion names, that's the key in this song. You're right, that's the story we want to tell.
 
 2. **CONFUSION length**: 24 bars as sketched (room to develop the
    flicker) or trim to 16 to land nearer 6:00? I recommend 24 — v4's
    confusion is one of its best ideas and deserves the development
    space.
+   Answer: Yes, length is not a restriction. Let's keep 24 bars.
 
 3. **The heartbeat in LOSS**: keep (it worked in v4 and reads as the
    one human sound in the break) or drop as clutter? I recommend keep.
+   Answer: Yes, the heartbeat works very in this track. It's essential.
