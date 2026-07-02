@@ -46,7 +46,7 @@ opposite.
 | 2:18 | *I will face my fear.* | Peak density — but the D drone holds perfectly steady underneath. Eb *and* E-natural drones beat against D. Both 303s with cutoff ceilings rising each bar. Whispers almost intelligible, dense dust. Heartbeat ~72 BPM. This is the loudest section, RMS target ~0.11. |
 | 3:06 | *I will permit it to pass over me and through me.* | The pass-through: the entire fear stack (303s, Eb/E drones, whispers, dust) makes one slow traverse of the stereo field, L → through center → R, over ~20 s, then starts thinning. The D drone does not move. Heartbeat begins slowing. |
 | 3:50 | *And when it has gone past, I will turn the inner eye to see its path.* | Recession: layers strip one per slow bar (dust, second 303, E, Eb, whispers...). The first 303 slows to 1/16 speed — its last note is a long slide 48→50 that never resolves its cutoff. Two final heartbeats. Breath. |
-| 4:38 | *Where the fear has gone there will be nothing.* | **TRUE SILENCE** — hard cut to digital zero, ~9 s (album's only full silence; even Gurney's room tone rule is suspended, deliberately). |
+| 4:38 | *Where the fear has gone there will be nothing.* | **TRUE SILENCE** — hard cut to digital zero, ~x s (album's only full silence; even Gurney's room tone rule is suspended, deliberately). (see notes below regarding lenth of silence) |
 | 4:47 | *Only I will remain.* | The D drone alone, unchanged, ~43 s — then a 30 s fade to nothing (5:30–6:00). The fade is part of the remaining. |
 
 ## Instruments / layers
@@ -56,6 +56,8 @@ opposite.
    lowpassed ~400 Hz, evolving only via slow_noise filter/amp drift, no
    mid-frequency beating. Constant gain from 0:20 to 5:30. Never ducks,
    never swells with the fear — that is the point.
+   (User note: Be careful here: The drone sounds can be pretty overwhelming and distract from the rest of the music. Especially if it last a long time. Let's make sure the entire song does not sound like a vacum cleaner is running in the background).
+
 2. **Slowed 303 × 2** — sleeper's `acid_note` engine (iirpeak Q=11,
    tanh(2.8x), bright→dark crossfade) with the time base ×8: note
    durations 0.8–13 s, the per-note filter zap replaced by a whole-bar
@@ -68,12 +70,16 @@ opposite.
    5.5 Hz pulse: 4 s attacks, 6 s releases. One on D throughout from
    0:44; fear adds Eb (1:28) and E (2:18) copies. The 2.2–2.7 kHz
    formant kept ≤ 0.10 gain (anti-tinnitus).
+   (User note: Again, be careful with constant unwavering sounds)
+
 4. **Whisper texture (the litany itself)** — white noise through two
    swept formant bandpasses (F1/F2, Q≈8) walking vowel targets:
    i(270,2300) e(530,1840) a(730,1090) o(570,840) u(300,870). Each
    "phrase" = a 2–4 s breath envelope traversing 3–6 vowels — it
    *almost* says words. Alternates ears L/R like someone whispering
    close (the psy element). Density/urgency follows the fear arc.
+   (User note: "white noise" - they we want to be ver careful with that)
+
 5. **Fear stack pads** — Eb and E sine-cluster pads (detuned ±0.3%)
    that beat against the drone's D2/D3 partials at 1–4 Hz — audible
    dissonance roughness = fear proximity. Mid register, moderate gain,
@@ -102,6 +108,8 @@ flinched.
 1. **Silence length**: spec says "one bar" = 13.2 s of digital black.
    Proposed ~9 s instead — long enough to be shocking, short enough
    that it doesn't read as playback failure. Happy to do the full bar.
+   (User note: I'll push back on this: a 9s silence is not shocking - it sounds like the track already stopped, so it's puzzeling when it comes back and plays for another few bars)
+
 2. **Heartbeat**: in the current plan (it made ambient_composition
    better per earlier feedback). Cut if it reads as a beat in a track
    whose point is beatlessness.
