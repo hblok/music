@@ -152,6 +152,22 @@ reusable recipe to CLAUDE.md:
   syllable layered with a sub-octave copy, a ring-modulated copy, and a
   formant-shifted copy, all time-aligned. Useful as a game SFX *and* as a
   one-shot scare in B3.
+- **C7. Real vocals / real lyrics** (from sihaya feedback, 2026-07-02:
+  the vowel-only singing works but sounds "a bit strange — like a
+  different language"; intriguing, but the next step is words). Take the
+  sihaya duet to real text. Paths, cheapest first: (a) **TTS-derived
+  singing** — we already have the gTTS/edge-tts + OLA pitch/speed
+  pipeline from the game voices; render a line syllable by syllable,
+  then OLA pitch-shift and time-stretch each syllable onto the melody
+  grid (pitches + durations straight from the hook). edge-tts has Arabic
+  neural voices — **Arabic fits the world** better than English and
+  hides TTS artifacts from non-speakers; try an `ar-*` female voice for
+  Chani's answers. (b) **Hybrid**: keep the synth vowel engine for the
+  sustained vowels (it holds pitch perfectly) and graft TTS consonant
+  onsets onto each note — real intelligibility, synth control. (c) Full
+  English verses only if (a)/(b) prove out — English exposes every
+  artifact. First experiment: one hook line ("Sihaya" is conveniently a
+  real word) in all three treatments, A/B'd against the vowel engine.
 
 ---
 

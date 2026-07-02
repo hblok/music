@@ -343,6 +343,41 @@ Every script follows the same shape:
   via `sosfiltfilt`, gain = median(env)/env clipped 0.75–1.6x). It
   levels 1-s RMS (verify min/mean ≥ 0.8) while leaving 8–14 Hz flutter
   intact, because the follower is far below the flutter band.
+- **Sung vowel voice / duet leads** (sihaya — the album's "vocalists"):
+  the chant glottal source made melodic — `glide_curve` portamento at
+  70 ms, vibrato blooming over 0.8 s (male 5 Hz/0.5 %, female 5.8 Hz/
+  0.35 %) — sung through the litany vowel table (i/e/a/o/u f1+f2) as
+  `iirpeak(Q=8)` pairs (f2 at 0.7 gain), one vowel PER NOTE crossfaded
+  over 90 ms (a singer moving through a word, not a filter switch), each
+  vowel's filtered signal RMS-equalized. Add a lowpassed chest layer
+  (butter 750·scale on the raw source) or the fundamental vanishes under
+  the resonances. Soft 'h' onset = the first vowel's formants on noise
+  decaying at 25/s. Hum variant: all-"u", lp 1400, more chest. FEMALE =
+  same engine one octave up, formants ×1.18, softer source (1/k^1.2),
+  10 % breath (bp 2–5 kHz riding the env), lp 4800 vs male 3400. Keep
+  leads fairly dry (wet 0.22) and panned ±0.12 — a close duet, not a
+  hall. Caveat (user feedback): vowels-only works but reads as an
+  invented language — fine for Fremen; real lyrics are the next step
+  (see `more_ideas.md` C7).
+- **Song form / question-and-answer** (sihaya — the fix for "short
+  sections that lack coherence"): what made one track read as ONE song.
+  (1) A per-bar `CHORD_MAP` for the whole track — one progression
+  family, every layer reads its harmony from the same list. (2) Q/A at
+  three levels: antecedent phrases end off-tonic, consequents resolve to
+  D with the SAME rhythm; an instrument echoes every vocal tail,
+  entering ON the singer's held final note (this is also what stitches
+  phrases — no dead air); dark verses ask, the major-D chorus answers.
+  (3) Repetition is the point: the hook sung 18×, refrain vowels
+  identical every time (= "same words"), verses same tune / different
+  vowel-words. (4) Every section boundary crossed by a pickup note, a
+  ringing chord, or a fill — print a seam checklist plus per-section RMS
+  and CHECK the ordering (verse < pre-chorus < chorus1 < chorus2 <
+  chorus4 loudest; a pre-chorus louder than its chorus reads as a
+  letdown — the rise vocals/strings needed ×0.7). (5) The pop
+  silence-drop: one beat of near-silence before the final chorus with
+  only a lone vocal pickup hanging in it — a composed event, not a seam.
+  (6) The bridge strips ONE layer per bar (never all at once) and avoids
+  the tonic chord so the final chorus lands as arrival.
 - **Anti-tinnitus rule** (learned from arrakis v1): any sustained
   high-frequency tonal element MUST either pulse to true silence
   (`np.clip(sin,0,1)**2` envelopes, not `0.5+0.5·sin`) or fade out entirely

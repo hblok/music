@@ -350,6 +350,155 @@ repeats verbatim.
   hoofbeat that never repeats: the horse walking away. The kanly is
   settled and it bought nothing.
 
+### 14. `the_navigator.wav` — *The Navigator* (6:05)
+**Script:** `generate_the_navigator.py`
+
+Dune + Goa trance: a Guild Navigator consuming the spice and folding
+space, consciousness dilating until past and future collapse into one
+fold. The album's first escape from home: **E Hijaz Kar**
+(E–F–G♯–A–B–C–D♯), the first key that resolves to a **major third** —
+and **THEME_FOLD**, a 4-bar hook that resolves *upward* to G♯: the
+album's first ecstatic, unshadowed resolution. New machinery to match:
+a two-operator **FM Goa lead** (index decaying 4→0.8, bright→warm
+sweep — the nasal Juno Reactor melody voice), a **choir-formant pad**
+("ah"-vowel bandpasses pulsing to true zero), a **crystalline FM
+arpeggio** ping-ponging hard L/R and doubling to 32nds in builds, and a
+**tabla tarang** (darbuka with tuned E2/B2 resonator rings). Also the
+bass-mastering reset: the deep 55 Hz shelf removed, sub boom lifted to
+66→52 Hz — the earbud-friendly target (~+2 dB below 100 Hz) all later
+psy tracks inherit. Structure: submersion → awareness → PRESCIENCE
+(drop 1) → the held breath → CONVERGENCE → **THE FOLD** (peak drop) →
+stillpoint (one vast hit, then dead air — the ship has arrived) →
+arrival (the groove returns warmer, THEME_FOLD resolved to a long G♯
+hold) → the void beyond, stripped layer by layer to silence.
+
+### 15. `jihad.wav` — *Jihad* (5:55)
+**Script:** `jihad.py`
+
+The dark one (idea B3): the holy war Paul foresaw — the war that
+*follows* the victory. War psy at 152 BPM in **D Hijaz Kar** (the
+Navigator's scale, weaponised back onto the album's D root), a direct
+energy successor to *Fall of Arrakeen*: same room-shake kick stack, sub
+boom and sidechain pump, but the pulse never fully stops. The
+**Sardaukar chant is chopped into rhythm** — 16th- and 32nd-note gated
+chant bursts are the battle-breath that carries every recharge — and
+above it a **screamed carnyx horn** (the war horn pushed into chaotic
+vibrato, a 1.8–3.5 kHz scream formant and tanh drive) declaims
+THEME_JIHAD over each drop. First appearance of the wide **12-voice
+choir** (the Choir of Sietch Tabr recipe, later quoted by *Kwisatz
+Haderach* and *Sihaya*), and a war-noise bed instead of desert wind:
+low massed feet and engines, mid roar, far screams. The piece escalates
+through **three waves**, each drop longer and heavier than the last,
+then an 8th-note kick sprint — and **ends mid-fury with a hard cut to
+silence**: the album's only unresolved ending. The war does not end;
+the track just stops being able to watch.
+
+### 16. `kwisatz_haderach.wav` — *Kwisatz Haderach* (9:00)
+**Script:** `generate_kwisatz_haderach.py`
+
+The album closer (idea B1): a track that **contains the whole album**.
+The one who can be many places at once sees every timeline the psy line
+has visited — three "visions of possible futures" cycle the actual
+engines and riffs of the previous psy tracks: *Water of Life*'s trance
+kick and rolling K-b-b-b bass (Theme W on the duduk), *Sleeper*'s
+brighter kick and sliding 303 (Theme S), *Arrakeen*'s room-shake stack,
+snare march and war horn (THEME_WAR). Each vision is interrupted by the
+*Night Pursuit* tick and a heartbeat: time itself changing the channel.
+Then the still point (ghosts of all three themes drift past), the
+24-bar build, and **THE FUSION** — 104 bars with all three engines at
+once: both basses sidechained against the arrakeen kick, both 303
+riffs in 2-bar call-and-response panned L/R, the 12-voice choir, war
+drums, two mini-dips, **Theme A over the machine**, a false ending, and
+a last wave where Theme A (duduk + ney) and THEME_WAR (horn) sound
+together over an 8th-note kick sprint. 146 BPM, 33 committed layers,
+seed 10193. At 8:14 one final stab silences everything — except the
+original arrakis wind, which plays the album out alone: **the first
+sound of the album is also the last**.
+
+### 17. `gurneys_song_v2.wav` — *Gurney's Song* (4:15)
+**Script:** `generate_gurneys_song.py` (design notes: `gurneys_song_notes.md`)
+
+The album's only **performed** piece (idea C2): Gurney Halleck alone
+with his baliset between battles — one instrument, one-take feel, fully
+rubato, no wind, no drone, no grid. He plays the album's main theme
+(THEME_A, the duduk line from *Water of Life* and *Kwisatz Haderach*)
+as a song. The **baliset** is the oud recipe grown up: 9 strings in 3
+triple courses (three detuned Karplus-Strong strings per note), a warm
+3-tap pick, body resonance from a two-mode IR (110/220 Hz — wood, not
+synth), strummed chords with staggered onsets, flageolet harmonics, and
+performance dirt (fret squeaks, room tone). Intimate small-room reverb.
+v2 rebuilt the piece around the feedback that became the *Sihaya*
+doctrine: **one continuous performance cursor** (no dead seams — every
+section starts where the last ends), the tuning intro cut to a breath,
+and the good motifs (the arpeggio figure, the descant) properly
+developed instead of abandoned after four bars.
+
+### 18. `litany_against_fear.wav` — *Litany Against Fear* (6:00)
+**Script:** `generate_litany_against_fear.py` (design notes: `litany_against_fear_notes.md`)
+
+The beatless psy track (idea B4): the litany is not a description of
+fear but a *procedure* for surviving it, and the track performs the
+procedure — eight sections, one per line. The compositional conceit:
+**the D drone is "I"** — it fades in first, never changes character,
+holds perfectly steady while fear peaks around it, and is the only
+thing left at the end. Everything else is fear: *Sleeper*'s 303 engine
+at **1/8 speed** (RIFF_DARK quoted verbatim, one riff statement = one
+13.2 s slow bar), the chant's formant stack stretched into E♭/E drones
+beating against D, **whispered-noise vowels that almost say the words**
+(pink noise through i/e/a/o/u formant pairs — the recipe that became
+*Sihaya*'s singing voices), texture dust, and a heartbeat that quickens
+toward the peak and slows as fear recedes. After the pass-through and
+recession: **3.5 seconds of exact digital zero** — the album's only
+true silence ("where the fear has gone there will be nothing") — and
+then the drone alone, unchanged, fading only because the track ends.
+Only I will remain.
+
+### 19. `sihaya.wav` — *Sihaya* (6:00)
+**Script:** `generate_sihaya.py` (design notes: `sihaya_notes.md`)
+
+The album's first actual **song** — verse / chorus / bridge form, a
+refrain the listener can hum, and question-and-answer at every level.
+Reference: *Inama Nushif* from the Children of Dune miniseries. *Sihaya*
+("desert spring") is Paul's name for Chani, and the track is a **duet**
+between two new synthesized singing voices: the Sardaukar glottal source
+made melodic and sung through interpolated vowel formants — **Paul**, a
+close dry baritone, and **Chani**, an octave up, brighter and breathier.
+The "lyrics" are vowel sequences; the refrain is the title itself:
+i–a–a, *si-ha-ya*, identical in all four choruses (18 sung hook
+statements in total). 96 BPM, D Phrygian dominant, one chord-progression
+family for the whole song (the Gurney's Song voicings — same songbook).
+
+- **0:00** — baliset arpeggio; Chani hums the hook half-voice: the
+  thesis in ten seconds, her last note ringing across the verse downbeat.
+- **0:10** — verse 1: Paul sings paired question/answer phrases (same
+  rhythm, questions ending off-tonic, answers resolving to D), the oud
+  echoing every tail; pre-chorus trades (he asks, she answers) rise into
+- **1:10** — CHORUS 1: the refrain — Paul, Chani an octave up, Paul,
+  Chani — full darbuka, quiet choir. **1:50** verse 2 swaps the roles:
+  Chani leads a varied melody and *Paul* echoes; the second pre-chorus
+  runs the rise in canon, her one bar behind.
+- **2:50** — CHORUS 2: both voices in parallel octaves, war drums on the
+  cell downbeats.
+- **3:30** — the bridge: layers strip one per bar down to baliset and
+  wind while the duduk drifts unresolved **Theme A** fragments — the
+  album's oldest question — then the rebuild: the voices hum Theme A in
+  alternation, strings and riser crescendo, and everything cuts to
+  **one beat of near-silence** with only Chani's pickup note hanging in
+  it —
+- **4:20** — CHORUS 3 slams back; ney descants answer every line.
+- **5:00** — CHORUS 4, the everything-chorus: the choir doubles the
+  hook, and **Theme A on the duduk sounds under the refrain as a
+  counter-line** — question and answer together at last. The final line
+  stretches ritardando across the seam.
+- **5:40** — outro bookend: the band stops on one ringing strum, Chani
+  hums the hook once more over the arpeggio, a last quiet strum rings
+  into the wind.
+
+The script verifies its own form: it prints the sung-hook count, a seam
+checklist (what crosses every section boundary — pickup, ringing chord,
+or fill), and per-section RMS with ordering checks (chorus 1 above its
+pre-chorus, chorus 4 the loudest, the bridge trough the quietest point).
+
 ## The Musical Ideas
 
 **One key, one mode family.** Everything is rooted on **D**. The calm track
@@ -393,6 +542,12 @@ python3 generate_spice_must_flow.py  # -> /workspace/music/spice_must_flow.wav
 python3 generate_stillsuit.py        # -> /workspace/music/stillsuit.wav
 python3 generate_sandstorm_coriolis.py # -> /workspace/music/sandstorm_coriolis.wav
 python3 generate_kanly.py            # -> /workspace/music/kanly.wav
+python3 generate_the_navigator.py    # -> /workspace/music/the_navigator.wav
+python3 jihad.py                     # -> /workspace/music/jihad.wav
+python3 generate_kwisatz_haderach.py # -> /workspace/music/kwisatz_haderach.wav
+python3 generate_gurneys_song.py     # -> /workspace/music/gurneys_song_v2.wav
+python3 generate_litany_against_fear.py # -> /workspace/music/litany_against_fear.wav
+python3 generate_sihaya.py           # -> /workspace/music/sihaya.wav
 ```
 
 For game-engine delivery, WAVs convert to mp3 with ffmpeg:
