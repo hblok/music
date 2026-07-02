@@ -49,6 +49,18 @@ Everything synthesized (numpy + scipy); drums bone dry, melodics through the
 long dark hall. Output: /workspace/music/nachtkind_v3.wav + .mp3 (192k).
 """
 
+"""
+How the song treatment landed:
+
+    The refrain is an 8-bar Q/A cell over one i–VI–VII–V pass per half: the question climbs G→Bb→D→Eb…C→D and hangs on F#5 — the gothic leading tone left unresolved — and the answer, same rhythm, falls back through F and resolves F#→G across the barline. That F#→G semitone does double duty as the track's main seam device: both pre-choruses end on the hanging F# so the chorus's first G resolves them across the seam, and the final chord answers the bookend's question-half the same way.
+    The duet is earned, per the notes: chorus 1 is piano alone; chorus 2 the lead appears only as two composed echoes per statement (entering on the piano's last note — answering the hang, then echoing the resolution up high); after the bridge's silent beat, choruses 3–4 are the full stacked duet with the lead carrying the refrain itself, ride entering, and the octave shimmer + stab joining only in the final wave.
+    Thesis and bookend: solo wet piano states the full refrain at 0:00 (the low G rings under the dry kick entry at 0:14 — v2 took 42 s to get here); the ending mirrors it, but as the question-half only, so the final G-minor chord is what answers it. The bridge likewise plays only question fragments over pads — the answer is withheld until the fusion.
+    Verses are piano, low register, as you chose: Q/A pairs where the question hangs on D4 and the answer resolves F#3→G3; verse 2 develops them with octave doubling, the offbeat stab, and the opened bass — the old "new element every 16 bars" engine now lives inside the verses.
+    Eye Q rules intact: 909 kit bone dry, all melodics through the 6 s hall, no snare rolls (the build into the fusion is the walking kick + reverse cymbal swelling into the silent beat, measured 0.066 RMS against 0.199/0.230 around it), long deconstruction kept per your answer.
+
+Statement count is 11 (fragments not counted), RMS arc: thesis 0.040 → chorus 1 0.211 → fusion 0.225 → chorus 4 0.232 loudest → bridge trough 0.054 → bookend 0.036. Ready for a listen — tech_noir_v3 is the remaining note doc whenever you want it.
+"""
+
 import os
 import subprocess
 import wave

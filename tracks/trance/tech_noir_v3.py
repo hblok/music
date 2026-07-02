@@ -45,6 +45,18 @@ no risers, no reverse cymbals, no filter sweeps, no sidechain, ends cold.
 Output: /workspace/music/tech_noir_v3.wav + tech_noir_v3.mp3 (192k, ffmpeg).
 """
 
+"""
+How the doctrine-without-the-pop-form landed, with your answers steering it:
+
+    Contour duality, not mirroring. The love theme keeps its own rhythm entirely; the correspondence is that its first note is A — the question's hollow ending, picked up an octave above — falling stepwise home to the D the fanfare is denied. And per your Terminator point about melody-vs-bassline, the duality also lives in two other dimensions: in the interrogation the harmony trades along with the voices (Dm pedal under the question fragments, warm Bb under the answers), and in the fusion the pedal deliberately refuses to move under the love theme — the machine does not accommodate.
+    The question formalized: one fanfare form only, ending hollow on A every time (D–F–E–C–A), stated identically 9 times. In the question section the anvil answers each phrase-end in the rest bar — the machine's only reply is metal.
+    The interrogation (the experiment you approved): six 2-bar trades — the question's head cut short hanging on E, answered twice by the love theme's cadence landing on D, and then the last two questions go unanswered, driving into the fusion.
+    The fusion is the first time the themes overlap: octave-doubled fanfare with the love theme as counter-line, doubled slams, taps, insistent clangs — measured as the loudest section (0.165 vs question 0.128).
+    Everything banned stayed banned: no risers, no reverse cymbals, no builds — the seam checklist uses only slams, clangs, and rings. It ends cold: final slam + anvil at 3:13, ring decayed to 0.004 RMS in the last second, hard stop.
+    Length: per your answer it took only the bars it needed — the structure matches the sketch bar-for-bar, but at the real 13/16 bar length it lands at 3:20 rather than the sketch's rough 4:30 estimate. Nothing was padded to hit a duration.
+
+"""
+
 import os
 import subprocess
 import wave

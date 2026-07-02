@@ -58,6 +58,19 @@ Dread is SADNESS, not horror. Everything synthesized (numpy + scipy).
 Output: /workspace/music/lost_v6.wav + lost_v6.mp3 (192k, ffmpeg).
 """
 
+"""
+How the "one refrain, three lights" concept landed in the implementation:
+
+    The light is literally a rotation. One loop (Bm–G–D–A) entered at three points: verses/breaks use the rotation ending on A (the open question), LOVE/HOPE/fusion end the cell on D, DREAD ends it on Bm. The refrain's final melody note is always D — root of the D chord in the bright choruses, minor third of Bm in the dread. Not a single note of the tune changes between choruses; 19 refrain statements total, all identical (plus the ritardando tail on the last fusion statement).
+    Q/A at the three levels from the notes: the refrain is itself a question hanging on A answered through C#→D; the piano echoes the lead's verse tails and takes over statement 3 of chorus 1; piano asks / cello answers bare over the heartbeat in LOSS; and the fusion chorus puts the verse melody (the question voice) on cello under the refrain.
+    CONFUSION as "the tune losing its footing": piano leads the verse melody, but in the flicker cells the third flattens (F#→F over Dm), the answer phrase slides down to land on Bb instead of D, phrases get shoved a half-beat late, and the arp runs backwards.
+    Seams: every boundary is crossed by something (printed as a checklist); the one true drop-silence beat before HOPE measured 0.048 RMS against 0.28/0.31 around it, with the lone piano pickup hanging in it and the slam on beat 2.
+
+Two balance iterations were needed: the dread wave initially out-loudened the fusion chorus (0.33 vs 0.30). Pumping chorus 4 harder mostly self-defeated because commit() peak-normalizes each layer, so the fix was giving the fusion the deeper sustained sub (0.85 vs dread's 0.62 — it feeds the 95 Hz shelf) plus the octave shimmer, while thinning the dread's hats slightly. Final ordering: fusion 0.332 > dread wave 0.327 > chorus 1 0.301, breaks at ~0.10.
+
+Ready for a listen. If the dread no longer feels like enough of a climax after the trim, the sub split (0.62/0.85) is the knob to revisit.
+"""
+
 import os
 import subprocess
 import wave
