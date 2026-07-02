@@ -97,8 +97,7 @@ Shortlisted next (full write-ups in `more_ideas.md`):
 - ~~**Kwisatz Haderach** (B1)~~ — DONE (`generate_kwisatz_haderach.py`).
 - **Spice Agony (Reverend Mother Mix)** (B2) — downtempo dub-psy, ~85 BPM;
   half-time kick, tape-echo skanks, one 303 note per bar with full-bar sweeps.
-- **Litany Against Fear** (B4) — beatless psy, 6 min; sleeper 303 at 1/8
-  speed, chant as formant drones, whispered-noise texture, one bar of true
-  silence, then the D drone alone for 40 s.
+- ~~**Litany Against Fear** (B4)~~ — DONE (`generate_litany_against_fear.py`,
+  design notes in `litany_against_fear_notes.md`).
 - ~~**Gurney's Song** (C2)~~ — DONE (`generate_gurneys_song.py`, design
   notes in `gurneys_song_notes.md`).

@@ -120,6 +120,23 @@ flinched.
    scripted per-section sequences — it's invisible structure that
    costs nothing.
 
+## Resolutions after user review
+
+1. **Silence = 3.5 s**, not 9–13 s. A long silence reads as "track
+   ended" and the return is puzzling; 3.5 s is a held breath. Edges get
+   40 ms cosine ramps (no clicks), core is exact digital zero.
+2. **Drone**: purely tonal detuned partials (no noise bed), breathing
+   amplitude/filter drift from slow_noise, conservative weight — a
+   presence you feel, not a vacuum cleaner. Steadiness check runs on
+   the drone layer itself (its own envelope, peak window vs coda).
+3. **Formant drones**: never static — 0.05 Hz breathing swells plus
+   slow ±0.3 % pitch drift against the fixed formants so the timbre
+   itself evolves.
+4. **Whispers**: pink-weighted noise (not white), energy confined to
+   the formant bands, 5 kHz master lowpass on the layer, and strictly
+   breath-shaped envelopes with syllabic ripple — never continuous
+   hiss.
+
 ## Build conventions
 
 Standalone script, numpy+scipy only, duplicate helpers. Layer-commit
