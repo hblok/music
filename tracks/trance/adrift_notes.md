@@ -186,6 +186,7 @@ dark-swell build kit; dry drums / wet melodics, no sidechain pump.
    (the high drifting cloud — sky-only, cooler) vs *Halcyon* (the
    mythic calm sea — but it collides with Orbital's classic of that
    name, which I'd rather not touch). Filename follows.
+   Answer: Adrift works.
 
 2. **Key**: (a) **C♯ natural minor, C♯m–A–E–B** (my recommendation —
    the dream-era progression shape in a key no track owns; Zhi-Vago's
@@ -194,6 +195,7 @@ dark-swell build kit; dry drums / wet melodics, no sidechain pump.
    it did render in exactly this key and family, so the identity
    collision is real), vs (c) **F♯ natural minor, F♯m–D–A–E** (same
    shape, sits a touch darker/heavier in the bass register).
+   Answer: Difficult. I'm torn between C# minor and A minor. I'm probably leaning towards the former.
 
 3. **The choir's melodic license** — how vocal may the "soft vocals"
    get: (a) **pad + hang-answers** (my recommendation — harmony
@@ -203,6 +205,7 @@ dark-swell build kit; dry drums / wet melodics, no sidechain pump.
    statement in the drift (the performer handoff — maximum dream, but
    it walks right up to the unsung dead-end line), vs (c) strictly
    harmonic pad, never a melodic tone (safest, least vocal).
+   Answers: yes, harmonic throughout
 
 4. **How dirty is the piano**: (a) subtle grit — ~22 kHz ZOH + wow +
    soft drive, felt as warmth and age more than heard, vs (b) **openly
@@ -211,15 +214,21 @@ dark-swell build kit; dry drums / wet melodics, no sidechain pump.
    the high notes, wow ±0.05 %; musical lo-fi, not bitcrush novelty),
    vs (c) clean M1 brightness, detune only. The knobs print either
    way, easy to re-dial after the first listen.
+   Answers: let's keep it warm
 
 5. **The tide count**: (a) **one big tide** (my recommendation — the
    classic dream form: one drift, one return, maximum weight on the
    single moment), vs (b) two tides (a small early drift of 8 bars
    after chorus 1, foreshadowing the big one — more ocean-like, but
    it spends the device's surprise early).
+   Answers: one tide count
 
 6. **Space sounds scope**: (a) **textural only** (my recommendation —
    cloud swells + air shimmer, per the no-literal-SFX rule), vs (b)
    also one recurring "signal" motif — a soft echo-blip with long
    feedback delay answering the piano once per chorus (the DJ Dado /
    X-Files school; a fourth voice, at the cost of palette economy).
+   Answer: Ah, yes! X-Files. Briliant. That's an excellent reference. so I guest long feedback delay.
+
+Extra: In almost all the other tracks, the baseline has been an oschilating 303 like bass. I think we've tried that many times now. It's time to come up with something else. Especially, since we're leaving the proto-trance behind here, and going into a slightly different era. Now, "Children" had a very soft bass line. With BBE's 7 days, there's something in the middle.
+But if we look at U96 - Love sees no colour (more techno than dream trance, but still), there we have an intereting more dirty beat. It's almost like scratched record (not skipping, but smeared out). Maybe that could work.
