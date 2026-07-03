@@ -287,3 +287,14 @@ Era-correct means minimal — a mantra, not verses of prose. Proposal
    Recommended if we want the era nailed; skippable if the doctrine +
    this doc feel sufficient.
    Answer: No, we don't need further docs right now. Let's write the generator script.
+
+
+   
+## Updates, based on vocal probe
+   See also ungeschrieben.py
+
+   Probe results so far: Variant B (hybrid — TTS consonant graft on synth vowel) is pitch-perfect (median 3 cents error, max 6 cents).
+
+   What's left for next session: Write the full unsung.py generator (hybrid voice treatment, full song structure, all layers, verification blocks), then the idea.md + CLAUDE.md amendments.
+
+   Probe shows hybrid treatment (B) is pitch-perfect. Next session: write the full unsung.py generator script, then amend idea.md/CLAUDE.md.

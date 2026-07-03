@@ -158,12 +158,3 @@ sparseness is the identity; resist stacking.
    a big part of the 1992 sound; the guardrails should keep it round
    rather than acid.
    Answer: Yes, era-authentic sounds good.
-   
-## Updates, based on vocal probe
-   See also ungeschrieben.py
-
-   Probe results so far: Variant B (hybrid — TTS consonant graft on synth vowel) is pitch-perfect (median 3 cents error, max 6 cents).
-
-   What's left for next session: Write the full unsung.py generator (hybrid voice treatment, full song structure, all layers, verification blocks), then the idea.md + CLAUDE.md amendments.
-
-   Probe shows hybrid treatment (B) is pitch-perfect. Next session: write the full unsung.py generator script, then amend idea.md/CLAUDE.md.
