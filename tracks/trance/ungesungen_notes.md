@@ -260,7 +260,7 @@ Era-correct means minimal — a mantra, not verses of prose. Proposal
    trance but exposes every artifact (the C7 warning). I recommend
    (a), German female, and the probe can render two candidate voice
    IDs for the same price.
-   Answer:
+   Answer: Let's try English, female voice. And yes, ara-authentic Frankfurt. Let's focus on only one.
 
 5. **How much singing**: (a) hook-only vocal — verses stay
    instrumental, the voice appears only in thesis/choruses/bookend
