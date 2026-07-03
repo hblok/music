@@ -1,7 +1,9 @@
-# Fernweh — design notes (song form, the second original)
+# Far Light — design notes (song form, the second original)
 
-Composition document for review before writing `fernweh.py`
-(→ `fernweh.wav`; filename follows the title — see question 1).
+Composition document, reviewed (answers embedded below), for
+`farlight.py` (→ `farlight.wav`). Title per answer 1: English, a new
+naming direction — **Far Light**, the refrain's own image (the bell IS
+the far light), and it matches answer 5: keep it light.
 
 Per the roadmap in `idea.md`: **a second original in a proven shape**.
 The shape is **song form** (the most-proven — lost, nachtkind), with its
@@ -10,16 +12,19 @@ time; the era reference is 1994/95 **Berlin/MFS melodic trance** (early
 Paul van Dyk, *For an Angel* school) — the moment trance left Frankfurt.
 That the scene itself moved cities is the point:
 
-**The story**: Fernweh — the ache for *elsewhere*, homesickness's
-opposite. The verses are the familiar ground: a harmonic shuttle that
-rocks in place and never leaves. The refrain is the far light — a glassy
-bell theme whose last note always falls back home to the sad minor
-third: the pull felt, the departure not taken. In the bridge the
-question is asked alone and gets no answer. Then the final chorus takes
-the departure: the *identical* refrain, its identical last note, re-lit
-once as the root of the relative major. The tune never changes; the
-light does (lost's proven device, used ONCE, as the story's single
-payoff).
+**The story**: the far light on the horizon, and the joy of setting
+out toward it. Per answer 5 this is a LIGHT, HAPPY track — wanderlust
+as glad anticipation, never ache. The verses are the familiar ground:
+a harmonic shuttle that rocks in place, restless but bright. The
+refrain is the far light — a glassy bell theme whose last note lands
+home on the minor third every chorus: the pull felt, the departure
+not yet taken. In the bridge the question is asked alone and gets no
+answer. Then the final chorus takes the departure: the *identical*
+refrain, its identical last note, re-lit once as the root of the
+relative major. The tune never changes; the light does (lost's proven
+device, used ONCE, as the story's single payoff). The happiness lives
+in the execution: bouncy dotted rhythms in the tune, glittering
+octave plucks, bright open pads, a spring in the groove.
 
 - Tempo/key: **136 BPM, E natural minor** (free key — nachtkind owns
   G minor, tech_noir D minor, lost D/Bm, ungeschrieben F minor).
@@ -32,7 +37,7 @@ payoff).
 - Seed: `np.random.default_rng(1995)  # the year trance left home`.
 - Length ~160 bars ≈ 4:45 + tail (bar = 1.765 s) — the bars the
   material needs; no DJ intro, no padding.
-- Output: `/workspace/music/fernweh.wav` (+ mp3).
+- Output: `/workspace/music/farlight.wav` (+ mp3).
 
 ## How the song doctrine maps
 
@@ -60,12 +65,14 @@ payoff).
    refrain, phrase-interlocked. Printed as a duet-overlap ratio
    (reusing unsung's duet-separation check for an instrumental duet:
    early choruses near zero, final chorus substantially overlapped).
-5. **Seams / this track's own vocabulary**: **snare rolls and
-   white-noise risers** — era-authentic for 1995, and deliberately the
-   opposite of ungeschrieben's 1992 ban (the era marker; see question
-   4) — plus bell pickup notes, ringing chords, and the one composed
-   silent beat before the final chorus. No reverse cymbals
-   (nachtkind's), no tom fills (ungeschrieben's), no acid, ever.
+5. **Seams / this track's own vocabulary**: **snare rolls and noise
+   swells** — era-authentic for 1995, and deliberately the opposite
+   of ungeschrieben's 1992 ban (the era marker; per answer 4, with
+   caution on the noise: dark bandlimited swells, never a white-noise
+   wash) — plus bell pickup notes, ringing chords, and the one
+   composed silent beat before the final chorus. No reverse cymbals
+   or downsweeps (nachtkind's family), no tom fills
+   (ungeschrieben's), no acid, ever.
 
 ## New instruments (the recipes this track adds)
 
@@ -78,9 +85,10 @@ payoff).
    (wet ~0.5). Warmth rules still bind it: partial gains rolled off,
    no 2–4 kHz spike — glassy but *round*, never icy-shrill.
 2. **The 1995 riser/roll kit** — 16th→32nd snare roll into a crest +
-   a bandpassed noise riser, the era's build furniture (sanctioned
-   for this track only, q. 4). Short (≤ 2 bars), always resolved by a
-   crash on the downbeat.
+   a noise swell, the era's build furniture (sanctioned for this
+   track only; per answer 4 the swell is DARK and bandlimited,
+   250–2400 Hz, kept low in the mix — careful with the white noise).
+   Short, always resolved by a crash on the downbeat.
 
 Reused as-is (the corpus recipes): warmed rolling 16th mono bass on E
 with octave jumps (lost_v4 `bass_note` school), the glassy-warm
