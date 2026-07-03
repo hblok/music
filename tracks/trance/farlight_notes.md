@@ -170,3 +170,33 @@ hat, claps on 2&4. Dry drums / wet melodics, no sidechain pump.
    Answer: Well, let's be careful with the white-noise, shall we. But sure, era-authentic sounds good.
 
 5. One more note: Let's make a light happy track. Homesickness sounds a bit sad... Let's keep it happy!
+
+## v2 amendments (2026-07-03, after the first listen)
+
+Feedback: the track is good but too short — instead of jumping to the
+final chorus at 3:25 there should be "another full extended 3rd chorus,
+and then it extends in a version, and then the final" (~6:00). And at
+the 3:25 slam "the speaker gets a bit too much".
+`farlight_v2.py` → `farlight_v2.wav` (v1 kept, never overwritten):
+
+1. **The extended back half.** The post-bridge slam now lands
+   **CHORUS 3** — full and extended (24 bars, refrain ×3: plain →
+   +octave bells → +glitter), still bell-only, still Em. Then **THE
+   VERSION** (16 bars): the refrain passes to the plucks ×2 (the
+   performer handoff, a proven lost device), bells only *answering*
+   the held notes; claps out, texture lighter — the breather that
+   keeps the long drop alive. Then build 3 (roll + swell), and only
+   then the FINAL fusion chorus (24 bars: fusion / dip / wave /
+   re-light at 5:30). New length 6:07. Statement count 8 → 13
+   (target >= 12); version statements count (any instrument), bell
+   answers don't. New checks: chorus 3 >= chorus 2; THE VERSION is a
+   breather (below choruses 3 and final); final chorus > build 3;
+   choruses 1–3 all trade (overlap < 0.10).
+2. **The slam no longer blasts the speaker.** Cause: the sustained
+   sub (41 Hz sine) snapped on at FULL gain with a 50 ms attack at
+   the same instant as kick + crash + bass, right out of silence.
+   Fix: sub entries now BLOOM — 0.25 s attacks, per-bar entry ramp
+   0.55→1.0 across each chorus's first three bars, a 0.3 s ease out
+   of the silent beat, slam crash 1.0 → 0.85. Measured: slam-bar
+   sub-100 Hz RMS 0.220 → 0.192, and 0.74× the settled chorus level
+   (was 0.81×) — the weight arrives over three bars now.
