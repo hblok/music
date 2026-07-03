@@ -197,7 +197,7 @@ and bass bone dry (the dry-wet contrast rule).
    it to a composed device — the melody heard gated for minutes sings
    free exactly once, then the gate snaps back at the peak. Confirm?
    (It becomes a printed check either way.)
-   Answer: what? I have no idea...
+   Answer: Yes!
 
 4. **Bell scope**: (a) one tease in the answer section + full
    call-and-response at the peaks (my recommendation — the tease makes
