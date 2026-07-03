@@ -31,13 +31,16 @@ this file only covers what is specific to the trance tracks.
   rompler strings as the withheld refrain, the filter arc as the
   development engine, one spoken-word drop ("Die Zukunft ist
   ungeschrieben", `VOICE_GAIN` knob at the top of the script).
-- **unsung** — `unsung.py` → `unsung.wav` — the first VOCAL song
+- **unsung** — `unsung.py` → `unsung.wav` — the first VOCAL song attempt
   (1993/94 Frankfurt vocal trance, Jam & Spoon school): 132 BPM, A natural
   minor, Am–F–C–G; the hook "So long unsung — until tonight" SUNG by the
   hybrid TTS-graft voice (probe: `unsung_probe.py`), thesis/bookend a
   cappella, the voice/lead duet earned across the choruses.
   `VOICE_MODE = "sung" | "spoken" | "instrumental"` + `VOICE_GAIN` at the
-  top of the script; notes doc is `ungesungen_notes.md`.
+  top of the script; notes doc is `ungesungen_notes.md`. **Verdict: a
+  dead end** — every check passes, but the sung voice sounds strange,
+  the bridge drop is awkward, and the instrumental offers little. Kept
+  for reference, not a base to build on.
 
 Seeds are thematic: `1984` (tech_noir, the year the machine arrived), `1993`
 (nachtkind, the year *Brainchild* came out), `130` (lost, the BPM), `1992`
@@ -179,8 +182,10 @@ it never parks and screams. Don't copy the Q without the guardrails.
   dotted-8th echoes. Dropped ONCE (the classic single movie-sample
   placement) with a 2-bar sequence dip carved under it. `VOICE_GAIN = 0.0`
   at the top of the script = fully instrumental; that knob is the contract.
-- **The hybrid sung voice** (unsung — the headline recipe, C7 made real;
-  probe-validated in `unsung_probe.py`, median 3 cents): per melody note,
+- **The hybrid sung voice** (unsung — C7 made real, then judged a DEAD
+  END: it measures pitch-perfect but *sounds strange* — the pitch check
+  is correctness, not musicality. Recorded so it isn't rebuilt as-is;
+  don't retry TTS singing without a new naturalness idea): per melody note,
   the edge-tts syllable's **consonant onset (~0.10 s) and coda are grafted
   onto a synth vowel that holds the target pitch perfectly** — real
   intelligibility, synth control. The vowel: rolled-off harmonic source

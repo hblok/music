@@ -50,16 +50,13 @@ composition for free without importing the Dune *sound*.
   choir, darbuka, or D Phrygian dominant. Each trance track keeps its
   own established sound: nachtkind's Eye Q kit + gothic piano, lost's
   warm five (lead/pluck/pads/piano/cello), tech_noir's Fiedel machine.
-- **Vowel singing** *(rule dated: it held for the first four tracks)*.
-  Originally: these tracks stay instrumental, the refrain carried by an
-  instrument (piano, lead, fanfare). **`unsung` (2026-07) sanctions the
-  voice as a trance instrument** — per the standing principle, the rule
-  served the music until the music wanted to sing. Its own identity
-  separation still applies: TTS-derived singing with real words (the
-  hybrid recipe — TTS consonants grafted onto pitch-held synth vowels),
-  never the dune vowel engine's exposed vowels-only timbre, and every
-  vocal track ships a documented `VOICE_MODE`/`VOICE_GAIN` knob so it
-  can render instrumental.
+- **Vowel singing / vocals.** These tracks stay instrumental, the
+  refrain carried by an instrument (piano, lead, fanfare). The rule was
+  suspended ONCE (`unsung`, 2026-07: a sung TTS-hybrid hook, real
+  words) and the verdict was a dead end — pitch-perfect but the voice
+  sounds strange to the ear. So the rule stands again, dated and
+  tested, until someone brings a genuinely new idea for vocal
+  naturalness — not just a rerun of the hybrid recipe.
 - **Existing genre rules stay load-bearing**: the warmth recipe, the
   Eye Q dry/wet contrast, the 13/16 limp, no acid in lost, dread =
   sadness not horror. The doctrine changes *form*, never timbre.
@@ -106,20 +103,18 @@ all checks passing:
    the development engine (printed and checked), rompler strings, one
    spoken-word drop with a documented `VOICE_GAIN` knob.
 5. **unsung** (`unsung.py`, notes `ungesungen_notes.md`, probe
-   `unsung_probe.py`) — DONE. The first VOCAL song: the proven song
-   form carried by a sung voice ("So long unsung — until tonight",
-   the hybrid TTS-graft recipe, pitch verified to 3 cents). Thesis and
-   bookend a cappella, the duet earned (choruses 1–2 trade at zero
-   overlap, chorus 3 fuses), the composed silent beat with a sung
-   pickup hanging in it. `VOICE_MODE` knob: sung / spoken /
-   instrumental — the track survives its singer (checked in all modes).
+   `unsung_probe.py`) — BUILT, but the verdict was **a dead end**: the
+   first vocal-song attempt (the hybrid TTS-graft voice, pitch verified
+   to 3 cents) passes every check, yet the sung voice sounds strange,
+   the spoken bridge drop is awkward, and as an instrumental it offers
+   little. Kept for reference; see its notes doc for the lesson.
 
-The doctrine now has three proven shapes — **song form** (lost,
-nachtkind, unsung), **machine score** (tech_noir), **two-reveal**
-(ungeschrieben) — plus the voice as a sanctioned instrument, with the
-check variants recorded in `../VERIFY.md`. Next candidates: a second
-original in a proven shape, or a new shape entirely — note doc with
-embedded questions first, as always.
+The doctrine has three proven shapes — **song form** (lost, nachtkind),
+**machine score** (tech_noir), **two-reveal** (ungeschrieben) — with
+the check variants recorded in `../VERIFY.md`. The vocal song is NOT
+yet a proven shape: unsung tried it and stalled. Next candidates: a
+second original in a proven shape, or a new shape entirely — note doc
+with embedded questions first, as always.
 
 ## Conventions (unchanged)
 

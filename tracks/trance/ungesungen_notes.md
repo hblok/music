@@ -290,7 +290,16 @@ Era-correct means minimal — a mantra, not verses of prose. Proposal
 
 
 
-## Status — DONE
+## Status — built; verdict: a dead end
+
+Built as designed and every check passes — but the listening verdict
+(2026-07-03) was negative: **the sung voice sounds strange** (pitch-
+perfect, yet uncanny), **the spoken bridge drop is awkward**, and as an
+instrumental the track doesn't offer much. No concrete improvement idea
+at hand, so this stays as-is: a completed experiment, kept for
+reference, not a base to build on. The lesson worth keeping: the vocal
+pitch check measures correctness, not musicality — don't retry TTS
+singing without a genuinely new idea for naturalness.
 
 - **The probe** (`unsung_probe.py` → `unsung_probe.wav`): variant B, the
   hybrid (TTS consonant onset/coda grafted onto the pitch-held synth
