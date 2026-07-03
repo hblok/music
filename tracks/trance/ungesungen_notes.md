@@ -54,8 +54,8 @@ See question 8 on whether we write a proper inspiration doc first.
   re-lighting trick is available if we want it.
 - Seed: `np.random.default_rng(1994)  # the year the Frankfurt vocal broke`.
 - Length ~5:30–6:00. Bar = 1.818 s at 132 BPM.
-- Output: `/workspace/music/ungesungen.wav` (+ mp3) — filename follows
-  the title answer (question 3).
+- Output: `/workspace/music/unsung.wav` (+ mp3) — English title per the
+  question-3 answer, so the track is **Unsung** (`unsung.py`).
 
 ## THE DOCTRINE AMENDMENT (must be sanctioned — question 1)
 
@@ -289,12 +289,21 @@ Era-correct means minimal — a mantra, not verses of prose. Proposal
    Answer: No, we don't need further docs right now. Let's write the generator script.
 
 
-   
-## Updates, based on vocal probe
-   See also ungeschrieben.py
 
-   Probe results so far: Variant B (hybrid — TTS consonant graft on synth vowel) is pitch-perfect (median 3 cents error, max 6 cents).
+## Status — DONE
 
-   What's left for next session: Write the full unsung.py generator (hybrid voice treatment, full song structure, all layers, verification blocks), then the idea.md + CLAUDE.md amendments.
-
-   Probe shows hybrid treatment (B) is pitch-perfect. Next session: write the full unsung.py generator script, then amend idea.md/CLAUDE.md.
+- **The probe** (`unsung_probe.py` → `unsung_probe.wav`): variant B, the
+  hybrid (TTS consonant onset/coda grafted onto the pitch-held synth
+  vowel), won — median 3 cents error, max 6. Variant A (pure TTS+OLA)
+  drifts up to 1445 cents; variant C is pitch-perfect but wordless.
+- **The lyric, final** (English per the answers): the hook is
+  **"So long unsung — until tonight."** — 4+4 syllables, Q rising to
+  hang on E4 over F, A falling home to A3; the same line SPOKEN is the
+  bridge's fragment. Voice: `en-US-AriaNeural`, one voice only.
+- **The track** (`unsung.py` → `unsung.wav`, 5:28): built as designed —
+  hook-only vocal, thesis/bookend a cappella, the earned duet (choruses
+  1–2 trade at 0.00 overlap, chorus 3 fuses at 1.00), the composed
+  silent beat with the sung pickup. The knob generalized as planned:
+  `VOICE_MODE = "sung" | "spoken" | "instrumental"` + `VOICE_GAIN`;
+  syllable cache at `/workspace/music/samples/unsung/`. All 11 checks
+  pass (song-form set + vocal pitch median 3 cents + duet separation).

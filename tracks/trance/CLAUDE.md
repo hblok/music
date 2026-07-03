@@ -31,17 +31,27 @@ this file only covers what is specific to the trance tracks.
   rompler strings as the withheld refrain, the filter arc as the
   development engine, one spoken-word drop ("Die Zukunft ist
   ungeschrieben", `VOICE_GAIN` knob at the top of the script).
+- **unsung** — `unsung.py` → `unsung.wav` — the first VOCAL song
+  (1993/94 Frankfurt vocal trance, Jam & Spoon school): 132 BPM, A natural
+  minor, Am–F–C–G; the hook "So long unsung — until tonight" SUNG by the
+  hybrid TTS-graft voice (probe: `unsung_probe.py`), thesis/bookend a
+  cappella, the voice/lead duet earned across the choruses.
+  `VOICE_MODE = "sung" | "spoken" | "instrumental"` + `VOICE_GAIN` at the
+  top of the script; notes doc is `ungesungen_notes.md`.
 
 Seeds are thematic: `1984` (tech_noir, the year the machine arrived), `1993`
 (nachtkind, the year *Brainchild* came out), `130` (lost, the BPM), `1992`
-(ungeschrieben, the year of *No Fate*).
+(ungeschrieben, the year of *No Fate*), `1994` (unsung, the year the
+Frankfurt vocal broke).
 
 ## Composition: the song doctrine
 
 `idea.md` in this directory is the doctrine (refrain identity, Q/A at three
 levels, seam devices at every boundary, thesis/bookend, the fusion payoff,
 one progression family) and records which shape each track uses — song form,
-machine score, or two-reveal. `../VERIFY.md` is the verification standard:
+machine score, or two-reveal — and the dated amendment that sanctions the
+voice as a trance instrument (unsung). `../VERIFY.md` is the verification
+standard:
 every script prints a section map, hook/statement count, seam checklist,
 per-section RMS, and PASS/FAIL form checks. Both are load-bearing: write
 the `*_notes.md` design doc (with embedded open questions) first, implement
@@ -169,6 +179,21 @@ it never parks and screams. Don't copy the Q without the guardrails.
   dotted-8th echoes. Dropped ONCE (the classic single movie-sample
   placement) with a 2-bar sequence dip carved under it. `VOICE_GAIN = 0.0`
   at the top of the script = fully instrumental; that knob is the contract.
+- **The hybrid sung voice** (unsung — the headline recipe, C7 made real;
+  probe-validated in `unsung_probe.py`, median 3 cents): per melody note,
+  the edge-tts syllable's **consonant onset (~0.10 s) and coda are grafted
+  onto a synth vowel that holds the target pitch perfectly** — real
+  intelligibility, synth control. The vowel: rolled-off harmonic source
+  (`1/k**1.2`), two `iirpeak` Q 8 formants per vowel (diphthongs morph
+  f1/f2 across the note), a lowpassed chest layer so the fundamental
+  survives, 8 % breath, our own 5.7 Hz blooming vibrato (never the TTS
+  prosody). TTS syllables are f0-measured (autocorrelation) and resampled
+  to target from the nearer of two base renders (+0/+60 Hz) so the ratio
+  stays < ~6 % — no chipmunk. Light sampler chain (tanh 0.9, 6 kHz LP),
+  near-dry (wet 0.18), detuned ±0.3 % double in choruses only. Pure
+  TTS+OLA singing (variant A) drifts up to 1445 cents — don't ship it.
+  Two checks come with the recipe: printed per-note pitch (cents) and the
+  duet-separation overlap ratio (see `../VERIFY.md`, vocal songs).
 
 ## Emotional-trance structure (lost_v3)
 

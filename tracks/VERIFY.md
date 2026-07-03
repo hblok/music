@@ -95,6 +95,16 @@ set for what the form actually promises:
   curve's value at every boundary and check its shape from the curve
   itself, not the audio (rise / global max inside the peak section /
   return to the opening value).
+- **Vocal songs** (unsung): the standard song-form set, plus two checks
+  the voice itself must pass. **Vocal pitch**: for every sung note the
+  script re-measures the f0 of the *rendered* syllable and prints target
+  vs measured in cents; median |error| <= 35 cents, max <= 60. **Duet
+  separation**: printed overlap ratio of refrain vs countermelody
+  activity per chorus — early choruses near zero (they trade), the
+  fusion chorus substantially overlapped (earned, not default). The
+  `VOICE_MODE`/`VOICE_GAIN` knobs are printed; in "instrumental" mode
+  the hook-count target still holds (lead-carried statements count
+  instead) and the pitch check is skipped, not failed.
 - **Seamless state loops** (stillsuit, arrakis_winds_v3,
   spice_must_flow): the promise is *nothing ever builds*. Check a flat
   RMS trend — 1-second RMS series, first half vs second half within a few
