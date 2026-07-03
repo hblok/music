@@ -116,6 +116,78 @@ yet a proven shape: unsung tried it and stalled. Next candidates: a
 second original in a proven shape, or a new shape entirely — note doc
 with embedded questions first, as always.
 
+## Classical → trance: the source list (2026-07-03)
+
+A lot of successful instrumental techno/trance borrowed from the
+classical canon. We want sources that are **not already worn out by
+the dance floor**. Off the table as sources (they are precedents that
+prove the move works, nothing more): Barber's *Adagio for Strings*
+(Ferry Corsten/Tiësto), Pachelbel's *Canon*, *Für Elise*, *O Fortuna*,
+Bach's *Toccata & Fugue*, the *Four Seasons*, Albinoni's *Adagio*
+(already euro-danced in the 90s), Grieg's *Mountain King*, the
+*Moonlight* first movement — plus everything on William Orbit's
+*Pieces in a Modern Style* (Barber again, Ravel's *Pavane*, Górecki 3,
+Cavalleria rusticana): covered means claimed.
+
+What makes a piece translate: a hummable theme (refrain identity for
+free), loop-compatible harmony (ground bass / chaconne / ostinato —
+the trance loop 300 years early), modal color, drone/pedal tolerance,
+and a formal arc that maps onto one of our proven shapes. As always:
+one blueprint doc per piece in `../../inspiration/` (the
+Symmetry/No-Fate flow), then a notes doc with open questions, then the
+track. We take the *form and theme*, never a sampled recording —
+everything stays synthesized.
+
+The candidates:
+
+1. **Satie — Gnossienne No. 1** (1890, solo piano). Modal, hypnotic,
+   bar-less; the melody floats free over an oscillating two-chord
+   minor accompaniment that is already a trance loop. Almost zero
+   dance remixes (the Gymnopédies took the ambient hits). Fit: the
+   dirty dream piano carries it; early-dark or dream both work.
+   Shape: song form, the accompaniment as the unmoved ground.
+2. **Debussy — La cathédrale engloutie** (1910, Préludes I). The
+   sunken cathedral rising from the sea and sinking back — continues
+   Adrift's ocean thread; parallel-fifth modal swells, bell tolls, one
+   huge crest. Essentially never club-remixed. Shape: single-wave
+   (penumbra's), with the rise-crest-sink baked into the source.
+3. **Purcell — Dido's Lament** (1689). THE ground bass: a repeating
+   5-bar descending line with the lament unfolding over it — a
+   looping bassline with development on top, i.e. trance form three
+   centuries early. Known, but not dance-worn. Note: the ground is
+   *chromatic* — would need a sanctioned exception to the diatonic
+   rule, agreed in its notes doc. Shape: a new one — "the ground"
+   (loop constant, everything above develops).
+4. **Holst — Neptune / Venus** (1914–16, The Planets). Actual space
+   music: Venus floats, Neptune dissolves into an offstage **wordless
+   female choir** fading to nothing — our breath choir's direct
+   ancestor, and the "space sounds" answer. Mars is worn; these two
+   are not. Shape: texture-led, likely two-reveal or a state piece.
+5. **Chopin — Prelude Op. 28 No. 15 "Raindrop"** (1839). One repeated
+   pedal note through the entire piece — a pulse/ostinato the beat can
+   own — with the dark C♯-minor middle as the composed trough. Media-
+   known, barely dance-remixed. Shape: song form with the pedal as the
+   seam device everywhere (nothing ever stops).
+6. **Rachmaninoff — Vocalise** (1915). A melody *written wordless* —
+   the one source whose theme the breath choir could legitimately
+   carry without breaking the instrumental rule (no words by design,
+   not by omission). The careful path back toward a "vocal" track
+   after unsung's dead end. Shape: song form, choir as refrain voice.
+7. **Fauré — Pavane** (1887, F♯ minor). Modal melancholic theme over a
+   walking pluck pulse; the dreamier, less-claimed sibling of Ravel's
+   (Orbit took Ravel's, not this). Shape: song form, dream-era palette.
+8. **Bach — "Ich ruf zu dir, Herr Jesu Christ" BWV 639** (chorale
+   prelude). A three-voice texture that is already sequencer music:
+   steady arpeggiated middle voice, walking bass, long-tone chorale on
+   top. The precedent is perfect: Artemyev's synth arrangement carried
+   Tarkovsky's *Solaris* (1972) — proto-electronic before Switched-On
+   wore off. Shape: the ground/chorale split maps to bass-arp/refrain.
+
+Recommended first two: **Gnossienne No. 1** (the piano-led early-dark
+one) and **La cathédrale engloutie** (the dream one, and the ocean
+thread continues). Dido's Lament is the form-nerd wildcard when we
+want a new shape rather than a new palette.
+
 ## Conventions (unchanged)
 
 Same as `CLAUDE.md` here + `../dune/CLAUDE.md`: standalone scripts,
