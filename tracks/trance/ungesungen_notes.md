@@ -234,7 +234,7 @@ Era-correct means minimal — a mantra, not verses of prose. Proposal
    rule with `ungesungen` as the sanctioned exception (wording per the
    section above). This is the load-bearing question; everything else
    follows from it.
-   Answer:
+   Answer: Yes, of course, we are heading in a different direction with this track, so the "only instrumental" rule is no longer absolute.
 
 2. **The staged plan**: confirm the probe-first approach —
    `ungesungen_probe.py` rendering ONE hook line three ways
@@ -243,12 +243,12 @@ Era-correct means minimal — a mantra, not verses of prose. Proposal
    probe and build the track directly with the hybrid as default
    (faster, riskier). I recommend the probe — it is cheap and the
    whole track leans on this one unproven recipe.
-   Answer:
+   Answer: Yes, let's probe
 
 3. **Title / language of the story**: *Ungesungen* ("unsung" — the
    companion to *Ungeschrieben*, my recommendation), vs *Stimme*
    ("voice"), vs English *Unsung*. Filename follows the answer.
-   Answer:
+   Answer: Let's try English this time.
 
 4. **The voice itself**: (a) female German neural voice — continuity
    with ungeschrieben's Katja, though a different voice ID keeps the
@@ -268,17 +268,17 @@ Era-correct means minimal — a mantra, not verses of prose. Proposal
    lines too (the draft couplets above, or your edits). I recommend
    deciding AFTER the probe: if the sung voice is strong, (b); if it
    is fragile, (a) keeps its exposure short and precious.
-   Answer:
+   Answer: Yes, a, hook only.
 
 6. **The lyric**: approve or edit the hook line ("Ungesungen — bis
    heute Nacht") and, if (5b), the verse couplets. Constraint to keep:
    the hook must split into a 4-syllable question + 4-syllable answer.
-   Answer:
+   Answer: I don't think we clearify the lyrics - but I don't have any ideas right now. However, it is important that the words make some kind of sense. It cannot just be more vowels.
 
 7. **Key / tempo sanity check**: A natural minor at 132 BPM,
    Am–F–C–G. Confirm, or push toward E minor (darker, sits lower on a
    male voice if question 4 goes that way).
-   Answer:
+   Answer: Let's keep it lighter, trance-like.
 
 8. **Inspiration doc**: should I first write
    `inspiration/JamAndSpoon-Right_in_the_Night.md` (a blueprint doc in
@@ -286,4 +286,4 @@ Era-correct means minimal — a mantra, not verses of prose. Proposal
    have you review it before the track, as was done for ungeschrieben?
    Recommended if we want the era nailed; skippable if the doctrine +
    this doc feel sufficient.
-   Answer:
+   Answer: No, we don't need further docs right now. Let's write the generator script.
