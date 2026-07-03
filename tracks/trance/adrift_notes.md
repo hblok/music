@@ -232,3 +232,30 @@ dark-swell build kit; dry drums / wet melodics, no sidechain pump.
 
 Extra: In almost all the other tracks, the baseline has been an oschilating 303 like bass. I think we've tried that many times now. It's time to come up with something else. Especially, since we're leaving the proto-trance behind here, and going into a slightly different era. Now, "Children" had a very soft bass line. With BBE's 7 days, there's something in the middle.
 But if we look at U96 - Love sees no colour (more techno than dream trance, but still), there we have an intereting more dirty beat. It's almost like scratched record (not skipping, but smeared out). Maybe that could work.
+
+## Amendments after review (2026-07-03)
+
+1. **Question 4 → (a), the warm dial.** The dirt is felt as age, not
+   heard as lo-fi: ZOH resample to ~14.7 kHz effective, wow ±0.04 % at
+   0.3 Hz, `tanh(0.9)`, lowpass 7.5 kHz. Knobs printed.
+2. **Question 6 → (b), the signal motif is IN** (the DJ Dado /
+   X-Files school): a soft glide-whistle that *echoes* the refrain's
+   hang — B5 sliding down to F♯5, never resolving it (the resolution
+   stays the piano's) — trailing off on a long dotted-8th feedback
+   delay (~0.55 feedback, ping-pong, ~6 repeats). Once per chorus:
+   chorus 1, chorus 2, the drift (its most weightless placement), the
+   wave, and one last call in the tail = **5 total**. Discipline
+   checked: zero before chorus 1, ≤ 1 per section, count == 5.
+3. **THE BASS (review extra) — the rolling 16th oscillator is retired
+   for this track.** New recipe between *Children*-soft and
+   BBE-melodic, with the U96 smear: a round **8th-note octave-bounce
+   riff** (root/octave quarters in the verses, doubled 8ths + a fifth
+   for drive in the choruses), a single diatonic approach-8th walking
+   into every chord change, and **no filter resonance anywhere** —
+   the core is a near-triangle (sine + soft 2nd/3rd harmonic). THE
+   SMEAR: a parallel copy driven `tanh(2.2)`, bandpassed 80–700 Hz,
+   diffused through a 35 ms noise burst (the smeared-record blur, not
+   a skip), mixed under the round core at ~0.25. Knobs printed.
+   Check: bass onsets ≤ 8 per bar everywhere (the roller was 12–16).
+4. **Question 3 confirmed as (a)**: choir harmonic throughout;
+   hang-answers (a single held E5) in the wave only, ×3.
