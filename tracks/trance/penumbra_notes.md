@@ -181,7 +181,7 @@ and bass bone dry (the dry-wet contrast rule).
    light/dark is the concept made audible; my recommendation), vs
    *Axis* (the mirror line of the symmetric arc — closer to the
    source's own title), vs something else English. Filename follows.
-   Answer:
+   Answer: Penumbra is fine
 
 2. **Key**: the blueprint is literally F minor / Fm–E♭–D♭ — which is
    ungeschrieben's exact key and chord set. Options: (a) **C natural
@@ -190,25 +190,27 @@ and bass bone dry (the dry-wet contrast rule).
    (F♯m–E–D — bass register closest to the blueprint's F1 weight),
    (c) keep literal F minor and accept the collision (era-authentic;
    BPM and instrumentation may separate them enough).
-   Answer:
+   Answer: Let's try C natural minor
 
 3. **The ungated breakdown statement**: the blueprint hints at it
    ("pads and the lead sustain in reverb-heavy space"); I've promoted
    it to a composed device — the melody heard gated for minutes sings
    free exactly once, then the gate snaps back at the peak. Confirm?
    (It becomes a printed check either way.)
-   Answer:
+   Answer: what? I have no idea...
 
 4. **Bell scope**: (a) one tease in the answer section + full
    call-and-response at the peaks (my recommendation — the tease makes
    the peak's duet feel foreshadowed, and gives the outro's single
    ring a referent), vs (b) strictly peak-only, per the blueprint's
    stricter reading (counter-melody enters only at the peak).
-   Answer:
+   Answer: one tease and answer.
 
 5. **Gate pattern**: (a) straight 16ths, ~55–60 % duty (my
    recommendation — the blueprint calls it a 16th stutter, and the
    reviewers' point was that remixes *lost* energy dropping the fast
    gate), vs (b) an accented pattern (e.g. offbeat-weighted duty) for
    more groove at the cost of the relentless flicker.
-   Answer:
+   Answer: ok, straight 16th
+
+Extra: I'm interested in the main line of the Symmetry track. The analysis says F minor - "built around F, A♭, B♭, C, E♭.". While above, question 2, you said  F minor / Fm–E♭–D♭. Now, maybe the same "symmetry" part works in C minor. However, the main point is the back and forth. The Question and Answer. That's why the track is called Symmetry in the first place. It would be great to mimick that somehow.
