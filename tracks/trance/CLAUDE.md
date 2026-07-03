@@ -9,17 +9,43 @@ this file only covers what is specific to the trance tracks.
 
 ## The tracks
 
-- **tech_noir** — `generate_tech_noir.py` (current) — early-80s Fiedel /
-  Terminator machine score, 13/16, D minor. (`tech_noir_v2.py` is a parallel
-  take kept for reference.)
-- **nachtkind** — `nachtkind_v2.py` (current), `nachtkind_v1.py` (kept) —
-  early-90s Frankfurt / Eye Q trance, 139 BPM, G minor, gothic piano + lead.
-- **lost (trance)** — `lost_v4.py` (current) → renders `lost_v5.wav`;
-  `lost_v3.py` (→ `lost_v4.wav`) kept for reference — a one-piece
-  emotional-trance reworking of the ambient `../ambient/lost.py`.
+- **tech_noir** — `tech_noir_v3.py` (current, → `tech_noir_v3.wav`) —
+  early-80s Fiedel / Terminator machine score, 13/16, D minor, composed as
+  question (hollow-ended fanfare) / answer (love theme, contour-level) with
+  a fusion over the unmoved pedal; ends cold. (`generate_tech_noir.py` and
+  `tech_noir_v2.py` kept for reference; both wrote `tech_noir.wav`.)
+- **nachtkind** — `nachtkind_v3.py` (current, → `nachtkind_v3.wav`) —
+  early-90s Frankfurt / Eye Q trance, 139 BPM, G minor: the gothic piano
+  theme as a Q/A refrain (question hangs on the F# leading tone, answer
+  resolves F#→G across the barline), solo-piano thesis/bookend, the
+  piano+lead duet earned across the choruses. (`nachtkind_v2.py`,
+  `nachtkind_v1.py` kept; both wrote `nachtkind.wav`.)
+- **lost (trance)** — `lost_v6.py` (current) → `lost_v6.wav` — the
+  emotional journey (love/confusion/loss/dread/sadness/hope) as a SONG:
+  one identical refrain re-lit by entering the Bm–G–D–A loop at three
+  rotation points (bright D / sad Bm / resolved D). (`lost_v4.py` →
+  `lost_v5.wav`, `lost_v3.py` → `lost_v4.wav` kept for reference.)
+- **ungeschrieben** — `ungeschrieben.py` → `ungeschrieben.wav` — 1992
+  Frankfurt proto-trance in the TWO-REVEAL form (blueprint:
+  `../../inspiration/Zyon-No_Fate.md`): 130 BPM, F natural minor, Fm–Db–Eb;
+  rompler strings as the withheld refrain, the filter arc as the
+  development engine, one spoken-word drop ("Die Zukunft ist
+  ungeschrieben", `VOICE_GAIN` knob at the top of the script).
 
 Seeds are thematic: `1984` (tech_noir, the year the machine arrived), `1993`
-(nachtkind, the year *Brainchild* came out).
+(nachtkind, the year *Brainchild* came out), `130` (lost, the BPM), `1992`
+(ungeschrieben, the year of *No Fate*).
+
+## Composition: the song doctrine
+
+`idea.md` in this directory is the doctrine (refrain identity, Q/A at three
+levels, seam devices at every boundary, thesis/bookend, the fusion payoff,
+one progression family) and records which shape each track uses — song form,
+machine score, or two-reveal. `../VERIFY.md` is the verification standard:
+every script prints a section map, hook/statement count, seam checklist,
+per-section RMS, and PASS/FAIL form checks. Both are load-bearing: write
+the `*_notes.md` design doc (with embedded open questions) first, implement
+its Verify paragraph exactly, and on a FAIL fix the music, not the check.
 
 ## THE warmth recipe (read this before touching any synth voice)
 
@@ -51,6 +77,12 @@ cutoff, a sub"*), and `lost_v4.py:bass_note` (the rolling octave bass —
 `iirpeak` Q 3.5→1.2 / blend 0.7→0.3, `1/k`→`1/k**1.3`, drives 1.6–1.9→0.9–1.1).
 `lost_v3.py` still has the old harsh bass — keep it for A/B reference, but
 `lost_v4.py` is the one to build on.
+
+ONE sanctioned exception: `ungeschrieben.py:seq_pluck` runs `iirpeak` at
+**Q 2.2 / blend 0.40** — the era-authentic 1992 resonance, agreed in its
+notes doc. The guardrails that keep it round rather than acid: soft drive
+(`tanh(0.8)`), a sine sub for body, and the peak rides a *sweeping* cutoff —
+it never parks and screams. Don't copy the Q without the guardrails.
 
 ## Synthesis recipes (track-specific)
 
@@ -104,7 +136,39 @@ cutoff, a sub"*), and `lost_v4.py:bass_note` (the rolling octave bass —
   philosophy — add one element per 16-bar block, never all at once.
 - **Gothic leading-tone** (nachtkind): the progression is i–VI–VII–V
   (Gm–Eb–F–D); the **F# of the D-major V chord** against the G-minor field is
-  the single gothic colour — borrowed, not diatonic.
+  the single gothic colour — borrowed, not diatonic. In v3 it is also the
+  main seam device: pre-choruses end hanging ON the F#, resolved by the
+  chorus' first G across the barline; the final chord answers the bookend's
+  question-half the same way.
+- **Refrain rotation lights** (lost_v6): Bm–G–D–A entered at three points —
+  `ROT_Q` ends on A (open), `ROT_D` ends on D (bright), `ROT_B` ends on Bm
+  (sad). The refrain's final note is always D: root of D in the bright
+  choruses, minor third of Bm in the dread. Re-light the tune with the
+  harmony; never change its notes.
+- **Rompler strings, M1/D-50 character** (ungeschrieben — the emotional
+  centerpiece): three detuned rolled-off saw copies (`1/k**1.3`, dets
+  ±0.45 %) + a 2–5 kHz **bow-noise layer** riding the same envelope, a fast
+  ~0.12 s raised-cosine "sampled" attack, and a **~5.8 Hz ±5 % amplitude
+  flutter per voice** — the sample-loop wobble that makes it read as
+  *sampled*, not analog. Long hall, wet 0.55. `strings_line` (glide legato,
+  carries the theme) + `strings_chord` (per-bar rearticulated chords — the
+  era string-stab feel).
+- **The filter arc** (ungeschrieben): the sequence's 1-bar cell never
+  changes notes; ALL development is `CUT_BARS`/`CUT_HZ`, a piecewise-linear
+  cutoff automation over bars. Each 16th is rendered at the cutoff of its
+  own onset and cached in 40 Hz buckets (`seq_pluck(midi, cutoff)`), so the
+  sweep is baked into the notes AND the arc is printable/checkable (rise,
+  global max inside the peak section, return to the intro value).
+- **909 toms** (ungeschrieben): falling sine (`f0*1.6→f0`) + a soft
+  400–2500 Hz skin burst; hi/mid/lo at 196/147/110 Hz, panned across.
+  Transition fills ONLY — the era's seam device; three in the whole track.
+- **Spoken-word drop** (ungeschrieben): edge-tts neural voice rendered ONCE
+  to `/workspace/music/samples/` (cache-first — no network needed after the
+  first run, graceful instrumental fallback), hardware-sampler pitch-down
+  (plain resample ×0.94), 6 kHz lowpass, dry center + tempo-synced
+  dotted-8th echoes. Dropped ONCE (the classic single movie-sample
+  placement) with a 2-bar sequence dip carved under it. `VOICE_GAIN = 0.0`
+  at the top of the script = fully instrumental; that knob is the contract.
 
 ## Emotional-trance structure (lost_v3)
 

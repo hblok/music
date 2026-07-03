@@ -42,7 +42,7 @@ composition for free without importing the Dune *sound*.
    per-section RMS with ordering checks (chorus above its pre-chorus,
    final chorus loudest, bridge trough quietest), and a seam checklist
    naming what crosses every boundary. Structure verifiable without
-   listening.
+   listening. (Codified as the repo-wide standard in `../VERIFY.md`.)
 
 ## What stays behind (no cross-pollination)
 
@@ -73,29 +73,43 @@ Exception: tech_noir is a machine score, not dance music — it takes the
 doctrine (Q/A, refrain identity, fusion, seams) *without* the pop form;
 see its note doc.
 
-## Roadmap
+## Roadmap — status
 
-Note docs in this directory, in suggested build order:
+All four tracks are built, each printing the `../VERIFY.md` blocks with
+all checks passing:
 
-1. **`lost_v5_notes.md`** — the emotional journey retold as a song:
-   one refrain re-lit by the harmony (bright D / sad B / resolved D).
-   Closest to done already (the cohesion trinity is in place).
-2. **`nachtkind_v3_notes.md`** — the gothic piano theme becomes a true
-   refrain; piano/lead call-and-response replacing the stacked duet
-   until the fusion earns it.
-3. **`tech_noir_v3_notes.md`** — the experiment: how much song doctrine
-   fits a 13/16 machine score (answer: Q/A + fusion + seams; no
-   verse/chorus).
+1. **lost_v6** (`lost_v6.py`, notes `lost_v6_notes.md`) — DONE. One
+   refrain, three lights: the Bm–G–D–A loop entered at three rotation
+   points, so the *identical* refrain lands bright (D), sad (Bm), or
+   resolved — the emotion is the harmony's light, never the tune.
+2. **nachtkind_v3** (`nachtkind_v3.py`, notes `nachtkind_v3_notes.md`)
+   — DONE. The gothic piano theme as a Q/A refrain hanging on the F#
+   leading tone (resolved F#→G across every seam); the piano/lead duet
+   earned progressively: alone → composed echoes → the fusion.
+3. **tech_noir_v3** (`tech_noir_v3.py`, notes `tech_noir_v3_notes.md`)
+   — DONE. The doctrine without the pop form: hollow-ended fanfare
+   question vs love-theme answer at *contour* level (the duality lives
+   across dimensions — melody vs bassline, harmony trades), the
+   interrogation, the fusion over an unmoved pedal, ends cold.
+4. **ungeschrieben** (`ungeschrieben.py`, notes
+   `ungeschrieben_notes.md`) — DONE. The from-scratch original became
+   the **two-reveal form** (1992 proto-trance, blueprint in
+   `../../inspiration/Zyon-No_Fate.md`): withheld thesis (the ghost
+   foreshadow — a sanctioned doctrine deviation), the filter arc as
+   the development engine (printed and checked), rompler strings, one
+   spoken-word drop with a documented `VOICE_GAIN` knob.
 
-Later, once the retrofits prove the port: an **original song-form
-trance track** designed from bar 0 as a song (refrain written before
-the groove) rather than retrofitted — genre open (Frankfurt anthem or
-uplifting), decide after hearing the three revisions.
+The doctrine now has three proven shapes — **song form** (lost,
+nachtkind), **machine score** (tech_noir), **two-reveal** (ungeschrieben)
+— with their check variants recorded in `../VERIFY.md`. Next candidates:
+a second original in a proven shape, or a new shape entirely — note doc
+with embedded questions first, as always.
 
 ## Conventions (unchanged)
 
 Same as `CLAUDE.md` here + `../dune/CLAUDE.md`: standalone scripts,
 duplicated helpers, seeded RNG, revisions get a new WAV name — never
-overwrite a WAV the user has listened to (note: `lost_v4.py` already
-renders `lost_v5.wav`, so the *lost_v5 script* renders `lost_v6.wav`).
-WAVs to `/workspace/music/`, stage in git, no commit without asking.
+overwrite a WAV the user has listened to (e.g. `lost_v4.py` had already
+rendered `lost_v5.wav`, so the next revision became `lost_v6.py` →
+`lost_v6.wav`). WAVs to `/workspace/music/`, stage in git, no commit
+without asking.

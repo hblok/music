@@ -86,6 +86,15 @@ set for what the form actually promises:
   ordering (e.g. the fusion section loudest, the answer section quieter
   than the question section, outro settling) plus "ends cold": the last
   audio event is a hard stop, no fade tail.
+- **Two-reveal form** (ungeschrieben): the promise is that the theme is
+  a *reveal*, so the thesis check flips — **zero** full statements
+  before reveal 1 (one drowned foreshadow fragment allowed, uncounted).
+  Ordering: the reduction is the trough between the reveals, reveal 2
+  is the loudest section, the outro lands back near the intro. When the
+  development lives in an automation curve (the filter arc), print the
+  curve's value at every boundary and check its shape from the curve
+  itself, not the audio (rise / global max inside the peak section /
+  return to the opening value).
 - **Seamless state loops** (stillsuit, arrakis_winds_v3,
   spice_must_flow): the promise is *nothing ever builds*. Check a flat
   RMS trend — 1-second RMS series, first half vs second half within a few

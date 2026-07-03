@@ -82,10 +82,11 @@ air euphoria.
 3. **909 toms** — high/mid/low pitched-thump family (sine 200/150/110 Hz
    falling, short), used ONLY as transition fills (the era's seam
    device). Two or three fills in the whole track.
-4. **Spoken word** — see question 2. If used: our own line, synthesized
-   via the existing TTS+OLA pipeline (technique reuse, no Dune
-   content), dry, sparse — intro and reduction only, tempo-synced
-   delay tail.
+4. **Spoken word** — see question 2. Final: our own line ("Die Zukunft
+   ist ungeschrieben", edge-tts German neural voice, cache-first),
+   dropped ONCE in the reduction per the answer — dry, sampler
+   pitch-down, tempo-synced delay tail, and the documented
+   `VOICE_GAIN` knob in the script (0.0 = fully instrumental).
 
 Reused as-is: 909 kick/hats/claps recipes (lost_v6 kit, dialed rawer:
 punchy not sub-heavy), rolling 16th mono bass on the F pedal with
@@ -98,11 +99,11 @@ sparseness is the identity; resist stacking.
 
 | bar | t | section | what happens |
 |-----|------|---------|--------------|
-| 0 | 0:00 | intro (16) | Kick alone, then hats; the sequence enters with the filter nearly CLOSED (a dark throb, barely a pitch). Spoken line (if kept) lands dry ~bar 6. The GHOST at bar 10: one drowned string voice, first phrase only, half-heard. |
+| 0 | 0:00 | intro (16) | Kick alone, then hats; the sequence enters with the filter nearly CLOSED (a dark throb, barely a pitch). The GHOST at bar 10: one drowned string voice, first phrase only, half-heard. |
 | 16 | 0:30 | groove (32) | Bass rolls in on the F pedal; the sequence proper; additive 16-bar cycles (+open hat, +claps at 2&4). The filter opens gradually across the whole section — the question asked braver and braver. |
 | 48 | 1:29 | pre-reveal (8) | The filter sweep crests, hats double, tom fill in the last bar, crash → |
 | 56 | 1:44 | **REVEAL 1** (24) | THE STRINGS: the theme 2× (Q/A), harmonic movement arrives with them (Fm–Db–Eb under the melody for the first time); 8 more bars of sustained string chords riding the groove. Sequence stays half-open under it. Last chord rings across — |
-| 80 | 2:28 | reduction (24) | Strings recede to the dark pad; claps and open hat strip out; the bass filters down; the spoken line returns (or the ghost, again); the sequence's filter CLOSES back down — doubt. |
+| 80 | 2:28 | reduction (24) | Strings recede to the dark pad; claps and open hat strip out; the bass filters down; THE SPOKEN LINE drops ONCE here (bar 86, dry, a 2-bar sequence dip under it — per answer 2, the classic single sample drop); the sequence's filter CLOSES back down — doubt. |
 | 104 | 3:12 | rebuild (8) | Filter reopens faster than before, bass brightens, hats return, the long tom fill, crash → |
 | 112 | 3:27 | **REVEAL 2** (32) | The peak: theme 3×, strings in octaves, a high descant answering the consequent phrases; **the sequence reaches fully open here — question and answer at full voice at last** (the fusion). Loudest section of the track. |
 | 144 | 4:26 | ride-out (24) | Peel in reverse order: descant gone, strings hand back to the pad, claps out, the filter starts its long descent. |

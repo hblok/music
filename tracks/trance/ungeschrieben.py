@@ -499,6 +499,9 @@ SEQ_G = {"intro": 0.7, "groove": 0.9, "prerev": 1.0, "rev1": 0.85,
 clear()
 for b in range(4, B_END):
     g0 = SEQ_G[section_of(b)]
+    if VOICE_GAIN > 0 and 86 <= b < 88:
+        g0 *= 0.5                    # the present holds its breath: the seq
+                                     # thins for two bars under the spoken line
     for step in range(16):
         cut = cutoff_at(b + step / 16.0)
         m = SEQ_CELL[step]
@@ -613,10 +616,10 @@ add_at(lay_R, gR, bar_t(10), 0.35)
 # REVEAL 1: the theme twice over its harmony, then chords riding the groove
 for b in range(B_REV1, B_RED):
     cL, cR = strings_chord(CH_CELL[(b - B_REV1) % 8], BAR)
-    add_at(lay_L, cL, bar_t(b), 0.75)
-    add_at(lay_R, cR, bar_t(b), 0.75)
-place_theme(B_REV1, 0.95)
-place_theme(B_REV1 + 8, 0.95)
+    add_at(lay_L, cL, bar_t(b), 0.85)
+    add_at(lay_R, cR, bar_t(b), 0.85)
+place_theme(B_REV1, 1.0)
+place_theme(B_REV1 + 8, 1.0)
 
 # REVEAL 2: the theme three times IN OCTAVES over bigger voicings, the
 # descant answering the consequent halves of statements 2 and 3
@@ -647,7 +650,7 @@ add_at(lay_R, cR, bar_t(B_KSTOP), 0.7)
 
 lay_L = reverb(lay_L, IR_L, 0.55)
 lay_R = reverb(lay_R, IR_R, 0.55)
-commit(lay_L, lay_R, 0.30)
+commit(lay_L, lay_R, 0.36)                        # the centerpiece owns the mix
 print("strings committed")
 
 
@@ -737,7 +740,7 @@ if VOICE is not None:
     for i, g in [(1, 0.30), (2, 0.14)]:           # tempo-synced delay tail
         add_at(lay_L, VOICE, t0 + i * 0.75 * BEAT, g if i % 2 else g * 0.6)
         add_at(lay_R, VOICE, t0 + i * 0.75 * BEAT, g * 0.6 if i % 2 else g)
-    commit(lay_L, lay_R, 0.13 * VOICE_GAIN)
+    commit(lay_L, lay_R, 0.28 * VOICE_GAIN)       # a sample drop sits ON TOP
 print(f"spoken word: {voice_status}")
 
 
