@@ -189,18 +189,21 @@ one line in the drawer, nothing else.
    fits the story, the era scene, and the nachtkind/ungeschrieben
    naming line; my recommendation), vs *Stampfwerk* ("stamping works",
    more machine), vs English *Icerun*. Filename follows the answer.
+   Answer: Eisgang is fine.
 
 2. **The V-major question**: the far side's `Gø – C(E♮) – Fm` is a
    functional dominant cadence — the "coming home" pull is the whole
    chorus payoff (my recommendation). Alternative: stay strictly
    Aeolian with Cm (v), which is more era-orthodox but makes arrival
    flat — the circle would loop rather than *resolve*. Confirm the E♮.
+   Answer: Let's try "the far side" (we can afford to break with the era style)
 
 3. **Skyline pitches**: confirm the proposed line
    (C D♭ B♭ C | A♭ B♭ G→) or push it darker (start on A♭, dip below the
    root somewhere)? Register: stab hammers around C5–C6, lead sings an
    octave below the stab or unison? (I'd put the lead at the stab's
    octave-below for warmth, octave-up double only in the final chorus.)
+   Answer: Yes, let's keep it warm and lighter (so the proposed line)
 
 4. **How hard do the drums break from the house style?** As specced:
    no 16th hat carpet + tick pair + beat-4& stamp (my recommendation —
@@ -208,18 +211,22 @@ one line in the drawer, nothing else.
    oscillation bars the kick also drops beat 3 (a limp — every second
    bar stumbles). Riskier for dance flow; tech_noir already owns
    "limp" as identity. Say yes only if the stamp alone proves too tame.
+   Answer: Yes, let's do 4/4. We still want it dancable.
 
 5. **The freeze on Gø** (bridge): 16 bars of near-silence on the
    coldest chord, pulse reduced to one plant per 4 bars — confirm this
    is the trough we want, or should the freeze sit on the held V (C,
    E♮ exposed) instead, making the thaw a pure dominant resolution?
    Gø is colder (my rec); C is more functional.
+   Answer: Ok, let's try C -  more functional.
 
 6. **Retrograde walk** (optional development, cheap to add): in the
    ride-out, the bass walks the circle BACKWARDS one lap (fourths —
    walking home the way you came). Cute mirror of the story, or too
    clever? I lean *skip* — the ride-out peeling is enough.
+   Answer: Interesting. I think it could be worth the experiment. And if it's only one the ride-out, we can afford to experiment more.
 
 7. **Tempo**: 138 (my rec — a stomper should push harder than
    ungeschrieben's 130; nachtkind holds 139 but shares nothing else)
    vs 132–134 (roomier for the tick pair)?
+   Answer: Yes, 138 bpm sounds good. A hard techno trance track.
