@@ -123,7 +123,7 @@ classical canon. We want sources that are **not already worn out by
 the dance floor**. Off the table as sources (they are precedents that
 prove the move works, nothing more): Barber's *Adagio for Strings*
 (Ferry Corsten/Tiësto), Pachelbel's *Canon*, *Für Elise*, *O Fortuna*,
-Bach's *Toccata & Fugue*, the *Four Seasons*, Albinoni's *Adagio*
+Bach's *Toccata & Fugue*, Albinoni's *Adagio*
 (already euro-danced in the 90s), Grieg's *Mountain King*, the
 *Moonlight* first movement — plus everything on William Orbit's
 *Pieces in a Modern Style* (Barber again, Ravel's *Pavane*, Górecki 3,
@@ -182,6 +182,18 @@ The candidates:
    top. The precedent is perfect: Artemyev's synth arrangement carried
    Tarkovsky's *Solaris* (1972) — proto-electronic before Switched-On
    wore off. Shape: the ground/chorale split maps to bass-arp/refrain.
+9. **Vivaldi — Winter, RV 297** (1725, The Four Seasons; added on
+   review). Honest wear-warning: this is the most-claimed source on
+   the list — Max Richter recomposed the whole cycle (2012), Orbit's
+   album took *L'inverno* too. The unworn corner is the middle
+   **Largo**: a pizzicato rain-ostinato under one long cantabile
+   melody — offbeat pluck + refrain, a dream-trance texture as
+   written. The famous shivering repeated-chord ostinato of the first
+   Allegro comes along as *texture* only (the icy stab/tremolo bed),
+   not as the theme everyone has already stormed through. Source key
+   is F minor — ungeschrieben's identity — so it transposes; decide in
+   its notes doc. Shape: song form; Largo theme as refrain, the
+   Allegro shiver as the verses' cold engine.
 
 Recommended first two: **Gnossienne No. 1** (the piano-led early-dark
 one) and **La cathédrale engloutie** (the dream one, and the ocean
