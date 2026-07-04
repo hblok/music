@@ -47,16 +47,19 @@ re-reading the old generators; copy the function, don't import.
   the bridge drop is awkward, and the instrumental offers little. Kept
   for reference, not a base to build on.
 
-- **eisgang** — `eisgang.py` → `eisgang.wav` — 138 BPM hard techno-trance
-  in the CIRCLE form (notes `eisgang_notes.md`; one motif only from
-  Vivaldi's Winter — W3 "stamping feet" behaviors, none of its pitches):
-  harmony that WALKS the F-minor circle of fifths (verses the near half,
-  choruses the full lap home through the one borrowed E♮), the skyline
-  refrain hammered in augmentation from bar 1 and sung only in choruses,
-  run-and-plant thud-bass (duty-cycle checked ≤ 0.6 — the anti-rolling
-  bass), no closed-hat carpet (tick pair instead), the 4& stamp, freeze
-  on the held V, retrograde ride-out. Declared rule-breaks live in its
-  notes doc.
+- **eisgang** — `eisgang_v2.py` (current, → `eisgang_v2.wav`) — 138 BPM
+  hard techno-trance in the CIRCLE form (notes `eisgang_notes.md` + v2
+  amendments; Vivaldi Winter borrows are MECHANISMS only — W3's
+  stamping-feet behaviors, W5's ladder+sigh development — never
+  pitches): harmony that WALKS the F-minor circle of fifths (verses the
+  near half, choruses the full lap home through the one borrowed E♮),
+  the skyline refrain hammered in augmentation from bar 1 and spoken in
+  choruses by the SKYLINE PIANO over the underglow (v2 — the v1 hollow
+  pulse lead read as a toy xylophone), run-and-plant thud-bass
+  (duty-cycle checked ≤ 0.6 — the anti-rolling bass; the listen
+  verdict's keeper), no closed-hat carpet (tick pair instead), the 4&
+  stamp, freeze on the held V, retrograde ride-out. Declared
+  rule-breaks live in the notes doc. (`eisgang.py` kept for reference.)
 
 Seeds are thematic: `1984` (tech_noir, the year the machine arrived), `1993`
 (nachtkind, the year *Brainchild* came out), `130` (lost, the BPM), `1992`

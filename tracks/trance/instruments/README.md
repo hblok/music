@@ -65,7 +65,9 @@ duplicated here.
 | love theme voice | `tech_noir_v3.py:love_phrase` | the warm answer/contour voice of the machine score |
 | GATED lead | `penumbra.py:lead_bar` — owned by penumbra | the 16th trance gate (58 % duty, raised-cosine edges) BAKED into per-bar renders, cutoff-bucket cached; square-saw odd-weighted core |
 | ungated free lead | `penumbra.py:lead_free` | the same voice singing free (breakdown only) |
-| hollow pulse lead | `eisgang.py:lead_line` — owned by eisgang | odd-harmonics-only legato glide (portamento tau 0.07), bloom vibrato; the skyline voice |
+| ~~hollow pulse lead~~ | `eisgang.py:lead_line` (v1) | odd-harmonics glide; **retired as a foreground voice** — read as a toy xylophone up high (the v1 listen verdict). Survives only as eisgang_v2's underglow |
+| skyline piano | `eisgang_v2.py:piano_note` — owned by eisgang | the M1 piano de-gothed (hammer 0.14 @ 1200–3600, LP 5000, mid register, LH octaves); the chorus refrain voice |
+| the underglow | `eisgang_v2.py` (lead_line, −12, LP 1600, quiet) | the D-50 trick: a dark sustain layer under the piano's attack; carries held notes piano decay can't |
 | the signal | `adrift.py:make_signal` — owned by adrift | glide-whistle call (B5→F#5) on a long dotted-8th feedback trail; an FX-lead, once per chorus |
 
 ## Keys & bells
@@ -127,5 +129,6 @@ duplicated here.
 - **adrift** — dirty dream piano, breath choir, the signal, clouds, tide form
 - **farlight** — the bell, the re-light (minor→major), sustained bloom-sub
 - **penumbra** — the 16th gated lead, static-modal Juno pads, single-wave arc
-- **eisgang** — thud-bass (run-and-plant), tick pair, the stamp, hammer stab,
-  hollow pulse lead, walking circle-of-fifths harmony
+- **eisgang** — thud-bass (run-and-plant — the listen verdict's keeper),
+  tick pair, the stamp, hammer stab, skyline piano + underglow, walking
+  circle-of-fifths harmony, ladder/sigh refrain development

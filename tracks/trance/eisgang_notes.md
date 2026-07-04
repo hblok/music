@@ -230,3 +230,42 @@ one line in the drawer, nothing else.
    ungeschrieben's 130; nachtkind holds 139 but shares nothing else)
    vs 132–134 (roomier for the tick pair)?
    Answer: Yes, 138 bpm sounds good. A hard techno trance track.
+
+## v2 amendments (post-listen review, 2026-07-04 → `eisgang_v2.py`)
+
+The verdicts on v1: **the run-and-plant bass works very well — fun, a
+keeper** (noted in memory as a reusable pattern family). The melody was
+fun but (a) **too plain in its development**, (b) the hollow-pulse
+glide voice **read as childish** — "a christmas tune played on a
+xylophone". Direction: deeper and darker via a trance-era synth piano,
+but **not full goth** (that's nachtkind's register, and another time).
+Bass, drums, stab, structure: untouched.
+
+1. **The skyline piano.** The chorus voice is now an M1-school synth
+   piano (copied from `nachtkind_v3.py:piano_note` per the catalog,
+   de-gothed: hammer 0.14 @ 1200–3600 Hz instead of 0.16–0.20 @
+   1500–4000, lowpass 5000, mid register, LH octave under every stone).
+2. **The underglow.** The v1 glide voice survives, sunk an octave and
+   darkened (LP 1600, gain ~0.5) UNDER the piano — the D-50 trick:
+   percussive attack + breathing sustain as one instrument. It also
+   keeps the hanging G alive across the held V, which pure piano decay
+   cannot.
+3. **The refrain develops** — the second sanctioned Vivaldi borrow,
+   and like the first it is MECHANISMS, never pitches (this amends the
+   drawer clause above, which pre-approved only W2's zigzag): from the
+   Largo analysis, the **ladder** (W5 b3–4: an 8th+16th+16th climb up
+   the chord tones into each stone, placed as a *pickup* — the melody
+   arrives early, exactly like the bass plant) and the **sigh** (W5
+   b5–6: dip to the diatonic lower neighbor and return). Statement
+   development, printed as a map and checked never-decreasing:
+   - chorus 1 — L1: the stones plain + sighs (state);
+   - chorus 2 — L2: + ladder pickups into every stone; the first
+     pickup hangs in the stripped held-V bar 71 (a new seam);
+   - final chorus — L3: + octave dyads and answered sighs an octave
+     above, both laps (the fusion with the stab, as before).
+4. The C-major station's ladder climbs C–E♮–F into G: the borrowed
+   note is now *in the melody's approach*, not only the harmony.
+
+All 18 checks pass (the new one: "the refrain develops"). The v1
+verdict lesson for the palette is recorded in the instrument catalog
+(hollow pulse lead marked retired-as-foreground).
