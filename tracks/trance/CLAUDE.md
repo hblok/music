@@ -7,6 +7,11 @@ output, everything synthesized, seeded RNG, `commit()` mix-bus, per-section
 RMS verification, `add_at`/`glide_curve`/`reverb` helpers). Read that first;
 this file only covers what is specific to the trance tracks.
 
+**Instrument reuse: read `instruments/README.md` first** — the catalog of
+every voice, drum and texture across these scripts (source
+script:function, character, ownership). Pick from there instead of
+re-reading the old generators; copy the function, don't import.
+
 ## The tracks
 
 - **tech_noir** — `tech_noir_v3.py` (current, → `tech_noir_v3.wav`) —
@@ -42,10 +47,21 @@ this file only covers what is specific to the trance tracks.
   the bridge drop is awkward, and the instrumental offers little. Kept
   for reference, not a base to build on.
 
+- **eisgang** — `eisgang.py` → `eisgang.wav` — 138 BPM hard techno-trance
+  in the CIRCLE form (notes `eisgang_notes.md`; one motif only from
+  Vivaldi's Winter — W3 "stamping feet" behaviors, none of its pitches):
+  harmony that WALKS the F-minor circle of fifths (verses the near half,
+  choruses the full lap home through the one borrowed E♮), the skyline
+  refrain hammered in augmentation from bar 1 and sung only in choruses,
+  run-and-plant thud-bass (duty-cycle checked ≤ 0.6 — the anti-rolling
+  bass), no closed-hat carpet (tick pair instead), the 4& stamp, freeze
+  on the held V, retrograde ride-out. Declared rule-breaks live in its
+  notes doc.
+
 Seeds are thematic: `1984` (tech_noir, the year the machine arrived), `1993`
 (nachtkind, the year *Brainchild* came out), `130` (lost, the BPM), `1992`
 (ungeschrieben, the year of *No Fate*), `1994` (unsung, the year the
-Frankfurt vocal broke).
+Frankfurt vocal broke), `1725` (eisgang, the year Op. 8 was published).
 
 ## Composition: the song doctrine
 
