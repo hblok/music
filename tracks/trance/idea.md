@@ -183,7 +183,8 @@ The candidates:
    Tarkovsky's *Solaris* (1972) — proto-electronic before Switched-On
    wore off. Shape: the ground/chorale split maps to bass-arp/refrain.
 9. **Vivaldi — Winter, RV 297** (1725, The Four Seasons; added on
-   review). Honest wear-warning: this is the most-claimed source on
+   review; blueprint done: `../../inspiration/Winter_Vivaldi.md`, with
+   full score + MIDI in `inspiration/Winter_Vivaldi_score/`). Honest wear-warning: this is the most-claimed source on
    the list — Max Richter recomposed the whole cycle (2012), Orbit's
    album took *L'inverno* too. The unworn corner is the middle
    **Largo**: a pizzicato rain-ostinato under one long cantabile
