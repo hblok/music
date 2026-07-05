@@ -118,27 +118,31 @@ Very wet (the heart — long dark hall, ~5–6 s IR, wet ≈ 0.5):
   instead of tom fills (ungeschrieben owns those) or reverse cymbals
   (nachtkind owns that). Psy glitch culture and 1725 agree here.
 
-## Structure (sketch — song form with a withheld reveal)
+## Structure (updated per Q6: 64-bar drops, evolving — ~7:25)
 
 | t | bars | section | what happens |
 |------|------|---------|--------------|
 | 0:00 | 4 | thesis | The voice alone in the hall: the refrain's question phrase, once, hanging on D#. Air bed under it. (Doctrine: thesis in 10 s.) |
-| 0:07 | 16 | shiver intro (W1) | E pedal drone + stab voices entering one per 4 bars, dissonance rising; kick-roll build in the last bar. |
-| 0:33 | 16 | engine start | Kick + rolling bass lock in; hats, then clap staircase in (gains held ≤ 0.8 pre-drop). |
+| 0:07 | 16 | shiver intro (W1) | E pedal drone + stab voices entering one per 4 bars, dissonance rising (octave → 2nd-clash → tritone → the alien D#); kick-roll build in the last bar. The stabs snap to consonant Em when the kick drops. |
+| 0:34 | 16 | engine start | Kick + rolling bass lock in; hats staircase in (gains held ≤ 0.8 pre-drop). Ice-crack into the verse. |
 | 1:00 | 16 | verse 1 | 303 enters low and dark, cutoff arc rising; voice sings 2-bar FRAGMENTS of the refrain (ghost foreshadow — the two-reveal instinct). |
-| 1:26 | 8 | build (W4a) | Stutter ladder climbs; kick roll; one silent beat. |
-| 1:39 | 32 | DROP 1 | Full psy engine, 303-led. Mini-dips at 16 (kick+303 only, 4 bars). Zaps on 8-bar seams. The voice is ABSENT — the machine's drop. |
-| 2:32 | 16 | chorus 1 | The harmony event: Em–C–D–B arrives, pads + zigzag arp; the voice sings the FULL refrain for the first time (the reveal). Q hangs on D#, A resolves to E. |
-| 2:59 | 16 | break | Engine out (ice-crack seam, W8a). Voice + pads + low drone: the refrain restated slow, half-voice; heartbeat-quiet. |
-| 3:25 | 8 | build 2 | Ladder again, higher entry; roll; silent beat. |
-| 3:38 | 32 | DROP 2 / fusion | The payoff: full engine AND the walking chorus harmony AND the voice + octave double — 303 answers each vocal phrase-end in the gaps (composed trades, Q/A level 2). Mini-dip at 16: voice + kick only, 4 bars. |
-| 4:31 | 16 | chorus 2 (out) | Fusion continues, arp on top — fullest 16 bars; last refrain statement. |
-| 4:58 | 16 | outro | Strip layer by layer (bass out, 303 dims down the arc to its intro cutoff, hats out); kick fades like a calming heartbeat. |
-| 5:24 | 4 | bookend | The voice alone again: the ANSWER phrase this time, resolving D#→E. Hall tail rings out. |
+| 1:27 | 8 | build (W4a) | Stutter ladder climbs chromatically E→B (parks on the dominant); kick roll; one silent beat. |
+| 1:40 | 64 | DROP 1 | The machine's drop, voice ABSENT, EVOLVING per the dune lesson: riff A low (16) → dip 1: kick+303 only (4) → riff A octave-up (16) → dip 2: bass+hats, kickless (4) → riff B syncopated with slides, drop-1 cutoff max (24). Zaps on 8-bar seams; ice-crack out. |
+| 3:26 | 16 | chorus 1 | The harmony event: Em–C–D–B arrives (pads, walking bass, zigzag arp); the voice sings the FULL refrain for the first time (the reveal, ×2). Q hangs on D#, A resolves to E. |
+| 3:52 | 16 | break | Engine out (ice-crack seam, W8a). Voice + pads + low drone: the refrain once, half-voice; the trough. |
+| 4:19 | 8 | build 2 | Ladder again, higher entry, ends hammering D# — drop 2's downbeat E resolves it. Bass re-enters first (the pickup); roll; silent beat. |
+| 4:32 | 64 | DROP 2 / fusion | The payoff, EVOLVING: wave 1 — engine + walking harmony + voice, 303 answers each held D# with a lick ending on E (composed trades, Q/A level 2) (16) → dip: voice+kick only (4) → wave 2 — octave double joins (16) → dip: bass+hats+dark 303, voice out (4) → wave 3 — fullest, arp joins, arc GLOBAL MAX (24). |
+| 6:18 | 16 | chorus 2 (out) | Fusion continues, arp on top in octaves — fullest 16 bars; last statement's D# resolves to E across the outro seam. |
+| 6:44 | 16 | outro | Strip layer by layer (clap out, 303 dims down the arc to its intro cutoff, bass and hats out); kick fades like a calming heartbeat. |
+| 7:11 | 4 | bookend | The voice alone again: the ANSWER phrase, and the final E is STATED — the one place the melody itself lands home. Hall tail rings out. |
 
-Refrain identity: the sung refrain melody is identical every full
-statement (target ≥ 6 counted: thesis-half, chorus 1, break, drop 2
-×2 waves, bookend-half; halves count as declared).
+Refrain identity: the sung refrain melody (16-bar equivalent Q+A over
+one Em–C–D–B lap per half) is identical every full statement — 12
+counted: chorus 1 ×2, break ×1, drop 2 ×7 across its three waves,
+chorus 2 ×2 (target ≥ 6; the thesis Q-half, verse fragments, dip
+holds and bookend A-half are declared fragments, uncounted). The
+appended resolution E crossing a seam is the nachtkind mechanism,
+not a melody change.
 
 ## Verify (the script prints)
 
