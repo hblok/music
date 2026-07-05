@@ -65,9 +65,10 @@ duplicated here.
 | love theme voice | `tech_noir_v3.py:love_phrase` | the warm answer/contour voice of the machine score |
 | GATED lead | `penumbra.py:lead_bar` — owned by penumbra | the 16th trance gate (58 % duty, raised-cosine edges) BAKED into per-bar renders, cutoff-bucket cached; square-saw odd-weighted core |
 | ungated free lead | `penumbra.py:lead_free` | the same voice singing free (breakdown only) |
-| ~~hollow pulse lead~~ | `eisgang.py:lead_line` (v1) | odd-harmonics glide; **retired as a foreground voice** — read as a toy xylophone up high (the v1 listen verdict). Survives only as eisgang_v2's underglow |
-| skyline piano | `eisgang_v2.py:piano_note` — owned by eisgang | the M1 piano de-gothed (hammer 0.14 @ 1200–3600, LP 5000, mid register, LH octaves); the chorus refrain voice |
-| the underglow | `eisgang_v2.py` (lead_line, −12, LP 1600, quiet) | the D-50 trick: a dark sustain layer under the piano's attack; carries held notes piano decay can't |
+| ~~hollow pulse lead~~ | `eisgang.py:lead_line` (v1) | odd-harmonics glide; **retired as a foreground voice** — read as a toy xylophone up high (listen verdict). Survives only as the underglow |
+| ~~skyline piano~~ | `eisgang_v2.py:piano_note` (v2) | the de-gothed M1 piano; **also retired as a refrain voice** — still "pling-plong". THE LESSON (two strikes): percussive decaying attacks read as toys when they carry the tune; refrain voices need sustain + slow attack. Percussive = texture (stabs), not melody |
+| skyline lead | `eisgang_v3.py:skyline_note` — owned by eisgang | the warm-lead family dialed darker + SUSTAINED: LP 2200, `1/k**1.35`, sine body, bloom attack scaled to note length, full sustain, bloom vibrato; the chorus refrain voice |
+| the underglow | `eisgang_v3.py` (lead_line, −12, LP 1600, quiet) | the D-50 trick: a dark sustain bed under the refrain voice; carries held notes across the held V |
 | the signal | `adrift.py:make_signal` — owned by adrift | glide-whistle call (B5→F#5) on a long dotted-8th feedback trail; an FX-lead, once per chorus |
 
 ## Keys & bells
@@ -130,5 +131,5 @@ duplicated here.
 - **farlight** — the bell, the re-light (minor→major), sustained bloom-sub
 - **penumbra** — the 16th gated lead, static-modal Juno pads, single-wave arc
 - **eisgang** — thud-bass (run-and-plant — the listen verdict's keeper),
-  tick pair, the stamp, hammer stab, skyline piano + underglow, walking
+  tick pair, the stamp, hammer stab, skyline lead + underglow, walking
   circle-of-fifths harmony, ladder/sigh refrain development

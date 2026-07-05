@@ -269,3 +269,18 @@ Bass, drums, stab, structure: untouched.
 All 18 checks pass (the new one: "the refrain develops"). The v1
 verdict lesson for the palette is recorded in the instrument catalog
 (hollow pulse lead marked retired-as-foreground).
+
+## v3 amendment (post-listen review of v2 → `eisgang_v3.py`)
+
+Verdict on v2: **the melody works really well** — every note stays. But
+the synth piano STILL read as a xylophone ("pling-plong", "far too
+timid"). Two failed voices with the same complaint pins the diagnosis:
+**the attack, not the timbre** — percussive decaying hits read as toys
+when they carry the tune. The one v3 change: THE SKYLINE LEAD — the
+same phrase re-voiced on a sustained warm dark saw ensemble (the shared
+warm-lead family, declared per the catalog's ownership rule; dialed
+darker: LP 2200, `1/k**1.35`, sine body 0.32, bloom attack scaled to
+note length, FULL sustain, bloom vibrato). The underglow stays. Lesson
+recorded in memory and the catalog: melody voices need sustain and a
+slow attack for authority; percussive attacks are for texture (the
+stab), not the refrain.
