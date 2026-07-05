@@ -9,6 +9,9 @@ the named `script:function`; deep parameter recipes for the signature
 instruments live in `../CLAUDE.md` ("Synthesis recipes") and are not
 duplicated here.
 
+**Code docs** (function source extracted, ready to copy):
+`drums.md` · `basses.md` · `leads.md` · `keys.md` · `plucks.md` · `pads.md` · `textures.md` · `voice.md`
+
 ## Rules of reuse
 
 1. **Copy the function, keep the name** if unchanged; note the source
