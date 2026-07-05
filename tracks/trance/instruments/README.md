@@ -43,6 +43,9 @@ duplicated here.
 | the stamp + boot | `eisgang.py` (STAMP_K, BOOT) — owned by eisgang | shortened-kick double on 4& + 85 Hz tom under it |
 | heartbeat | `lost_v6.py:heart` | 32→68 Hz double thump; breaks only (the audible-heartbeat feedback) |
 | reverse cymbal | `nachtkind_v3.py` (RCYM) — owned by nachtkind | crash flipped, swell ENDS on the bar line |
+| psy kick | `maschinenherz.py:make_kick` (dune water_of_life lift; also silver_wire) | 150→45 Hz dive; harder/faster than the 909 kick; the psy house floor |
+| psy clap | `maschinenherz.py:make_clap` (also silver_wire) | beats 2&4; tighter and brighter than the Frankfurt clap |
+| psy zap | `maschinenherz.py:make_zap` (also silver_wire) | 8-bar phrase punctuation inside drops |
 
 ## Basses
 
@@ -53,6 +56,8 @@ duplicated here.
 | machine bass | `tech_noir_v3.py:bass_hit` — owned by tech_noir | the dry forward "DUN-dun" on the 13/16 grid |
 | sustained sub | `farlight_v2.py`/`penumbra.py` (in-line) | 41 Hz sine under choruses; **must BLOOM** (0.25 s attack, per-bar entry ramp) — the v1 slam lesson |
 | thud-bass (run-and-plant) | `eisgang.py:thud_bass` — owned by eisgang | percussive anti-rolling bass: sine + octave + 150–800 Hz knock, no saw; bounce–plant–REST, duty ≤ 0.6 |
+| psy rolling bass | `maschinenherz.py:psy_bass_note` (also silver_wire) | K-b-b-b engine: kick on the beat, bass on 3 16ths after (gains .8/.7/.95); saw stack LP 350 Hz, short gate; NEVER on a kick 16th (the gap IS the rest — duty printed and checked) |
+| sub-duty bass | `silver_wire_v2.py:sub_note` | pure sine + 0.3×2nd harmonic; drop-mode replacement when the 303 low register owns the mid-bass; no saw, no lowpass |
 | ~~lost_v3 bass~~ | `lost_v3.py` | the harsh pre-warmth bass, kept only as the A/B reference — do not reuse |
 
 ## Leads
@@ -70,6 +75,10 @@ duplicated here.
 | skyline lead | `eisgang_v3.py:skyline_note` — owned by eisgang | the warm-lead family dialed darker + SUSTAINED: LP 2200, `1/k**1.35`, sine body, bloom attack scaled to note length, full sustain, bloom vibrato; the chorus refrain voice |
 | the underglow | `eisgang_v3.py` (lead_line, −12, LP 1600, quiet) | the D-50 trick: a dark sustain bed under the refrain voice; carries held notes across the held V |
 | the signal | `adrift.py:make_signal` — owned by adrift | glide-whistle call (B5→F#5) on a long dotted-8th feedback trail; an FX-lead, once per chorus |
+| warmed 303 acid | `maschinenherz.py:acid_note` | psy-house base: rolled `1/k^1.3`, Q 4.5, fb 1.15/1.2, tanh(1.2), 0.30 sine body, within-note bright→dark sweep; cutoff from printable arc, never parked |
+| silver wire lead 303 | `silver_wire_v2.py:acid_note` + `build_half` melody constructor — owned by silver_wire | one notch sharper: Q 6, fb 1.3/1.35, tanh(1.5); 16-bar refrain constructed from Q_STEPS/A_STEPS winding cells, every-3rd accent roll, anti-arc CUT_PROFILE |
+| register-jump answers | `silver_wire_v2.py` — owned by silver_wire | the 303 answering itself an octave below; full-bar mini-runs in the acid grammar under the two refrain landmarks; both registers land A together |
+| love-voice port | `maschinenherz.py:voice_phrase` (tech_noir `love_phrase` re-voiced) | sine + 3 rolled harmonics, 5.2 Hz late vibrato, LP 3000, long hall wet ~0.5; new melodies only — the Terminator tune is never quoted. Original owned by tech_noir; this borrow declared in maschinenherz_notes.md |
 
 ## Keys & bells
 
@@ -110,15 +119,20 @@ duplicated here.
 
 | device | source | character / use |
 |---|---|---|
-| snare roll + dark swell | `adrift/farlight_v2/penumbra/lost_v6:roll` + `swell` | the era build pair: 16th→32nd roll under a 250–2400 Hz bandlimited swell (never white noise) |
+| snare roll + dark swell | `adrift/farlight_v2/penumbra/lost_v6:roll` + `swell` (also silver_wire builds) | the era build pair: 16th→32nd roll under a 250–2400 Hz bandlimited swell (never white noise) |
 | noise riser | `lost_v6.py:riser` | lost's own; banned by construction in the era-strict tracks |
 | cloud | `adrift.py:cloud` — owned by adrift | symmetric bandpassed wash that *passes by* (sin² envelope) — a non-riser |
 | air bed | `ungeschrieben.py`/`eisgang.py` (in-line "air") | 150–1100 Hz breathing noise at the track's edges (and eisgang's freeze) |
 | tom fill | `ungeschrieben.py:tom_fill`, `eisgang.py` | the era seam; ≤3 per track |
-| the silent beat | `farlight_v2/lost_v6/nachtkind_v3/unsung:silent_beat` | the one composed drop-beat before a slam/final chorus |
+| the silent beat | `farlight_v2/lost_v6/nachtkind_v3/unsung:silent_beat` (also maschinenherz / silver_wire builds) | the one composed drop-beat before a slam/final chorus |
 | tide out / return | `adrift.py:tide_out` — owned by adrift | kick+bass exit under a still-ringing melody; the return lands mid-phrase |
 | filter arc | `ungeschrieben.py`/`penumbra.py:cutoff_at` | development as a printable piecewise-linear cutoff curve, checked at boundaries |
 | harmonic odometer / cell map / duty check | `eisgang.py` (verify block) | form checks for walking harmony, two-bar cells, and non-rolling bass |
+| shiver stack (W1) | `maschinenherz.py:shiver_stab` — owned by maschinenherz | additive dissonance intro: one stab voice per 4 bars, layering DISSONANCE (octave → 2nd-clash → tritone → leading tone), first consonant chord lands with the kick |
+| ice-crack seam (W8a) | `maschinenherz.py:ice_crack` — owned by maschinenherz | stab—silence—upward flick; the psy glitch transition (not tom fills, not reverse cymbals) |
+| stutter ladder (W4a) | `maschinenherz.py:ladder_bars` — owned by maschinenherz | 303 locks one pitch per bar in 16th retrigger, climbing chromatically out of key into the drop; build 1 parks on dominant, build 2 ends on leading tone |
+| zigzag arp (W2) | `maschinenherz.py:arp_bars` — owned by maschinenherz | chorus arp cell formula: root–oct–oct–5th / 5th–♭3–♭3–root, restated up chord tones; glassy pluck voice |
+| anti-arc CUT_PROFILE | `silver_wire_v2.py` (CUT_PROFILE + `place_events`) | 16-entry per-bar cutoff multiplier, identical every statement; spread ~0 Hz, trend slope ~zero (both printed); the anti-arc device |
 
 ## Per-track signature summary (identity separation at a glance)
 
@@ -133,3 +147,10 @@ duplicated here.
 - **eisgang** — thud-bass (run-and-plant — the listen verdict's keeper),
   tick pair, the stamp, hammer stab, skyline lead + underglow, walking
   circle-of-fifths harmony, ladder/sigh refrain development
+- **maschinenherz** — warmed 303 acid + printable filter arc, psy kit
+  (kick/clap/zap), K-b-b-b rolling bass, love-voice port (declared
+  borrow), shiver stack (W1), stutter ladder (W4a), zigzag arp (W2),
+  ice-crack seam (W8a), D# leading-tone color, dry-engine/wet-heart split
+- **silver_wire** — silver wire lead 303 (acid melody grammar + anti-arc
+  CUT_PROFILE), register-jump low answers, K-b-b-b / sub-duty bass split,
+  psy/straight kit split, G# borrowed color, no break (composed trough)

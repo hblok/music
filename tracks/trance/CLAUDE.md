@@ -63,10 +63,53 @@ re-reading the old generators; copy the function, don't import.
   ride-out. Declared rule-breaks live in the notes doc. (`eisgang.py`,
   `eisgang_v2.py` kept for reference.)
 
+- **maschinenherz** — `maschinenherz.py` → `maschinenherz.wav` — the
+  first PSY trance track in this directory: 145 BPM, E minor, seed 1997
+  (the year German psy broke) — concept "a machine heart learns to sing"
+  (design notes: `maschinenherz_notes.md`): the dune psy engine (trance
+  kick, K-b-b-b rolling bass, warmed 303, offbeat hats, psy clap, zaps)
+  bone dry on the E pedal; the tech_noir `love_phrase` voice ported as a
+  declared instrument (new melodies, never the Terminator tune), drenched
+  in the long hall; harmony static in verses/drops (E pedal, authentic
+  psy) and walking Em–C–D–B in choruses (the D# of the B chord is the
+  color — the refrain hangs on D#, resolves D#→E across the barline, the
+  nachtkind mechanism transposed); Vivaldi W1/W2/W4a/W8a mechanisms used
+  (only the ones eisgang did NOT claim — W3/W5 stay eisgang's); 64-bar
+  EVOLVING drops with 4-bar mini-dips (the dune long-drop lesson); drop 1
+  machine-only, the voice revealed in chorus 1 (the two-reveal instinct),
+  fusion in drop 2; bookend: the voice alone states the final E ("the
+  heart wins").
+
+- **silver_wire** — `silver_wire_v2.py` (current, → `silver_wire_v2.wav`)
+  — 142 BPM, A minor, seed 303: the 303 IS the singer — one acid line
+  only, answering itself from an octave below (register-jump answers; the
+  low register speaks the same acid grammar). Concept: where maschinenherz
+  was a heart learning to sing over a machine, this track is the machine
+  singing, solo (design notes: `silver_wire_notes.md` +
+  `silver_wire_v2_notes.md`). Harmony Am–F–G–E; the E chord's G# is the
+  borrowed color; the refrain sings the G#→A close itself. THE ANTI-ARC
+  RULE (hard constraint from maschinenherz feedback): no track-long cutoff
+  ramp; the cutoff breathes in a fixed 16-entry CUT_PROFILE that is part
+  of the tune, identical every statement. THE ACID MELODY GRAMMAR (v2):
+  the 16-bar refrain constructed in code from per-bar winding-cell step
+  lists (Q_STEPS/A_STEPS) through build_half(), which applies an
+  every-3rd-16th accent roll phase-locked per half, snaps accented
+  chromatics to A-minor scale tones, and resolves slide chains — onset
+  density 0.90, 5 rests in 256 steps, one 112-step unbroken run; two
+  kept v1 landmarks: screaming hang on E (bar 8) and G#→A slide close
+  (bar 16, landing across the barline). Kit split: psy gait outside drops,
+  straighter/harder floor inside (open-hat offbeats only, bass sub-duty
+  only). No break section; build 2 is the composed trough; bookend = last
+  4 A bars + stated A at the thesis filter position. (`silver_wire.py` →
+  `silver_wire.wav` kept for reference — its 8-bar melody read as
+  pop/funk, the recorded lesson.)
+
 Seeds are thematic: `1984` (tech_noir, the year the machine arrived), `1993`
 (nachtkind, the year *Brainchild* came out), `130` (lost, the BPM), `1992`
 (ungeschrieben, the year of *No Fate*), `1994` (unsung, the year the
-Frankfurt vocal broke), `1725` (eisgang, the year Op. 8 was published).
+Frankfurt vocal broke), `1725` (eisgang, the year Op. 8 was published),
+`1997` (maschinenherz, the year German psy broke — X-Dream's era), `303`
+(silver_wire, the machine's own number).
 
 ## Composition: the song doctrine
 
@@ -220,6 +263,73 @@ it never parks and screams. Don't copy the Q without the guardrails.
   TTS+OLA singing (variant A) drifts up to 1445 cents — don't ship it.
   Two checks come with the recipe: printed per-note pitch (cents) and the
   duet-separation overlap ratio (see `../VERIFY.md`, vocal songs).
+- **Warmed 303 family** (maschinenherz base; silver_wire lead one notch
+  sharper): the sleeper_awakens within-note bright→dark sweep is KEPT in
+  both — that sweep is what makes acid read as acid; never remove it. Base
+  voice (`maschinenherz.py:acid_note`): rolled partials `1/k**1.3`, Q 4.5
+  `iirpeak`, feedback 1.15 (1.2 on accents), `tanh(1.2)`, 0.30 sine body
+  core, sweep `exp(−t/0.055)` or `0.10` for accents. Silver wire lead
+  (`silver_wire_v2.py:acid_note`): same recipe pushed one notch: Q 6,
+  feedback 1.3/1.35, `tanh(1.5)`. Guardrail in both: the cutoff never
+  parks (it rides the per-phrase CUT_PROFILE / the printable arc) — a
+  parked resonance screams; the sweep saves it. Neither is the dune recipe
+  (Q 11, feedback 1.9, tanh 2.8 — the dentist); never copy those numbers
+  into this directory.
+- **Psy kit + kit split** (maschinenherz / silver_wire, from dune
+  water_of_life / sleeper_awakens lifts): trance kick (150→45 Hz dive),
+  psy clap (beats 2 & 4), psy zap (8-bar phrase punctuation), offbeat
+  open hats + closed 16th ghost carpet. **Kit split in silver_wire**: psy
+  gait OUTSIDE the drops (rolling bass + closed 16th ghosts); straighter,
+  harder floor INSIDE the drops — open-hat offbeats only, no ghost
+  carpet, bass thins to sine sub duty (`sub_note`). The acid-techno lean
+  lives in the drops and nowhere else.
+- **K-b-b-b bass contract** (`psy_bass_note` — maschinenherz /
+  silver_wire): the rolling psy bass pattern is kick-on-the-beat, bass on
+  the THREE 16ths after (gains .8 / .7 / .95), saw stack lowpassed at
+  350 Hz, short gate. The 350 Hz lid keeps it from reading harsh despite
+  the continuous 16ths — the psy sanctioned exception to "no rolling
+  bass". THE CONTRACT (printed as a duty check, per the K-b-b-b gap
+  verify): **the bass is silent on every kick 16th (position 0 of each
+  beat)**; the gap IS the rest; a bass onset on a kick 16th is a bug.
+  Roll mode (full outside drops): `psy_bass_note`, gains .8/.7/.95. Sub
+  mode (inside drops, silver_wire): `sub_note` — pure sine + 0.3×2nd
+  harmonic, no saw, no lowpass; the 303's low register owns the mid-bass
+  there.
+- **Acid melody grammar** (silver_wire_v2 — the validated recipe): the
+  16-bar refrain is CONSTRUCTED in code from per-bar winding-cell step
+  lists (Q_STEPS / A_STEPS, 7 run bars each) through `build_half()`,
+  which applies an every-3rd-16th accent roll phase-locked per half, snaps
+  accented chromatics to scale tones (free chromatics on weak 16ths only),
+  and resolves slide chains to the next sounding pitch. Bars 8 and 16 are
+  the two kept landmarks (inserted literally after each half). Checked
+  metrics: onset density 0.90, ≤ 24 rests in 256 steps, longest unbroken
+  run ≥ 32 (actual: 112), ≥ 4 consecutive bars of 3-cycle accent roll,
+  ≥ 4 mid-run slide chains (2+ consecutive slid notes), tied/slid fraction
+  ≥ 0.25. THE ANTI-ARC RULE (hard constraint — the maschinenherz-feedback
+  lesson): no track-long cutoff ramp; development comes from composition
+  (register, arrangement, harmony), not from gradually opening the filter.
+  The cutoff breathes in a fixed `CUT_PROFILE` (16 entries, one per bar of
+  the refrain) identical every statement; the per-statement cutoff spread
+  must be ~0 Hz and the linear trend slope ~zero (both printed and
+  checked). The eisgang lesson in acid dialect: **slides are the 303's
+  sustain** — a running lead earns its legato through tie chains, not slow
+  attacks. Low-register answers speak the same grammar: full-bar mini-runs
+  under the two landmarks (E-rooted under the hang, A-rooted under the
+  close; both registers land A together across the barline).
+- **Vivaldi mechanism assignments** (maschinenherz owns W1/W2/W4a/W8a;
+  eisgang keeps W3/W5 — never use either set in another track without a
+  declared borrow): W1 shiver stack = additive layers that increase
+  DISSONANCE, not density (maschinenherz intro: bare octave → 2nd-clash →
+  tritone → alien color, first consonant chord lands with the kick). W4a
+  stutter ladder = the 303 locks one pitch per bar in 16th/32nd retrigger,
+  climbing chromatically OUT of the key into the drop (build 1 parks on
+  the dominant, build 2 ends hammering the leading tone so the drop
+  downbeat resolves it — `maschinenherz.py:ladder_bars`). W2 zigzag
+  cascade = the chorus arp cell formula root–oct–oct–5th /
+  5th–♭3–♭3–root, restated up the chord (`maschinenherz.py:arp_bars`).
+  W8a ice-crack = stab—silence—upward flick, the composed seam fill
+  (maschinenherz's transition vocabulary; not tom fills, not reverse
+  cymbals — those are already claimed).
 
 ## Emotional-trance structure (lost_v3)
 
