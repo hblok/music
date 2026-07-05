@@ -117,24 +117,24 @@ is joined by the **complexity block**, printed from THEME itself:
    keep 8 bars and put ALL the complexity inside (count target
    stays 8)? Recommended: 16 — "long" was half the feedback, and the
    halves give the thesis/bookend clean quarters to state.
-   Answer:
+   Answer: Yes, 16 bars. The point is to extend the tune.
 
 2. **Chromatic budget.** Free chromatic lower neighbors on weak
    16ths, scale tones on accents (recommended — the snake without
    losing A minor)? Or stricter (diatonic runs, chromatics only at
    the two landmark approaches, i.e. barely more than v1)?
-   Answer:
+   Answer: Free chromatics.
 
 3. **The low answers.** Keep the v1 cells exactly (they passed the
    listen test), or let the low register speak the new grammar too —
    its answer cells become 1-bar mini-runs (still never the
    refrain)? Recommended: upgrade — a running lead over v1's sparse
    funk-ish low cells would reopen the genre gap from below.
-   Answer:
+   Answer: The low answer should follow the questions, thus, also needs the new grammar. 
 
 4. **East Europe.** Not findable online — if there is one specific
    quality of that track you want imported as *technique* (e.g. the
    relentlessness of the runs, a particular winding-down-then-jump
    contour, triplet-feel accent rolls, the way it never breaks for a
    chorus), name it and it gets written into the melody rules.
-   Answer:
+   Answer: Right, it has a relentlessness run, and 303 tune used as an instrument, where the tune is inspired by Eastern folk music and song. Now, we don't need to emulate that right now, it was just an example. And, we can dig up the track so we can analyse it later. Although, all I have is a wave file, so that will have to be a project for later.
