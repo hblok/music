@@ -166,7 +166,7 @@ checks this track exists for:
    German thread continues). Alternatives: *Silberdraht* (silver
    wire), *Säureherz* (acid heart — maybe too close to
    Maschinenherz). Seed 303 regardless?
-   Answer:
+   Answer: Let's go with an English name this time. "Silver Wire" is good.
 
 2. **One wire or two.** The answer 303 (Hardfloor's two-machine
    conversation: lead sings, a darker one answers from below) gives
@@ -175,17 +175,17 @@ checks this track exists for:
    truly solo, answers played by register jumps within the same
    voice. Recommended: two — the conversation is where the fun
    compounds, and the two-wire a cappella dip in drop 2 needs it.
-   Answer:
+   Answer: Let's go with only one 303, and answers by register jumps.
 
 3. **Key.** A minor as reasoned above (303 range sweet spot; scale ≠
    identity per your ruling). Fine, or another root?
-   Answer:
+   Answer: A minor is good
 
 4. **How sharp may the singer get.** Lead at Q ~6 / feedback ~1.3 /
    tanh(1.5) — a notch past maschinenherz (Q 4.5/1.15/1.2), well
    short of the dune acid (Q 11/1.9/2.8). It has to cut through as a
    lead without becoming the dentist. Start there and judge by ear?
-   Answer:
+   Answer: Yes, sounds good.
 
 5. **The break's augmentation.** The half-speed refrain over the low
    pad is the plan for the trough (the wire singing slow). Risk: a
@@ -194,7 +194,7 @@ checks this track exists for:
    thesis texture revisited mid-track). Recommended: try augmentation
    first — it's the one transform that shows the melody is a MELODY,
    not a riff; fall back if it noodles.
-   Answer:
+   Answer: Well, actually, I was thinking cut the break completely out this tine (so need to rewrite the Structure a bit). Let's go Thesis, engine, verse, build -> Drop. Chorus -> build -> drop, and so on.
 
 6. **How close to acid techno.** As sketched the kit stays psy
    (rolling bass, offbeat hats). The dial toward acid techno would
@@ -203,9 +203,10 @@ checks this track exists for:
    303s run. Recommended: exactly that split — psy gait in
    verses/build, harder straighter floor inside the drops. Or keep
    full psy throughout?
-   Answer:
+   Answer: The split sounds fun.
 
 7. **BPM.** 142 (a hair off maschinenherz's 145; acid lines read
    better with a little more air per 16th). Or hold 145 for a
    matched pair?
-   Answer:
+   Answer: Let's try 142
+   
