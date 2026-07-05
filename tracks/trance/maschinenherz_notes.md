@@ -170,17 +170,17 @@ Fiedel pitch sequence.
    nachtkind/ungeschrieben). Alternatives: *Herzmaschine*,
    *Nachtmaschine*. Seed 1997 as reasoned above — or pick another
    thematic year.
-   Answer:
+   Answer: Maschinenherz - perfect.
 
 2. **Key.** E minor recommended (all claimed keys avoided; E pedal
    sits well for the rolling bass at E1/E2). Any reason to prefer
    another?
-   Answer:
+   Answer: E minor - good. (Just note our previous conclusion: the scale is not identity; we can afford to share scale across. (For a 7-note scale like D minor (D, E, F, G, A, B♭, C) using exactly 7 unique notes without repetition, there are 5,040 different sequential combinations. And this of course grows with longer sequences and melodies. Thus, the melody is the identity of the song)).
 
 3. **BPM.** 145 recommended (psy's home range 140–148; clearly
    harder/faster than nachtkind's 139 and eisgang's 138). Go higher
    (148) for more aggression, or hold 145?
-   Answer:
+   Answer: 145 is good
 
 4. **How much squelch on the 303.** The dune sharp-303 (Q 11,
    feedback 1.9×, tanh 2.8) is era-authentic psy but violates every
@@ -197,14 +197,14 @@ Fiedel pitch sequence.
    (drop 2). Should it ALSO ride inside drop 1 (more voice, less
    contrast), or is drop 1 staying machine-only the right reading of
    the concept (recommended — the reveal lands harder)?
-   Answer:
+   Answer: Yes, agree with recommended - reveal lands harder.
 
 6. **Drop lengths.** Two 32-bar drops with one mini-dip each (~53 s
    at 145). The dune lesson says 64-bar drops work if they evolve;
    going 64+64 would push the track toward ~7:30. Recommendation:
    32+32 — this track's story is the voice/machine meeting, not a
    floor marathon. Stretch if you want a DJ cut?
-   Answer:
+   Answer: Let's stretch, but make sure evolves, not just repeat. 
 
 7. **The ending.** Bookend as planned (voice resolves D#→E, hall
    rings out) vs ending cold on the machine (tech_noir's move —
@@ -212,4 +212,7 @@ Fiedel pitch sequence.
    says the machine does. Recommended: the bookend — every borrow
    here is about the machine learning the song, and psy tracks
    traditionally land, not cut.
-   Answer:
+   Answer: Yes, let it land and fade - the heart wins.
+
+
+
