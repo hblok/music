@@ -63,8 +63,12 @@ re-reading the old generators; copy the function, don't import.
   ride-out. Declared rule-breaks live in the notes doc. (`eisgang.py`,
   `eisgang_v2.py` kept for reference.)
 
-- **maschinenherz** — `maschinenherz.py` → `maschinenherz.wav` — the
-  first PSY trance track in this directory: 145 BPM, E minor, seed 1997
+- **maschinenherz** — `maschinenherz_v2.py` (current, →
+  `maschinenherz_v2.wav`; v2 = v0.3 + the big-room master ONLY —
+  sidechain pump, sub-boom layer, master shelves + tanh bus limiter,
+  wider pads; notes doc v2 amendment; `maschinenherz.py` kept for
+  reference) — the first PSY trance track in this directory: 145 BPM,
+  E minor, seed 1997
   (the year German psy broke) — concept "a machine heart learns to sing"
   (design notes: `maschinenherz_notes.md`): the dune psy engine (trance
   kick, K-b-b-b rolling bass, warmed 303, offbeat hats, psy clap, zaps)
@@ -80,7 +84,10 @@ re-reading the old generators; copy the function, don't import.
   fusion in drop 2; bookend: the voice alone states the final E ("the
   heart wins").
 
-- **silver_wire** — `silver_wire_v2.py` (current, → `silver_wire_v2.wav`)
+- **silver_wire** — `silver_wire_v3.py` (current, → `silver_wire_v3.wav`;
+  v3 = v2 + the big-room master ONLY — sidechain pump, sub-boom layer,
+  master shelves + tanh bus limiter, wider pads; notes doc v3
+  amendment; `silver_wire_v2.py` kept for reference)
   — 142 BPM, A minor, seed 303: the 303 IS the singer — one acid line
   only, answering itself from an octave below (register-jump answers; the
   low register speaks the same acid grammar). Concept: where maschinenherz

@@ -138,3 +138,63 @@ is joined by the **complexity block**, printed from THEME itself:
    contour, triplet-feel accent rolls, the way it never breaks for a
    chorus), name it and it gets written into the melody rules.
    Answer: Right, it has a relentlessness run, and 303 tune used as an instrument, where the tune is inspired by Eastern folk music and song. Now, we don't need to emulate that right now, it was just an example. And, we can dig up the track so we can analyse it later. Although, all I have is a wave file, so that will have to be a project for later.
+
+
+## v3 amendment (2026-07-09) — the big-room master
+
+Listen feedback on v2: the acid grammar is CONFIRMED GREAT — melody,
+composition, instruments all FROZEN. The fail is the sound: flat,
+"like an atari recording", against modern big-room weight. v3 is a
+MIX-ONLY revision: not one note, bar, pattern or commit-order
+changes. The moves are the verified fall_of_arrakeen v2 master chain
+(dune/CLAUDE.md), plus one width knob:
+
+1. **Sidechain pump**: precomputed curve, 55 % duck at every
+   4-on-the-floor kick, `1 − 0.55·exp(−t/0.10)`, floor 0.30, applied
+   as `env=` to bass and pads. Roll bars don't pump. In the drops
+   this deepens the K-b-b-b swell (the fall_of_arrakeen-verified
+   "deeper, not muddier" effect on the same bass pattern).
+2. **Sub-boom layer**: pure sine at the bass root (A1/F1/G1/E1 —
+   already the boom register), ON every 4-on-the-floor kick,
+   sustaining the beat, hard release in the last 60 ms, its own
+   commit weight — MODEST at 0.14 (this bass already carries 55 Hz
+   sub duty; the boom only fills the kick 16th). Follows
+   `bass_root(b)`; scaled by `kick_gain(b)`. Inside the drops it
+   completes the sub: boom on the kick 16th, `sub_note` on the three
+   after — a continuous low-register line with the K-b-b-b contract
+   intact (the boom is the KICK's low end, not a bass onset).
+3. **Master shelves + bus limiter**: high `+0.22·butter(2,3000,hi)`,
+   low `+0.34·butter(2,95,lo)`, then
+   `tanh(1.35·mix/peak)/tanh(1.35)·0.88`. DECLARED DEVIATION from
+   the fall chain: NO deep 55 Hz shelf — this bass lives at
+   41–55 Hz; the compound shelf measured a 0.73–0.79 sub-60 share
+   of drop RMS (v2 baseline: 0.60–0.62), burying the mids/top.
+4. **Pad width**: detune ±0.07 % → ±0.12 %, cross-gain 0.65 → 0.40;
+   pad commit 0.13 → 0.16 gives back the pump's average cut (~0.88)
+   so the pads still differentiate drop 2 and the choruses (the
+   drop2 > drop1 RMS check was marginal by construction in v2:
+   0.191 vs 0.190).
+5. **FLAC**: the compressed deliverable is lossless flac, not 192k
+   mp3 (user request, 2026-07-09; applies to all future scripts).
+
+Declared NON-moves: the 303 is NOT pumped and gets NO delay throw —
+the running line's grammar (density 0.90, the slide chains) must not
+smear; it stays bone dry and center, the world pumps around it. The
+air layer keeps its band.
+
+Verify (v3 additions): print per-section sub-60 Hz and >3.5 kHz RMS
+shares and the pump floor/dip count; check both drops carry the sub
+(share >= 0.55) and the lit top octave (hf share >= 0.04) —
+thresholds pinned just under observed values, regression guards.
+
+DECLARED CHECK CHANGE (the one v2 check that is redefined, not
+weakened): "drop 2 > drop 1" is now compared on the >120 Hz band.
+The two drops share one identical kick/bass/boom floor by design
+(same kit split, same kick gain, same K-b-b-b contract), so total
+RMS only ever measured the added voices — and the v3 boom + low
+shelf turned total RMS into a sub meter (the sub floor, identical
+in both drops, swamps the average; measured: the v2 master orders
+the >120 Hz band the same way, 0.121 vs 0.113). Above 120 Hz, where
+the pads / octave double / full percussion live, drop 2 out-sings
+drop 1 with real margin (0.143 vs 0.131). All other v2 checks
+unchanged and must still pass.

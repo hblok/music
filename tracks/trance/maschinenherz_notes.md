@@ -220,3 +220,58 @@ Fiedel pitch sequence.
 
 
 
+
+
+## v2 amendment (2026-07-09) — the big-room master
+
+Listen feedback on v0.3: melody, composition and instruments are GOOD
+— all FROZEN. The fail is the sound: it lands flat, "like an atari
+recording", against the big-room/stadium weight of modern electronic
+music. v2 is a MIX-ONLY revision: not one note, bar, pattern or
+commit-order changes. Every move below is lifted from the verified
+fall_of_arrakeen v2 master (dune/CLAUDE.md, "Room-shake kick" +
+master chain) — the same feedback cycle, already tuned.
+
+1. **Sidechain pump**: a precomputed gain curve ducks 55 % at every
+   4-on-the-floor kick and recovers over the beat
+   (`1 − 0.55·exp(−t/0.10)`, floor 0.30), applied as `env=` to bass,
+   pads and drone. The kick owns the low end; the pumping IS the
+   big-room breath. Roll bars don't pump (they are crescendos).
+2. **Sub-boom layer**: a pure sine one octave under the bass root
+   (E1/C1/D1/B0), sounding ON every 4-on-the-floor kick and
+   sustaining the beat (hard release in the last 60 ms — booms never
+   overlap), committed as its OWN layer so peak normalization can't
+   trade it against the punch. Follows `bass_root(b)` — the walking
+   choruses keep their harmony in the sub. Scaled by `kick_gain(b)`.
+3. **Master shelves + bus limiter**: high shelf
+   `+0.22·butter(2, 3000, high)`, low `+0.34·butter(2, 95, low)`;
+   then the gentle tanh bus limiter
+   `tanh(1.35·mix/peak)/tanh(1.35)·0.88` — glue, loudness, and the
+   transient-headroom-theft fix, in one line. DECLARED DEVIATION
+   from the fall chain: NO deep 55 Hz shelf — with the boom already
+   filling 31–41 Hz, the compound shelf measured a 0.65–0.77 sub-60
+   share of drop RMS (v0.3 baseline: 0.38–0.45) and buried the
+   mids/top under the sub; the fall pair was tuned for a bass a
+   whole octave higher.
+4. **Pad width**: detune ±0.07 % → ±0.12 %, cross-gain 0.65 → 0.40 —
+   the supersaw-lite spread; the pads are the track's stereo walls.
+5. **FLAC**: the compressed deliverable is lossless flac, not 192k
+   mp3 (user request, 2026-07-09; applies to all future scripts).
+
+Declared NON-moves: the 303, the voice and the arp are NOT pumped
+(the singers keep their own rhythm against the breathing bed); no
+delay throw on the voice (the hall already owns its space); the air
+layer keeps its 150–1100 Hz band (the high shelf lights the top
+octave through hats/claps/accents instead).
+
+Declared fix: the shiver kick-roll build at bar 19 was dead code in
+v0.3 — `kick_on()` returned False for the whole shiver section
+before the roll branch could fire, so the seam checklist claimed a
+roll that never sounded. v2 lets bar 19 through; the roll plays as
+designed.
+
+Verify (v2 additions): print per-section sub-60 Hz and >3.5 kHz RMS
+shares and the pump floor/dip count; check that both drops carry the
+sub and the lit top octave (thresholds pinned just under the first
+run's observed values — regression guards, not targets). All v0.3
+checks unchanged and must still pass.
