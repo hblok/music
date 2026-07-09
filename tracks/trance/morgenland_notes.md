@@ -113,7 +113,7 @@ per-section RMS with the staircase/trough/summit orderings.
    this directory's first non-fast track). Recommended: **142** —
    the concept is the WIRE going east, not us making a Persian set;
    the source lends its mode, not its clock.
-   Answer:
+   Answer: Yes, let's do 142 - we're still doing dance music.
 
 2. **The santur answer voice.** Build it (the machine + the old
    instrument, Q/A trades, never the refrain) vs solo wire again
@@ -121,13 +121,13 @@ per-section RMS with the staircase/trough/summit orderings.
    **build it** — the ornament grammar will read twice as clearly
    answered by a hammered string, and the track needs its own
    identity beside silver_wire.
-   Answer:
+   Answer: Agree - "build it"
 
 3. **Pad harmony.** Open fifths + color tones (maqam-authentic,
    melody paints the mode) vs full triads (C major tonic per hijaz —
    warmer but more Western). Recommended: **open fifths**; the E♮
    belongs to the melody, not the bed.
-   Answer:
+   Answer: Open fifths.
 
 4. **The doum/tak gesture.** The source's darbuka doum/tak split
    could be SUGGESTED inside the psy kit as a kick/rim-tick ghost
@@ -135,22 +135,23 @@ per-section RMS with the staircase/trough/summit orderings.
    skipped entirely (kit stays pure psy). Recommended: **skip** for
    v1; the mode carries the east, the kit carries the machine. Keep
    as a v2 knob if the groove reads too western.
-   Answer:
+   Answer: No, I think we can afford darbuka doum/tak split. (The note on not touching anything related to Dune does not have to be so absolute that we cannot experiment. I think anyhow, this track will be very different from the Dune tracks. One borrow instrument does not hurt)
 
 5. **Drop harmony discipline.** Both drops full-pedal (authentic,
    maximum machine) vs drop 2 walking the C–D♭–G–C lap under the
    fusion (the maschinenherz move: the summit drop earns the walk).
    Recommended: **drop 2 walks** — the D♭ bars under the held D♭
    landmarks give the fusion its lean.
-   Answer:
+   Answer: Yes, drop 2 walks.
 
 6. **Name + seed.** *Morgenland*, seed 1001. Alternatives:
    *Ostwind*, *Karawane*, *Seidenstrasse*. 
-   Answer:
+   Answer: Morgenland, 1001 - perfect.
 
 7. **The East Europe WAV.** Proceed now on genre grammar + the
    Persian modal blueprint (recommended — silver_wire v2 proved the
    constructed route); when you dig up the WAV, it gets the
    inspector `--separate` treatment and its contours feed a future
    revision or a sibling track.
-   Answer:
+   Answer: Right, let's leave East Europe for another day. It will be a different story and a different track.
+   
