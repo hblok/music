@@ -168,6 +168,27 @@ notes doc. The guardrails that keep it round rather than acid: soft drive
 (`tanh(0.8)`), a sine sub for body, and the peak rides a *sweeping* cutoff —
 it never parks and screams. Don't copy the Q without the guardrails.
 
+## THE big-room master (validated 2026-07-09 — new tracks get this by default)
+
+Flat/"Atari" sound is a master-chain problem, not a composition
+problem. The chain (maschinenherz_v2 / silver_wire_v3, from the
+fall_of_arrakeen recipe, listen-test confirmed): **sidechain pump**
+(55 % duck per 4-on-the-floor kick, `1 − 0.55·exp(−t/0.10)`, floor
+0.30, via `commit(env=)`) on sustained layers — NEVER on the
+lead/voice, the singers hold steady while the world breathes;
+**sub-boom layer** (pure sine at/under the bass root, on every kick,
+hard release before the next hit, its OWN commit weight); **master
+shelves** high `+0.22·butter(2, 3000, high)` + low
+`+0.34·butter(2, 95, low)`; **tanh bus limiter**
+`tanh(1.35·mix/peak)/tanh(1.35)·0.88` (≈ +4 dB drop RMS, the glue);
+**wider pads** (detune ±0.12 %, cross-gain 0.40). Calibration
+guardrails: NO deep 55 Hz shelf when the bass register already lives
+at/below 55 Hz — target drop sub-60 share ~0.6–0.7, not 0.8 (0.8
+buries the mids/top; measured before fixing); post-limiter,
+total-RMS section comparisons become sub meters — compare drops
+above 120 Hz when their low floor is identical by design. Verify
+prints: per-section sub-60/HF shares + pump floor/beats.
+
 ## Synthesis recipes (track-specific)
 
 - **Warm Oberheim brass fanfare** (tech_noir — feedback: the old fanfare was
