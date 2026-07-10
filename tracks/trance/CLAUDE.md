@@ -111,6 +111,23 @@ re-reading the old generators; copy the function, don't import.
   `silver_wire.wav` kept for reference — its 8-bar melody read as
   pop/funk, the recorded lesson.)
 
+- **morgenland** — `morgenland.py` → `morgenland.wav` — THE 303 GOES
+  EAST (notes `morgenland_notes.md`, all seven questions answered):
+  142 BPM, **C Phrygian dominant / Maqam Hijaz** (declared sanction —
+  C not D, mode via the Persian analysis in
+  `../../inspiration/Persian_Trance_LdGhQaBCbcE_inspector/`), seed
+  1001. Third station of the machine-voice arc: the wire sings an OLD
+  SONG. The silver_wire acid grammar + the ORNAMENT VOCABULARY
+  (grace flicks / mordent turns / melisma chains — folk melisma in
+  303 dialect, all counted); the question hangs on Db5, the answer's
+  Db→C across the barline IS the Phrygian cadence; hijaz crossings
+  (Db↔E) counted. Santur answer voice (hammered string pair,
+  double-strike bounce, tremolo rolls — never the refrain); open-
+  fifth pads (no triads); drop 2 walks C–Db–G–C; **the Q4 darbuka
+  license** — the ONE sanctioned Dune borrow (doum/tak maqsum,
+  outside the drops only; a one-track sanction, not a precedent);
+  big-room master; bookend = wire + santur in octaves.
+
 Seeds are thematic: `1984` (tech_noir, the year the machine arrived), `1993`
 (nachtkind, the year *Brainchild* came out), `130` (lost, the BPM), `1992`
 (ungeschrieben, the year of *No Fate*), `1994` (unsung, the year the

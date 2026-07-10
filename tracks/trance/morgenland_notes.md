@@ -154,4 +154,20 @@ per-section RMS with the staircase/trough/summit orderings.
    inspector `--separate` treatment and its contours feed a future
    revision or a sibling track.
    Answer: Right, let's leave East Europe for another day. It will be a different story and a different track.
+
+## Post-review resolutions (2026-07-09, all questions answered)
+
+142 BPM (Q1); the santur answer voice is built (Q2); open fifths
+(Q3); drop 2 walks the lap (Q5); *Morgenland*, seed 1001 (Q6); East
+Europe parked for its own future track (Q7).
+
+**Q4 supersedes the sanction section above by ONE instrument**: the
+user relaxes the Dune ban for a **darbuka doum/tak layer** — "one
+borrow instrument does not hurt." So: a darbuka-style doum/tak
+pattern (recipe borrowed from the dune kit, declared here) joins the
+psy engine as groove seasoning — doum on low slots, tak answering
+high, never replacing kick/hats/clap as the machine's floor. Every
+OTHER Dune element stays banned (no duduk, ney, chant, wind beds, no
+D Phrygian); "melody and mode only" becomes "melody, mode, and the
+one declared drum."
    
