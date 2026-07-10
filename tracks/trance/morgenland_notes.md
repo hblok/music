@@ -170,4 +170,52 @@ high, never replacing kick/hats/clap as the machine's floor. Every
 OTHER Dune element stays banned (no duduk, ney, chant, wind beds, no
 D Phrygian); "melody and mode only" becomes "melody, mode, and the
 one declared drum."
+
+## v2 amendment (2026-07-10) — the melody SINGS
+
+Listen verdict on v1: **the refrain does not work at all** — "way way
+fast, each note of the 303 smeared into each other", and it reads as
+"the exact same melody as silver_wire, just faster". Both readings
+are correct and share one cause: v1 froze silver_wire's RUN grammar
+(near-continuous 16ths, density 0.90, the 112-step run) and only
+re-pitched it into hijaz, then stacked the ornament 32nds on top —
+~9.5 notes/second for 16 bars. A folk song sings at 2–4 notes/sec,
+and hijaz's semitone-neighbor cells turn to smear at 16th speed.
+
+THE LESSON (recorded for every future track): **a borrowed grammar
+needs a new dialect — the acid-run grammar IS silver_wire's
+identity, and "the machine sings" is a statement about NOTE VALUES,
+not about mode.** Same grammar = same song, whatever the scale.
+
+The v2 rewrite (BPM stays 142 — Q1 stands; the fix is note values):
+
+1. **The refrain is a SUNG folk tune**: 8 phrases of ~2 bars in
+   8ths / quarters / dotted values with held phrase-endings and
+   breath rests — ~79 onsets in 256 steps (density ~0.31,
+   ~2.9 notes/sec), longest 16th run ≤ a pickup pair. Slides become
+   audible portamento; notes ≥ a quarter get a slow sung vibrato
+   (±0.6 %, blooming after ~0.35 s — the eisgang sustain lesson in
+   303 dialect). The Db5 hang (bar 8, entered by portamento) and the
+   held Db→C close (bar 16) stay exactly where they were.
+2. **Ornaments live where folk ornaments live**: every mordent on a
+   phrase-head note ≥ an 8th, every flick INTO a held tone, melisma
+   as slide chains through 3+ sung pitches. On the v1 run they were
+   noise; on the sung line they are the eastern character.
+3. **The roles invert — the identity fix**: the machine SINGS, the
+   SANTUR RUNS. All 16th-run energy moves to the santur's answers,
+   turnarounds and break loops (idiomatic — the hammered string is
+   the virtuoso). Structurally impossible to hear as silver_wire.
+4. **The checks invert** so this cannot regress: onset density now a
+   WINDOW 0.20–0.50 (was a ≥0.70 floor), longest run ≤ 6 (was ≥32),
+   held fraction (steps in notes ≥ a quarter) ≥ 0.5, breaths ≥ 6,
+   rests 16–48 (punctuation, not holes), 100 % of ornaments on notes
+   ≥ an 8th. The 3-cycle accent-roll and tied-fraction checks retire
+   with the run grammar (accents now mark phrase heads). Mode blocks
+   (hijaz crossings ≥ 4, accents in scale, landmarks), K-b-b-b,
+   anti-arc, big-room floors: unchanged.
+
+Everything else — kit, darbuka license, santur voice, open fifths,
+harmony, structure, master — is untouched. `morgenland.py` /
+`morgenland.wav` kept for reference (the recorded smear); v2 is
+`morgenland_v2.py` → `morgenland_v2.wav`.
    
