@@ -258,4 +258,9 @@ entry is already the gesture; mordents 9 → 8) and bar 9's 70→68
 slide becomes detached so the flick owns the held Ab's entry
 (chains(2+) 7 → 6). All check floors still clear. v3 =
 `morgenland_v3.py` → `morgenland_v3.wav`; v2 kept for reference.
+
+LISTEN VERDICT (2026-07-10): **"much better — now it sounds
+arabic!"** The legato render is CONFIRMED — the sung-grammar +
+one-attack-per-gesture pair is the validated recipe for any future
+"the machine sings" melody.
    
