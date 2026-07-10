@@ -218,4 +218,44 @@ Everything else — kit, darbuka license, santur voice, open fifths,
 harmony, structure, master — is untouched. `morgenland.py` /
 `morgenland.wav` kept for reference (the recorded smear); v2 is
 `morgenland_v2.py` → `morgenland_v2.wav`.
+
+## v3 amendment (2026-07-10) — the 303 sings LEGATO
+
+Listen verdict on v2: the note values are right ("it does sound very
+folk!") but the refrain's 303 notes still push into each other — "a
+broken 303". The cause is RENDER-level, inherited from the run
+grammar: every slid note re-attacked (envelope + filter sweep
+restarting per note — a real 303 tie keeps the VCA open and never
+retriggers the sweep), ornaments rendered as separate ~53 ms
+mini-notes (stutter at exactly the phrase heads and held-note
+entries the ear watches), and slid notes overlapped their neighbors
+(the 1.02x run-grammar overlap). The melody DATA is unchanged.
+
+The v3 rendering (`acid_path` replaces per-note `acid_note` in the
+wire only; the santur is untouched):
+
+1. **True 303 legato**: a slide chain renders as ONE note — one
+   attack, one filter sweep, one envelope — whose pitch travels a
+   smoothed path through every chained pitch (one-pole glide,
+   ~35 ms; the portamento the mode sings with). The sweep never
+   retriggers mid-phrase.
+2. **Ornaments are inflections, not notes**: the grace flick is a
+   65 ms below-pitch onset bending up into the note; the mordent a
+   quick up-and-back wiggle (60 ms legs) after the attack — all
+   inside the note's single envelope. No more machine-gun 32nds.
+3. **Terminal bends LAND**: a slide with no following note (the
+   Db->C close, the Q-half exits) now sounds its arrival pitch for
+   ~100 ms across the barline — the Phrygian cadence audibly lands
+   instead of being cut at the line.
+4. **Detached notes get air**: unslid single notes gate at 0.85 of
+   the slot (was 0.92) — repeated pitches read as separate sung
+   notes, not a stuck key.
+
+Two data corrections so slides and ornaments never collide on one
+attack (validated by an assert): bar 9's head mordent is dropped
+(that note is the hang's cross-barline slide TARGET — the portamento
+entry is already the gesture; mordents 9 → 8) and bar 9's 70→68
+slide becomes detached so the flick owns the held Ab's entry
+(chains(2+) 7 → 6). All check floors still clear. v3 =
+`morgenland_v3.py` → `morgenland_v3.wav`; v2 kept for reference.
    
