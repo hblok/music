@@ -104,7 +104,9 @@ verified by construction (print the stab's bit depth / rate).
    and the track IS hammer blows) vs *Maschinensturm* (the machine-
    breakers' riot — great concept-fit but collides with
    maschinenherz's prefix) vs *Presswerk*. Seed 1991 either way.
-   Answer:
+   Answer: Reopened (2026-07-10): the German naming line is retired —
+   pick an English title instead (candidates: *Foundry*, *Ironworks*,
+   *Piledriver*). Final name pending; seed stays 1991.
 
 2. **The MC slot.** The source's rap verses need a replacement:
    (a) RECOMMENDED — the hoover answers ITSELF: low-register growl
@@ -114,7 +116,10 @@ verified by construction (print the stab's bit depth / rate).
    drop with a `VOICE_GAIN` knob (the ungeschrieben sanctioned
    device — a short German phrase, e.g. "das Hammerwerk", used
    once); (c) nothing — pure machine. (a) and (b) can combine.
-   Answer:
+   Answer: (2026-07-10) Not (b) — no rap / spoken-word direction at
+   all; the MC slot stays voiceless. Between (a) and (c), (a) stands
+   as the recommendation: the fully instrumental register
+   self-answer.
 
 3. **Key.** F# minor (recommended — the blueprint cites F/F# by
    pressing, and F natural minor is ungeschrieben's claimed
