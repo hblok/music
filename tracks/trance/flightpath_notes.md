@@ -106,12 +106,13 @@ seam downlifter, see engines).
   level (verses ask low, the recap-drop answers full); thesis = the
   first 4 sentence bars, one naked 303, in the first ten seconds
   (never the plunge); bookend per the coda exit.
-- **The 303 voice**: the warmed maschinenherz base (`acid_note` — Q 4.5,
-  fb 1.15/1.2, tanh 1.2, sine body, the within-note bright→dark sweep
-  that is never removed), declared borrow. NOT silver_wire's exact
-  Q 6 lead, and NOT its CUT_PROFILE mechanism or register-jump answer
-  device — identity separation (Q5 decides the duel partner without
-  reopening that).
+- **The 303 voice**: flightpath's OWN — the square-core `buzz_note`
+  (see "The voice" amendment below; user verdict 2026-07-11: the
+  saw-core 303 family all sounds the same across tracks — this one
+  gets a new sound). NOT maschinenherz's `acid_note`, NOT
+  silver_wire's Q 6 lead, NOT its CUT_PROFILE mechanism or
+  register-jump answer device. The within-note bright→dark sweep is
+  the one thing every 303 keeps (it is what makes acid read as acid).
 - **The big-room master** (directory default): pump (never on the
   303 — it stays bone dry and center, the world pumps around it),
   sub-boom, shelves, tanh bus limiter, FLAC out.
@@ -158,6 +159,42 @@ pedal, fusion per Q6) → waterfall + exit wedges → rising cold exit.
   semitones over ≤ 4 bars on the 16th grid over the bare V drone; a
   snare roll may join the last bar (standard pair), no noise riser.
 
+## The voice — the square-core 303 (2026-07-11, answers amendment)
+
+The extra feedback folded in: maschinenherz, silver_wire and
+morgenland all speak through the same saw-core + iirpeak + tanh
+recipe, differing only in Q and drive — the ear hears one instrument
+across three tracks. Flightpath's line gets the 303's OTHER waveform,
+hardware-true and unused by any track: **the square**. `buzz_note` /
+`buzz_path`:
+
+- **Pulse core, duty ~0.30** (asymmetric pulse = hollow odd-harmonic
+  body with a thin even sheen — nasal, reedy, the buzz), partials
+  rolled `1/k**1.25`, sine body 0.30 underneath.
+- **A reed formant instead of the acid scream**: moderate resonance
+  (Q ~2.5–3, blend ~0.4) parked NEVER — it rides the within-note
+  bright→dark sweep (`exp(−t/0.045)`, kept — the acid identity),
+  emphasis band ~1.1–1.4 kHz. Drive `tanh(1.0)` — well under
+  silver_wire's 1.5. The warmth guardrails all apply.
+- **The relay's two timbres are the two orchestral characters**:
+  A-bright ("violin" — LP ~2600, formant high, duty 0.30) and
+  B-hollow ("clarinet" — LP ~1900, formant low, duty 0.25). Same
+  notes, same grammar; crossfade on cell boundaries only.
+- **ANTI-GARBLE** (the Q4 caveat + the morgenland v3 lesson): a slide
+  chain is ONE note — one attack, one smoothed pitch path
+  (`buzz_path`), never a per-16th re-attack inside a chain (the v2
+  "broken 303" bug class); detached notes gate at ~0.9; the line is
+  bone dry, center, no delay, not pumped — the world moves around it.
+
+Identity separation at a glance (why this is not another
+silver_wire): square core vs saw core; C minor vs A minor; the
+anchor-on-the-fifth PITCH system vs the accent-phase system; harmony
+that TRAVELS (the fourths chain, the Dorian IV, augmented swells, one
+secondary dominant) vs one static lap; sparse 909 kit + stab-quarter
+bass vs psy kit + K-b-b-b; register as the development axis vs the
+fixed CUT_PROFILE; the duel / relay / wedges / sink-and-ramp /
+register-coda engines vs the no-break composed trough.
+
 ## Verify paragraph (implement exactly)
 
 Section map; seam checklist (wedges named where used); per-section
@@ -181,7 +218,11 @@ per bar (the anti-ladder assertion). Relay check: crossfade count and
 cell-boundary alignment printed. Anti-arc: per-statement cutoff spread
 ~0 Hz, linear trend slope ~zero. Cold exit: the track's last onset is
 its highest pitch; audio ends within 200 ms of it, no fade tail.
-Big-room metrics with pinned floors per the silver_wire_v3 block.
+Anti-garble block: slide chains rendered as single legato path notes
+(chain count + mean chain length printed, zero re-attacks inside
+chains by construction); the line dry/center/unpumped by construction
+(printed as declarations). Big-room metrics with pinned floors per
+the silver_wire_v3 block.
 
 ## Open questions for review
 
