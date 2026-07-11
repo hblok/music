@@ -115,8 +115,8 @@ seam downlifter, see engines).
 - **The big-room master** (directory default): pump (never on the
   303 — it stays bone dry and center, the world pumps around it),
   sub-boom, shelves, tanh bus limiter, FLAC out.
-- **Banned as ever**: Dune palette, gothic piano, rompler strings, TTS
-  voice, reverse cymbal, tom fills, ladders/ice-cracks/shiver stacks
+- **Banned as ever**: Dune palette, TTS
+  voice, ladders/ice-cracks/shiver stacks
   (maschinenherz's), the literal Bumblebee sentence, the plunge as a
   foreground hook, novelty-speed framing.
 
@@ -192,14 +192,14 @@ Big-room metrics with pinned floors per the silver_wire_v3 block.
    *Stratosphere* (the blueprint's own name for Coda II — but a worn
    word in trance) vs *Vector*. Nothing bee-literal — naming the gag
    invokes it. Seed 1900 either way.
-   Answer:
+   Answer: Flightpath is good.
 
 2. **Key.** C minor (recommended — unclaimed in the directory, and the
    source's own ♭VII-episode key; chain: Cm → Fm → B♭m episode → G
    pedal → Cm; the Dorian vamp is Cm↔F, the A♮ is the borrowed colour)
    vs D minor (the verified edition's key — but tech_noir's claim) vs
    B minor (the opera's waypoint — but brushes lost's loop).
-   Answer:
+   Answer: C minor good
 
 3. **The chromatic budget** (blueprint Q1: where does acid flip into
    bee?). Recommended rule: chromatics FREE inside the cell (the four
@@ -211,14 +211,14 @@ Big-room metrics with pinned floors per the silver_wire_v3 block.
    are banned regardless. Alternative: stricter (chromatics only as
    lower neighbours on weak 16ths — i.e. silver_wire's budget, safer
    but less bee).
-   Answer:
+   Answer: Ok, chromatics free inside cell
 
 4. **Anchor on the fifth** (blueprint Q2). Adopt as this track's
    default for the running line (recommended: keeps the root free for
    the stab bass — clean division of labour; the flick's upper
    neighbour target comes with it)? Or anchor on mixed chord tones
    (root/3rd/5th, freer, less source-true)?
-   Answer:
+   Answer: ok, default run line - however, make sure the 303 does not sound garbled.
 
 5. **The duel partner** (blueprint Q3). (a) RECOMMENDED — the stab
    voice answers: the source's own soloist-vs-accompaniment duel; the
@@ -228,7 +228,7 @@ Big-room metrics with pinned floors per the silver_wire_v3 block.
    percussive voice — consistent with the eisgang verdict (percussive
    = texture) since hammer/trill IS texture, but risks reading as a
    drum fill, not a duel.
-   Answer:
+   Answer: Yes, answer sounds interesting.
 
 6. **Register coda vs fusion payoff** (blueprint Q4; doctrine rule 7).
    Recommended: BOTH — the final chorus lifts the refrain +12 (the
@@ -236,7 +236,7 @@ Big-room metrics with pinned floors per the silver_wire_v3 block.
    it for the first time (the fusion). The two devices are compatible:
    fuse AND lift. Alternative: pure relocation (source-true, simpler,
    but breaks doctrine rule 7 and would need a declared deviation).
-   Answer:
+   Answer: OK Both.
 
 7. **The relay.** Adopt the two-timbre crossfade as this track's
    signature device (recommended — it is the orchestral version's own
@@ -244,4 +244,7 @@ Big-room metrics with pinned floors per the silver_wire_v3 block.
    the anti-arc rule forbids the filter from giving)? Or one timbre
    throughout (simpler; silver_wire survived on one voice at
    density 0.90 — but over 16-bar, not two-minute, spans)?
-   Answer:
+   Answer: ok, two-timbre.
+
+Extra: In the previous tracks, we've used the 303 as voice many times. However, it always sounds exactly the same. We can afford to tune the 303 a bit, so that has a different sounds more fitting to this track, and does not repeat what we've heard in all the previous (silver_wire, maschinenherz, eisgang, etc).
+

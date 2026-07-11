@@ -1,4 +1,4 @@
-# Hammerwerk — design notes (2026-07-09, next-track plan)
+# Hammerwerk — design notes (ABANDONED)
 
 **The hoover track.** Working title *Hammerwerk* (the industrial
 hammer mill — the German naming line continues; alternatives in Q1).
