@@ -143,6 +143,35 @@ re-reading the old generators; copy the function, don't import.
   wire + santur in octaves. (`morgenland.py` and `morgenland_v2.py`
   kept for reference — the recorded smear and the re-attack render.)
 
+- **flightpath** — `flightpath.py` → `flightpath.wav`/`.flac` — THE BEE
+  TRACK (notes `flightpath_notes.md`; blueprint
+  `../../inspiration/Bumblebee_RimskyKorsakov.md` — a grammar borrow,
+  never a cover: our own 8-bar sentence from the cell vocabulary, the
+  literal tune and the plunge-gag banned in the foreground): 138 BPM
+  (the blueprint's own math — Bumblebee 16ths ≈ trance 16ths), C minor,
+  seed 1900. The run lane's third track: silver_wire ran, morgenland
+  sang, flightpath FLIES — register is the development axis (the
+  anti-arc rule satisfied by the source's "register = filter" lesson).
+  Engines: the anchor system (chromatic cells pinned to chord tones on
+  half-bar downbeats, circling the FIFTH — the bass owns the root,
+  offbeat-8th stabs, no rolling bass), transposition-by-4ths (i → iv →
+  ♭VII episode → bare V pedal → home, the printed fourths ledger), the
+  i↔IV Dorian vamp (the A♮ is the borrowed colour), the hammer/trill
+  duel vs the stab voice under augmented swells (hammer stays put —
+  never climbs into a seam; that's maschinenherz's W4a), the
+  sink-and-ramp breakdown (the riser WRITTEN in pitches, 23 semitones
+  in 3 bars), the recap-as-drop, the register coda (fuse AND lift: +12
+  over a bare pedal, the duel material fused under it), contrary-motion
+  WEDGES as the seam device, and the rising cold exit (flick to C7,
+  hard stop). THE VOICE: the square-core `buzz_path` — the 303's OTHER
+  waveform (user verdict: the saw-core family all sounds the same) —
+  pulse duty 0.30/0.25, reed formant Q 2.8 blend 0.4 riding under the
+  kept bright→dark sweep, tanh(1.0); THE RELAY hands the line between
+  the two timbres at cell boundaries; slide chains render as ONE legato
+  path note (the morgenland v3 anti-garble lesson); the line is bone
+  dry, center, unpumped. Sparse kit by construction (the line IS the
+  16th layer — no closed-hat carpet, offbeat opens only).
+
 Seeds are thematic: `1984` (tech_noir, the year the machine arrived), `1993`
 (nachtkind, the year *Brainchild* came out), `130` (lost, the BPM), `1992`
 (ungeschrieben, the year of *No Fate*), `1994` (unsung, the year the

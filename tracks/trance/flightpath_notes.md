@@ -224,6 +224,22 @@ chains by construction); the line dry/center/unpumped by construction
 (printed as declarations). Big-room metrics with pinned floors per
 the silver_wire_v3 block.
 
+Implementation amendments (2026-07-11, first render — notes and
+checks changed together per VERIFY.md):
+
+1. **The trough check measures the sink's BARE half** (its first 8
+   bars). The section's last 4 bars are the ramp — the kick returns
+   under the written riser and measures like the build it is. Both
+   numbers printed.
+2. **The end check is a strip, not a monotone settle**: waterfall
+   AND exit each < 0.7 × the coda. The source's exit is a
+   *crescendo* (wedges, then the rising run) — demanding
+   exit < waterfall contradicted the form the track borrows.
+3. **Drop sub-60 floor pinned at 0.50** (measured 0.66–0.69 — inside
+   the validated 0.6–0.7 window). The offbeat-stab kit needed the
+   booms at true sub pitches (F1/G1/Bb1, C1 at home — the first
+   render's m−12 booms sat at 65 Hz+, above the measuring band).
+
 ## Open questions for review
 
 1. **Name.** English titles from here on — the German line (nachtkind
