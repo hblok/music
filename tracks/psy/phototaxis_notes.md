@@ -228,12 +228,14 @@ amplitude reaches true zero each cycle. FLAC written next to the WAV.
    chatter FX to the title, but jokier) vs *Heliotrope* (the plant
    that turns to the sun — prettier, less kinetic). Seed 1995 either
    way.
+   Answer: Phototaxis
 
 2. **Key.** F# minor (recommended — unclaimed anywhere in tracks/,
    sits between maschinenherz's Em and silver_wire's Am so the swarm
    registers clear both; goa lived around E/F#) vs E minor (era-truest
    but maschinenherz's) vs C# minor (unclaimed, darker, pushes the
    fizz very high).
+   Answer: F# minor
 
 3. **Inspiration doc first?** Option A (recommended): implement from
    this plan now — the era grammar above is well understood, and the
@@ -243,24 +245,30 @@ amplitude reaches true zero each cycle. FLAC written next to the WAV.
    write `inspiration/` notes before implementation — costs a session,
    buys era-calibration of cell shapes and kit weights. You said
    "come back to that"; this is the come-back point if wanted.
+   Answer: Option A - let's go.
 
 4. **Swarm size.** 3 pitched voices + murk shadow (recommended — the
    anti-mud budget is provable and the mix stays readable at 147) vs
    full 4 independent voices (denser, era-max, riskier mud; the ≤ 2
    simultaneous-onset budget gets tight).
+   Answer: 3 pitched + murk
 
 5. **Anthem harmony.** The i–VI–VII–v loop above (recommended) vs
    keeping even the anthem waves on the static F# ground with the
    melody implying the changes (more hypnotic, purer goa — but the
    reveal lands softer without the ground shifting under it).
+   Answer: Let's try the i–VI–VII–v loop
+   Extra note here: It would bee good to develop a way to quickly output an example of this, so it's easier to judge before we create everything. Let's make a note of that, and see if we can develop an app or just part of the process which comes before the full generation.
 
 6. **Era cheese level.** The chatter + bubble-rise as designed
    (recommended — signature but tasteful) vs adding one loud
    90s-style FX drop moment (a big pitch-dive "laser fall" before
    drop 2 — period-authentic, undeniably fun, risks kitsch).
+   Answer: chatter + bubble-rise
 
 7. **Directory boilerplate.** Add a short `tracks/psy/CLAUDE.md`
    (pointing at `../dune/CLAUDE.md` conventions + this freshness
    contract) now, or only after the first track ships and the
    directory has actual practice to document (recommended: after —
    one track is not a convention yet)?
+   Answer: Let's wait.
