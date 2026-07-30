@@ -288,3 +288,98 @@ amplitude reaches true zero each cycle. FLAC written next to the WAV.
    directory has actual practice to document (recommended: after —
    one track is not a convention yet)?
    Answer: Let's wait.
+
+## v1 listen verdict + v2 plan (2026-07-30)
+
+Verdict (`feedback_phototaxis_v1_listen`): fun and interesting, melodies
+nice, **glints a keeper** — but two problems.
+
+**P1 — timid / "pling pling" / no depth.** ROOT: the sustained pad
+(`glow`) renders only in the anthem waves (`harm=="loop"`, W7–W9); the
+whole 2:43 groove has NO sustained bed, and `boom` is drops-only, so
+W1–W4 low end is thin too. Everything decays <300ms → nothing for the
+plinks to sit on. The freshness contract (short cells, no saw stacks, no
+filter arcs) starved the track of body. '95 goa = fat warm pads + big
+resonant bass UNDER plinky leads.
+
+FIX (additive, not a melodic rewrite — the tunes stay):
+- **A warm evolving pad bed across the groove**, present from ~W2 on:
+  a wide detuned FM pad holding the F# ground (and the harm loop where it
+  applies). Deep/dark/low/evolving per the drone-bed rule — NOT a beating
+  mid tone. This is the single biggest lever.
+- **Fatten the low end throughout**: bring a (gentler) boom/sub into the
+  groove waves, not just drops; thicken `bass_note` body (sub-sine
+  reinforcement / slightly longer gate). Keep the kick-gap duty check.
+- **More space**: a touch more reverb/sustain tail on gurgle + pad so
+  they ring. Glints unchanged. Fizz stays short (texture).
+
+**P2 — the 2:57–3:35 break (~33s beatless) reads as "two separate
+songs".** ROOT: POOL (bars 108–124) is fully beatless AND the anthem is
+withheld until 3:35, so no melodic material carries across the gap. The
+recurring dead-seam problem (VERIFY / song-flow doctrine: one continuous
+cursor, no dead seams).
+
+FIX:
+- **Shorten the beatless span** hard (POOL 16→~8 bars) and **keep a pulse
+  alive across it** (half-time/filtered kick or a pulsing sub) so it
+  never goes fully silent — momentum carried, not cut.
+- **Foreshadow the anthem during/into the break** (a half-lit gurgle
+  statement of phrase 1 over the pool drone), so the 3:35 reveal is an
+  *arrival* of something hinted, not a brand-new song. This is the fork
+  in Q8 below.
+
+Revision = `phototaxis_v2.py` → `phototaxis_v2.wav` (never overwrite the
+heard WAV). Verify blocks updated alongside (VERIFY.md rule): add a
+groove-bed presence check (sustained energy < 200 Hz in W1–W6), the
+shortened-pool bar count, the across-break foreshadow bar(s), and a
+"no beatless span > N seconds" seam assertion.
+
+## Open questions for review (v2)
+
+8. **The withheld anthem vs. the two-songs feel.** The "two separate
+   songs" complaint is caused by the hard withhold + the long empty
+   break. Two ways to fix:
+   - **8a (recommended): bridge it.** Keep the reveal as the payoff, but
+     seed an anthem *fragment* earlier (a ghosted phrase-1) AND carry a
+     half-lit anthem statement across the shortened break. The reveal
+     still lands late and still re-frames — but now the halves share
+     material. Smallest change to the concept; directly answers the
+     complaint.
+   - **8b: soften the withhold.** State the anthem (quiet, solo) properly
+     in the first minute like a normal song-form thesis, drop the
+     "Mahadeva late-reveal" idea, and make the 3:35 moment a *fuller*
+     restatement rather than a first hearing. More conventional, more
+     cohesive, but abandons the track's original concept.
+   Which one?
+
+## v2 implemented (2026-07-30) — `phototaxis_v2.py` → `phototaxis_v2.wav`
+
+Built per the plan above; Q8 answer = **8b (soften the withhold, song
+form)**. All VERIFY blocks pass (0 fail). ~5:00, seed 1995, F# minor.
+
+**Depth (P1).** New `pad_bed()` — warm wide detuned FM (ratio 1, idx 0.7,
+LP ~1200, slow-noise evolve), rooted an octave up from the bass
+(F#2/E2/…), running under EVERY groove wave (v1 had a bed only in the
+anthem waves). Bass fattened with a sub octave; the boom sub now sits in
+the verses too (0.55) not just the drops (1.0). Gurgle held notes ring
+longer (0.22 s release) + more reverb (wet 0.45). Glints untouched.
+Checks: pad-layer RMS present in VERSE1 (0.26); VERSE1 sub-180 bed (0.52).
+
+**Song form (P2).** Sections: OPEN → INTRO → THESIS (quiet-solo anthem,
+bar 12 ≈ 0:20) → VERSE1/2 → BUILD1 → CHORUS1 → VERSE3 → CHORUS2 → VERSE4
+→ **BRIDGE** (half-time pulse kept alive, dark drone, a half-lit anthem
+phrase at bar 120, ONE composed drop-beat at bar 131) → BUILD2 (pulse +
+kick-roll rebuild) → **FINALCH** (the fusion climax, dense root-relative
+bass F, the loudest section) → CHORUSOUT (the FINAL C#→F# resolution, the
+single E# under it, swarm thinning — the lamp outlasts the moths) →
+OUTRO (machinery stops, solo anthem bookend at bar 176). 7 anthem
+statements, identical melody. Loop waves all use root-relative bass so
+the bassline follows i–VI–VII–v (fixed a v1-carryover clash where the
+choruses' bass stayed static under the moving harmony).
+
+**The break is fixed.** Max beatless gap between kicks = 2.45 s (the one
+composed drop-beat), vs v1's ~33 s hole; the anthem is now shared
+material across both halves, so no "two separate songs". New checks:
+no-beatless-gap < 3.5 s; groove-has-a-bed; climax-is-fullest; thesis-early.
+
+Listen verdict pending. `phototaxis.py` (v1) kept for reference.
