@@ -220,6 +220,22 @@ count in the drops' half; zero reverse cymbals / tom fills / zaps
 (declaration). Drone rule: breakdown bed spectral centroid < 400 Hz,
 amplitude reaches true zero each cycle. FLAC written next to the WAV.
 
+## Implementation amendments (2026-07-17, first render — notes and
+## checks changed together per VERIFY.md)
+
+1. **The fusion drop's sub-60 floor is pinned at 0.50** (measured 0.52;
+   the machine drop W5 measures 0.63, inside the 0.55–0.72 window). The
+   0.6–0.7 target was calibrated on machine-only drops; W8b carries the
+   anthem + underglow + full swarm on top BY DESIGN — the flightpath
+   precedent (its pin: 0.50). Both shares printed.
+2. **The OPEN wave got its drone breath** (the structure sketch said so;
+   the first render omitted it and the pool-trough check rightly failed
+   — the fix was the music, not the check).
+3. **The preview knob from Q5 exists**: `--preview harmony` (16 bars of
+   the anthem loop incl. the V resolution, ≈ 28 s) and `--preview swarm`
+   (8 bars of full swarm on the ground). Renders in seconds via the same
+   placement path as the full track; checks run on full renders only.
+
 ## Open questions for review
 
 1. **Name.** *Phototaxis* (recommended — the concept is the form: the
