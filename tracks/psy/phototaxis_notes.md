@@ -383,3 +383,17 @@ material across both halves, so no "two separate songs". New checks:
 no-beatless-gap < 3.5 s; groove-has-a-bed; climax-is-fullest; thesis-early.
 
 Listen verdict pending. `phototaxis.py` (v1) kept for reference.
+
+### v2.1 master fix (2026-07-30) — the "growl" on the loud sections
+
+Listen 2 verdict: warmth/heaviness/bridge all land, but the loud sections
+"clipped / went from clean to growling". Diagnosis (measured, not guessed):
+NOT mud — the bus soft-clipper was overdriven by the depth pass's low end.
+sub-120 Hz share had hit 0.77–0.86 and the FINALCH crest factor fell to
+2.50 (heavily saturated); the bass sub-octave (~23 Hz), the +34 % sub-bass
+shelf, and the tanh drive 1.35 all stacked. Fix (warmth at 100–400 Hz left
+untouched): master HP at 30 Hz (kills the inaudible sub-rumble eating the
+headroom), sub-octave 0.45→0.28, low shelf 0.34→0.20, tanh drive 1.35→1.12,
+ceiling 0.88→0.92 (uniform, recovers the level the cleanup cost). Result:
+crest 3.24–3.59, near-ceiling energy ~0.1–0.4 %, per-channel peaks 0.89/0.92
+(no clip), all checks pass. Preview renders retired (served their purpose).

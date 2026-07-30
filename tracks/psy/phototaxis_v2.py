@@ -264,7 +264,7 @@ def bass_note(midi, dur):
     idx = 0.6 + 0.5 * np.exp(-td / 0.02)
     y, ph_c = pm_core(f, n, 1.0, idx)
     y += 0.30 * np.sin(ph_c)
-    y += 0.45 * np.sin(2 * np.pi * (f / 2.0) * td)      # v2: sub octave body
+    y += 0.28 * np.sin(2 * np.pi * (f / 2.0) * td)      # v2: sub octave body
     gate = int(0.85 * n)
     env = np.ones(n)
     env[gate:] *= np.exp(-(td[gate:] - td[gate]) / 0.010)
@@ -853,12 +853,20 @@ for name in LAYER_NAMES:
     MIX[0] += WEIGHTS[name] * L
     MIX[1] += WEIGHTS[name] * R
 
-for ch in (0, 1):                                       # master shelves
+for ch in (0, 1):                                       # master chain
+    # v2.1: kill sub-30 Hz rumble (the bass sub-octave hits ~23 Hz on low
+    # notes) — inaudible but it was eating all the headroom and driving
+    # the bus saturator into "growl" on the loud sections.  Eased the
+    # sub-bass shelf too (the low end is already fat now).
+    MIX[ch] = highpass(MIX[ch], 30)
     MIX[ch] = (MIX[ch] + 0.22 * highpass(MIX[ch], 3000)
-               + 0.34 * lowpass(MIX[ch], 95))
+               + 0.20 * lowpass(MIX[ch], 95))
 pk = max(np.max(np.abs(MIX[0])), np.max(np.abs(MIX[1]))) + 1e-12
 for ch in (0, 1):                                       # tanh bus limiter
-    MIX[ch] = np.tanh(1.35 * MIX[ch] / pk) / np.tanh(1.35) * 0.88
+    # drive 1.35 -> 1.12: more headroom, gentler peaks (less saturation).
+    # Ceiling 0.88 -> 0.92 recovers a little level (uniform post-saturator
+    # gain — no new distortion) so the cleaner master still hits hard.
+    MIX[ch] = np.tanh(1.12 * MIX[ch] / pk) / np.tanh(1.12) * 0.92
 
 END = exit_chatter_end + 0.15 if not PREVIEW else step_t(TOTAL_BARS) + 1.5
 n_end = min(N, int(END * SR))

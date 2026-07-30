@@ -250,6 +250,22 @@ total-RMS section comparisons become sub meters — compare drops
 above 120 Hz when their low floor is identical by design. Verify
 prints: per-section sub-60/HF shares + pump floor/beats.
 
+**The growl (phototaxis_v2, 2026-07-30 — the SECOND failure mode of a
+hot low end).** A sub-60/sub-120 share creeping toward ~0.8 doesn't only
+bury the top — it *overdrives the tanh* into audible saturation
+("clean-to-growling", worst on the loud sections where every layer
+stacks). Tell-tale: the loud sections' **crest factor (peak/RMS)
+collapses toward ~2.5** while quiet ones stay ~3.5 — so PRINT per-section
+crest, not just RMS, and watch it fall. This is saturation, NOT mud
+(mud is masking, always-on; growl is level-dependent). Fixes, cheapest
+first: (1) a **master HP at ~30 Hz** — a bass sub-octave or the sub-boom
+hits ~23 Hz on low notes, inaudible but it eats all the headroom and
+feeds the growl; (2) ease the `+0.34` low shelf toward `+0.20` once the
+bass is already fat; (3) back the drive off (`1.35 → ~1.12`) and recover
+the lost level with the **output scalar** (`0.88 → 0.92`), never with
+more drive. Guardrail check: per-channel true peak < 1.0 (no int16
+clip) AND loud-section crest ≥ ~3.2.
+
 ## Synthesis recipes (track-specific)
 
 - **Warm Oberheim brass fanfare** (tech_noir — feedback: the old fanfare was
