@@ -154,3 +154,44 @@ Foreshadow fragments: well, doesn't have to be, and if it makes it too similar t
 
 Answer: the inspiration docs are a seperate effort, and do not have th be intangled with the planning.
 However, finding a good Hallucinogen track is a good idea. Let's make a note of that, so we come back to that another day.
+
+## Implemented (2026-07-31) — `meridian.py` → `meridian.wav` (~5:06)
+
+Built from the answers above; all VERIFY checks pass (0 fail). 145 BPM,
+seed 1997. Reuses the phototaxis engine (helpers, pad bed, big-room
+master, verify scaffolding); the composition is inverted per the thesis.
+
+**The star = the long morphing lead** (`lead_note`): sustained + sung,
+FM index morphs on a slow LFO tied to GLOBAL time (period 6.6 s = 4 bars,
+phase-continuous across notes → the liquid snaking line), ratio steps
+2→3 on the high euphoric notes. Present in 66% of bars (the through-line,
+checked). The swarm (fizz/glint/murk) is demoted to a shimmer BED — in
+the choruses the lead sits above every swarm voice (lead 1.0 vs fizz
+0.30, checked = the inversion of phototaxis).
+
+**Euphoric sunrise on a heavy engine (Q3).** Verses in E DORIAN over a
+heavier/darker kick (102→42, long body + sub tail) and a heavy sub-octave
+bass; the choruses bloom to bold Picardy E MAJOR (Q7). Written in
+DEGREES so the SAME refrain flips minor→major — the major 3rd (G#)
+appears in the choruses and NOWHERE in the verses (checked). The refrain
+arcs (rise→peak→descent) and hangs on the 3rd — which itself blooms
+G→G#; the final chorus resolves that 3rd down to the root E (a new
+cadence, not phototaxis's fifth-hang).
+
+**Seams (Q6, Meridian's own vocabulary):** `harmonic_bloom` (an FM chord
+whose index blooms open across 2 bars) into each chorus downbeat;
+`tape_flutter` (wow+flutter pitch-warble) swelling across the bridge and
+outro seams. Phototaxis's chatter + bubble-rise are NOT reused. Q8: the
+foreshadow fragments were dropped (kept distance from phototaxis).
+
+**Master.** The v2.1 growl guardrail carried over — but the growl check
+was REFINED: crest alone is a bad proxy (a heavy track sits at crest
+~2.9 and is still clean), so the check is now near-ceiling **hot%** (the
+direct saturation measure): FINALCH hot 0.24%, no clip. sub-60 share
+0.37–0.40 — lower than phototaxis because Meridian is bright by design
+(euphoric leads), with the heavy low end present in absolute terms.
+
+Form: OPEN→INTRO→THESIS(0:20)→VERSE1/2→BUILD1→CHORUS1(1:39)→VERSE3→
+CHORUS2→VERSE4→BRIDGE(3:12, dark Dorian, half-lit lead, one drop-beat)→
+BUILD2→FINALCH(3:52, the payoff)→CHORUSOUT(4:18, resolve)→OUTRO(4:45,
+wistful Dorian bookend). Listen verdict pending.
