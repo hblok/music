@@ -40,33 +40,41 @@ rather than just slow. Goes into `CLAUDE.md` once proven.
    breakdowns, no big song-form drop/chorus; hypnotic and spacious (the
    "morning after"). vs the song form we've used lately (thesis /
    verses / choruses / bridge / payoff) — more shape, less genuinely dub.
+   Answer: yes, dub form - new concept
 
 2. **How much of water_of_life to quote.** A recognisable REMIX
    (recommended): reuse its actual rolling-bass riff, its main theme, and
    its 303 line — slowed, dubbed, re-echoed — so a listener hears "that's
    Water of Life, dubbed". vs new material in the same palette (safer, but
    then it isn't really a "Mix" of anything).
+   Answer: let's try new material, but same palette (We've already produced very many tracks which sounds very similar - new directions are more interesting)
 
 3. **The Sardaukar chant.** Dubbed chant fragments (recommended): reuse
    the throat chant, chopped to short fragments drenched in the tape-echo
    (very dub — the voice as echo texture). vs instrumental only. (No new
    TTS/vocal work either way — the unsung dead-end stands.)
+   Answer: Yes, good idea. (go with recommended)
 
 4. **Heaviness vs spaciousness.** The dub balance: heavy sub + kick, but
    lots of air and long echo tails (recommended — slow AND heavy AND
    spacious). vs push the heaviness (denser, less "morning after"). "Slow
    and heavy" and "morning after" pull in opposite directions — which wins
    when they conflict?
+   Answer: Let's try slow but heavy. (les morning after)
 
 5. **Length.** ~7 min (the spec — dub wants room to breathe) vs a tighter
-   ~5–6 min. 
+   ~5–6 min.
+   Answer: Like we've talked about many times, time is not a factor nor limit. If it should be 7 min, then that's good.
 
 6. **Name.** *Spice Agony (Reverend Mother Mix)* (recommended — ties it to
    the ceremony and signals it's a mix) vs just *Spice Agony* vs something
    else. Filename `generate_spice_agony.py` either way.
+   Answer: Spice Agony is good
 
-7. **Inspiration doc first?** Option A (recommended): build from this plan
+7. ** Inspiration doc first?** Option A (recommended): build from this plan
    — the palette is the Dune album's own, fully understood, and the tape-
    echo is a clear DSP recipe. Option B: analyse a Massive Attack / dub
    reference via inspector first (costs a session). (phototaxis + the
    others went A.)
+   Answer : No inspiration doc
+   
