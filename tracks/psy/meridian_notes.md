@@ -195,3 +195,32 @@ Form: OPEN→INTRO→THESIS(0:20)→VERSE1/2→BUILD1→CHORUS1(1:39)→VERSE3�
 CHORUS2→VERSE4→BRIDGE(3:12, dark Dorian, half-lit lead, one drop-beat)→
 BUILD2→FINALCH(3:52, the payoff)→CHORUSOUT(4:18, resolve)→OUTRO(4:45,
 wistful Dorian bookend). Listen verdict pending.
+
+## VERDICT: DEAD END (2026-07-31 listen)
+
+Failed attempt — "nothing to do with goa/psy-trance; more akin to
+country/western (Clint Eastwood on his horse with his harmonica)." Kept
+for reference (like `../trance/unsung.py`), NOT corrected. The lesson is
+the value here — it maps where goa's genre boundary is:
+
+WHY IT LEFT THE GENRE (diagnosis, so the next goa track doesn't repeat it):
+- **Picardy MAJOR choruses** were the single biggest wrong turn. Goa is
+  MODAL and MINOR/dark. A major key reads pop/folk/country — not trance.
+- **A warm, sustained, vibrato "singing" lead playing an arch melody** =
+  a harmonica / pedal-steel / folk voice. Goa leads SNAKE and GNARL and
+  REPEAT hypnotically; they do not "sing a tune". The `lead_note` (ratio
+  2, warm LP 2600, sung vibrato, arch contour) is a harmonica.
+- **The song-doctrine "the lead sings a refrain" does NOT transfer to
+  goa.** That doctrine is for the trance/song tracks. In goa a hummable
+  warm major refrain = a ballad, and a mid-tempo heavy kick under it =
+  a Western groove.
+- **The "euphoric sunrise" emotional target (Q3)** was the seed: chasing
+  euphoric-MAJOR melodicism pulled it out of goa. Goa euphoria — when it
+  exists — comes from MODAL uplift + hypnotic layering, never a major-key
+  singing melody in a warm timbre.
+
+WHAT THIS CONFIRMS: phototaxis worked because it stayed F# MINOR, MODAL,
+SWARM-HYPNOTIC. Goa identity = modal + minor/dark + hypnotic + gnarly-
+electronic + repetitive-driving. "Freshness" within goa must keep that
+core; invert the COMPOSITION (swarm vs lead), never the genre DNA.
+See memory [[feedback_goa_genre_boundary]].

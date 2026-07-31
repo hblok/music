@@ -76,6 +76,28 @@ Declared per-track in the notes doc; the load-bearing rules:
    second failure mode of a hot low end (full recipe + the master HP / crest
    guardrail in `../trance/CLAUDE.md`). PRINT per-section crest, not just RMS.
 
+## THE GENRE BOUNDARY (Meridian, 2026-07-31 — a dead end, keep it in mind)
+
+`meridian.py` was the 2nd track: it inverted phototaxis (a long morphing
+LEAD as the star instead of the swarm) and chased a "euphoric sunrise" in
+Picardy E MAJOR. Verdict: **"nothing to do with goa — country/western,
+Clint Eastwood on his horse with his harmonica."** Kept for reference
+(like `../trance/unsung.py`), not corrected. What it teaches:
+
+- **Goa/psy identity = MODAL + MINOR/dark + HYPNOTIC + gnarly-electronic
+  + repetitive-driving.** That is the genre DNA; keep it.
+- **Do NOT go major.** A Picardy-major (or any major-key) chorus reads
+  pop / folk / country, not trance. This was the biggest wrong turn.
+- **The goa lead does NOT "sing".** A warm, sustained, vibrato lead on a
+  hummable arch melody is a harmonica / pedal-steel voice. Goa leads
+  SNAKE, GNARL and REPEAT hypnotically. The trance song-doctrine ("the
+  lead sings a refrain") is for `../trance/`, NOT here.
+- **"Euphoric" in goa comes from MODAL uplift + hypnotic layering**, never
+  a major-key singing melody in a warm timbre.
+- So: "freshness" within goa must invert the COMPOSITION (swarm-star vs
+  lead-star, etc.), NEVER the genre DNA. If a future track wants a
+  lead-star, make it a snaking/gnarly modal line, not a sung tune.
+
 ## Conventions
 
 Standalone script, duplicated helpers (copy the function, don't import),
