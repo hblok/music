@@ -117,14 +117,25 @@ def write_wav(path, x, peak=0.88):
 
 
 def audition(name, hits, loop=None, gap=0.35, out=None):
-    """Concatenate isolated `hits` (with gaps), then `loop`; write name.wav."""
-    parts = []
+    """Concatenate isolated `hits` (with gaps), then `loop`; write name.wav.
+    Items may be arrays or (label, array) pairs; `loop` an array or a list
+    of items.  Labels print as a timeline so a long audition is navigable."""
+    parts, t = [], 0.0
+    def push(item, pad_s):
+        nonlocal t
+        label, x = item if isinstance(item, tuple) else ("", item)
+        if label:
+            print(f"  {t:6.2f}s  {label}")
+        parts.append(x)
+        parts.append(np.zeros(int(pad_s * SR)))
+        t += len(x) / SR + pad_s
     for h in hits:
-        parts.append(h)
-        parts.append(np.zeros(int(gap * SR)))
+        push(h, gap)
     if loop is not None:
         parts.append(np.zeros(int(0.5 * SR)))
-        parts.append(loop)
+        t += 0.5
+        for item in (loop if isinstance(loop, list) else [loop]):
+            push(item, 0.0)
     x = np.concatenate(parts)
     assert np.all(np.isfinite(x)), "NaN/inf in audition"
     return write_wav(out or OUT_DIR / f"{name}.wav", x)
