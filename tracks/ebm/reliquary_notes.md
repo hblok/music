@@ -171,3 +171,36 @@ decay), not the check.
 
 Extra: I notice the cowbell. I'm really not sure about that. Is it really in style? Does it fit with the dark goth ebm?
 
+
+## Amendments (2026-09-05, pre-script — from the answers)
+
+- **The cowbell is out.** It is an electro / Miami-bass signature, not a
+  dark-EBM one; nothing on *Soli Deo Gloria* suggests it. The bar-25
+  density step is now the 808 closed hats going from 8ths to 16ths plus
+  the open hat on the & of 2 and 4. (`kit808.py` keeps the cowbell as
+  a library sound; this track does not call it.)
+- **The hook sketch tightened to 8th-note motion** so it passes its own
+  sung-grammar window (the quarter-note sketch above measures 0.09
+  onsets per 16th, below the 0.20 floor). The script's `HOOK` table is
+  the reference (8 tokens per bar, `-` hold, `.` rest):
+
+```
+Q | A4 - A4 C5 - - B4 - | A4 - - - . E4 G4 A4 | B4 - A4 G4 A4 - - - | E4 - - - - - . . |
+A | A4 - A4 C5 - - D5 - | D5 - - C5 . C5 B4 C5 | B4 - C5 B4 A4 - - - | A4 - - - - - . . |
+```
+
+  27 onsets / 128 steps = 0.21; held (>= a quarter) 14/27; the Q hangs
+  on E4, the A lands on A4; a breath rest closes each phrase.
+- **The tag.** Both statements stay identical (refrain identity), so
+  the open ending is a two-bar TAG after hook 2, over the cut:
+  `A4 - G4 - E4 - - - | - - - - - - . .` — the question re-asked, the
+  last lead note E4 (check 5). Uncounted.
+- **The open chord is E MINOR** (52, 55, 59), not E major: Apop stays
+  Aeolian, and the raised-7th hang is nachtkind's device.
+- **Strings hold** the Em for 6 bars from bar 41, releasing before the
+  last bar; check 5's "bed-only last second" is measured as the non-bed
+  layers' pre-master RMS < 25 % of the bed's in the final second (reverb
+  tails are real).
+- **Stereo:** pads, strings and the lead use the Juno's own stereo
+  chorus (the modulation inverted between channels — `juno.chorus(...,
+  phase=np.pi)` for the right side), not a detune trick.

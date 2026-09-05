@@ -32,15 +32,17 @@ _HPF_HZ = (150.0, 400.0, 900.0)                        # the 4-position HPF (0 =
 _CHORUS = {"I": [(0.5, 1.2)], "II": [(0.83, 1.5)], "I+II": [(0.5, 1.2), (0.83, 1.5)]}
 
 
-def chorus(x, depth=1.0, mode="I", base_ms=2.5):
+def chorus(x, depth=1.0, mode="I", base_ms=2.5, phase=0.0):
     """The Juno BBD chorus: dry + two delay taps modulated in anti-phase.
-    mode I ~0.5 Hz, II ~0.83 Hz, I+II both LFOs at once."""
+    mode I ~0.5 Hz, II ~0.83 Hz, I+II both LFOs at once.  The real
+    output is stereo with the modulation inverted between channels:
+    render L with phase=0 and R with phase=np.pi from the same dry."""
     n = len(x)
     t = np.arange(n) / SR
     idx = np.arange(n, dtype=float)
     out = x.copy()
-    for phase in (0.0, np.pi):
-        d = base_ms + sum(m * np.sin(2 * np.pi * r * t + phase) for r, m in _CHORUS[mode])
+    for ph0 in (0.0, np.pi):
+        d = base_ms + sum(m * np.sin(2 * np.pi * r * t + ph0 + phase) for r, m in _CHORUS[mode])
         out += 0.5 * depth * np.interp(idx - d * SR / 1000.0, idx, x)
     return out
 
