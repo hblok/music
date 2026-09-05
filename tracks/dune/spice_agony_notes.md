@@ -78,3 +78,27 @@ rather than just slow. Goes into `CLAUDE.md` once proven.
    others went A.)
    Answer : No inspiration doc
    
+
+## Implemented (2026-07-31) — `generate_spice_agony.py` → `spice_agony.wav` (~7:18)
+
+Built from the answers; all checks pass (0 fail). 85 BPM half-time, D
+Phrygian dominant, seed 10193. DUB form (loop-based, elements in/out):
+intro → kick → bass → locked groove → acid → DUB DROP (echo throw) →
+groove returns → the agony → dub breakdown (beat drops) → rebuild → heavy
+final → outro strip → coda. NEW material in the Dune palette (not a Water
+of Life quote): heavy half-time room-shake kick (two tanh rounds + sub
+tail), a heavy driven sub-bass, the dune acid one-note-per-bar with a
+full-bar resonant sweep, dubbed throat-chant fragments.
+
+**The tape-echo (new recipe):** a feedback delay whose every repeat is
+progressively darker (lowpass ×0.78^r) and pitch-WOBBLED by a slow wow
+LFO (a modulated fractional-delay read = tape varispeed). The skanks,
+acid and chant all melt through it; the DUB DROP and the breakdown are
+carried by high-feedback echo THROWS. Ready to graft into CLAUDE.md.
+
+**Clipping/overdrive (user's first-class requirement):** master ends on a
+guaranteed peak-normalize to 0.89 after a gentle tanh glue (drive 1.10 —
+weight without growl) and a 30 Hz HP. Verify checks: per-channel sample
+peak 0.88/0.89, ZERO int16-clipped samples, **4x-oversampled TRUE peak
+0.891 (−1.01 dBFS)** — no inter-sample overs — and hot% 0.11%. Listen
+verdict pending.
