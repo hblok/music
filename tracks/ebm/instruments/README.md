@@ -90,6 +90,8 @@ user has listened to — new demos get new names).
 
 Raw on purpose: no reverb, no sidechain, no master — those are the track's.
 
+A/B and stem workflow for the track scripts: `../LISTENING.md`.
+
 ## Declared exceptions (argue them in the track's notes doc)
 
 1. Bass resonance Q 2.5 above the warmth recipe's 1.2 — guardrails: the

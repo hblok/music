@@ -15,11 +15,23 @@ v3 (this script, 2026-09-05): the chest was too thin — the octave-below
 layer is fuller (cutoff 700, sub 0.5) and much louder (0.8 / 1.0), the
 lead layer a notch forward.  Same everything else.
 
-Output: /workspace/music/reliquary_v3.wav + .flac (44100 Hz stereo 16-bit).
+Output: /workspace/music/<NAME>.wav + .flac (44100 Hz stereo 16-bit) —
+NAME is the one constant to bump per iteration (v3.3, v3.4 ...).
 Seed 1993.  Prints the VERIFY.md blocks; a FAIL never aborts the render.
+
+Listening flags (A/B work — checks are skipped when the render is not
+the whole piece):
+  --solo lead[,bass]   render only these layers (through the master)
+  --mute drums         render everything but these
+  --slice 24 32        bars [24, 32) only — hook 1 alone
+  --suffix _leadA      output name <NAME>_leadA.wav
+  --stems              also write every layer, post-reverb + weighted,
+                       pre-master, to <NAME>_stems/<layer>.wav
+Then: python3 ../../tools/ab.py A.wav B.wav --bars 2   (the ABAB file)
 """
 from __future__ import annotations
 
+import argparse
 import pathlib
 import sys
 import wave
@@ -157,6 +169,26 @@ WETS = {"bed": 0.0, "pad": 0.35, "strings": 0.4, "arp": 0.15, "bass": 0.0, "drum
 WEIGHTS = {"bed": 0.30, "pad": 0.22, "strings": 0.26, "arp": 0.26, "bass": 0.32, "drums": 0.40,
            "lead": 0.38, "hit": 0.28, "fx": 0.14}
 
+NAME = "reliquary_v3.3"                                # bump per iteration
+
+ap = argparse.ArgumentParser(description="Reliquary (Part 1) v2+ — see the docstring")
+ap.add_argument("--solo", default="", help="comma-separated layer names to render alone")
+ap.add_argument("--mute", default="", help="comma-separated layer names to leave out")
+ap.add_argument("--slice", nargs=2, type=int, metavar=("B0", "B1"), help="bars [B0, B1) only")
+ap.add_argument("--suffix", default="", help="appended to the output name")
+ap.add_argument("--stems", action="store_true", help="also write per-layer stems")
+ARGS = ap.parse_args()
+SOLO = {x for x in ARGS.solo.split(",") if x}
+MUTE = {x for x in ARGS.mute.split(",") if x}
+PARTIAL = bool(SOLO or MUTE or ARGS.slice)          # not the whole piece -> no checks
+for name in SOLO | MUTE:
+    assert name in LAYER_NAMES, f"unknown layer {name!r}; layers: {LAYER_NAMES}"
+
+
+def want(name):
+    return name not in MUTE and (not SOLO or name in SOLO)
+
+
 HOOKS = 0
 lead_events = []            # (t, midi, dur)
 strings_events = []         # (bar, chord)
@@ -164,20 +196,21 @@ drum_times = []
 arp_table = []              # (bar, section, cutoff, rate)
 
 # ------------------------------------------------------------------- bed
-BED = seethe(45, END, throb=0.0, grit=0.25)
-place(LAYERS["bed"], BED, 0.0)
+if want("bed"):
+    place(LAYERS["bed"], seethe(45, END, throb=0.0, grit=0.25), 0.0)
 
 # ------------------------------------------------------------- pad / strings
-for b in range(0, 40):                                  # v2: the pad stays under hook 2's strings
+for b in range(0, 40) if want("pad") else ():           # v2: the pad stays under hook 2's strings
     place_stereo(LAYERS["pad"], pad(chord_at(b), BAR, depth=0.0), bar_t(b))
-for b in range(32, 40):
-    place_stereo(LAYERS["strings"], strings(chord_at(b), BAR, depth=0.0), bar_t(b))
-    strings_events.append((b, chord_at(b)))
-place_stereo(LAYERS["strings"], strings(EM, 6 * BAR, depth=0.0), bar_t(40))
-strings_events.append((40, EM))
+if want("strings"):
+    for b in range(32, 40):
+        place_stereo(LAYERS["strings"], strings(chord_at(b), BAR, depth=0.0), bar_t(b))
+        strings_events.append((b, chord_at(b)))
+    place_stereo(LAYERS["strings"], strings(EM, 6 * BAR, depth=0.0), bar_t(40))
+    strings_events.append((40, EM))
 
 # ------------------------------------------------------------------- arp
-for b in range(4, ARP_OUT_BAR):
+for b in range(4, ARP_OUT_BAR) if want("arp") else ():
     sec = section_of(b)
     rate = 2 if b >= CUT_BAR else 1
     x = arp(chord_at(b), bars=1, pattern="down", octaves=1, rate=rate, cutoff=ARP_CUTOFF[sec])
@@ -186,7 +219,7 @@ for b in range(4, ARP_OUT_BAR):
 
 # ------------------------------------------------------------------ bass
 BASS_CELL = "x.x.x.x.x.x.x.o."
-for b in range(8, CUT_BAR):
+for b in range(8, CUT_BAR) if want("bass") else ():
     root = ROOT[chord_at(b)]
     for s, ch in enumerate(BASS_CELL):
         if ch != ".":
@@ -197,7 +230,7 @@ KICK, SNARE, CH, OH = kick(decay=0.2), snare(), hat(), hat(open_=True)
 KICK_A, KICK_B = "x...x...x...x...", "x...x...x...x.x."
 SNARE_P = "....x.......x..."
 OH_P = "......x.......x."
-for b in range(8, CUT_BAR):
+for b in range(8, CUT_BAR) if want("drums") else ():
     hooks = b >= 24
     kp = KICK_B if b % 2 else KICK_A
     for s in range(16):
@@ -220,7 +253,7 @@ def dark_lead(midi, dur, chest=0.8):
     """The v2 voice: hollow square, no chorus, shallow slow vibrato, an
     octave-below saw chest under it (heavier in hook 2 — the voice
     deepens); mono, centre, in the face."""
-    top = lead(midi, dur, wave="pulse", cutoff=800.0, pluck=500.0, hpf=1, depth=0.0,
+    top = lead(midi, dur, wave="pulse", cutoff=1100.0, pluck=500.0, hpf=1, depth=0.0,
                vib=(4.5, 6.0, 0.6))
     low = lead(midi - 12, dur, wave="saw", cutoff=700.0, pluck=400.0, hpf=0, depth=0.0,
                vib=None, sub=0.5, res=1.0)
@@ -239,18 +272,19 @@ def place_line(lines, bar0, count=True, chest=0.8):
         HOOKS += 1
 
 
-for bar0 in (24, 32):
+for bar0 in (24, 32) if want("lead") else ():
     t_pick = bar_t(bar0) - BEAT / 2                     # the pickup on the & of 4 (E3)
     place(LAYERS["lead"], dark_lead(52, BEAT / 2 * 0.9), t_pick)
     lead_events.append((t_pick, 52, BEAT / 2 * 0.9))
     place_line(HOOK, bar0, chest=0.8 if bar0 == 24 else 1.0)
-place_line(TAG, 40, count=False, chest=1.0)
+if want("lead"):
+    place_line(TAG, 40, count=False, chest=1.0)
 
 # ------------------------------------------------------------ hit / fx
-HIT = hit()
-for b in (8, 32):
-    place(LAYERS["hit"], HIT, bar_t(b), pan=0.3)
-place(LAYERS["fx"], noise_sweep(BAR, 6000.0, 150.0, res=4.0), bar_t(32))   # v2: the downsweep after hit 2
+for b in (8, 32) if want("hit") else ():
+    place(LAYERS["hit"], hit(), bar_t(b), pan=0.3)
+if want("fx"):
+    place(LAYERS["fx"], noise_sweep(BAR, 6000.0, 150.0, res=4.0), bar_t(32))   # v2: the downsweep after hit 2
 
 # ------------------------------------------------------------------- mix
 MIX = [np.zeros(N), np.zeros(N)]
@@ -271,20 +305,37 @@ for ch in (0, 1):                                       # the minimal master: HP
 pk = max(np.max(np.abs(MIX[0])), np.max(np.abs(MIX[1]))) + 1e-12
 for ch in (0, 1):
     MIX[ch] = np.tanh(1.12 * MIX[ch] / pk) / np.tanh(1.12) * 0.92
-OUT = np.stack([fade(MIX[0], 0.002, 0.03), fade(MIX[1], 0.002, 0.03)], axis=1)
+i_sl = (int(bar_t(ARGS.slice[0]) * SR), int(bar_t(ARGS.slice[1]) * SR)) if ARGS.slice else (0, N)
+OUT = np.stack([fade(MIX[0][i_sl[0]:i_sl[1]], 0.002, 0.03), fade(MIX[1][i_sl[0]:i_sl[1]], 0.002, 0.03)], axis=1)
 
 out_dir = pathlib.Path("/workspace/music")
 out_dir.mkdir(parents=True, exist_ok=True)
-wav_path = out_dir / "reliquary_v3.2.wav"
-with wave.open(str(wav_path), "wb") as wf:
-    wf.setnchannels(2)
-    wf.setsampwidth(2)
-    wf.setframerate(SR)
-    wf.writeframes((np.clip(OUT, -1, 1) * 32767).astype(np.int16).tobytes())
-flac_path = out_dir / "reliquary_v3.flac"
+STEM = NAME + ARGS.suffix
+
+
+def write_wav(path, x):
+    with wave.open(str(path), "wb") as wf:
+        wf.setnchannels(2)
+        wf.setsampwidth(2)
+        wf.setframerate(SR)
+        wf.writeframes((np.clip(x, -1, 1) * 32767).astype(np.int16).tobytes())
+    print(f"Wrote {path}  ({len(x) / SR:.1f} s)")
+
+
+wav_path = out_dir / f"{STEM}.wav"
+write_wav(wav_path, OUT)
+flac_path = out_dir / f"{STEM}.flac"
 soundfile.write(str(flac_path), OUT, SR)
-print(f"Wrote {wav_path}  ({END:.1f} s)")
 print(f"Wrote {flac_path}")
+if ARGS.stems:                                          # post-reverb, weighted, PRE-master
+    stem_dir = out_dir / f"{STEM}_stems"
+    stem_dir.mkdir(exist_ok=True)
+    for name, (L, R) in PRE.items():
+        write_wav(stem_dir / f"{name}.wav", np.stack([L[i_sl[0]:i_sl[1]], R[i_sl[0]:i_sl[1]]], axis=1))
+if PARTIAL:
+    print(f"\npartial render (solo {sorted(SOLO) or '-'}, mute {sorted(MUTE) or '-'}, "
+          f"slice {ARGS.slice or '-'}): checks skipped — the piece is the full render.")
+    sys.exit(0)
 
 # ---------------------------------------------------------------- verify
 fails = []
