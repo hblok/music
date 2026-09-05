@@ -220,7 +220,7 @@ def dark_lead(midi, dur, chest=0.8):
     """The v2 voice: hollow square, no chorus, shallow slow vibrato, an
     octave-below saw chest under it (heavier in hook 2 — the voice
     deepens); mono, centre, in the face."""
-    top = lead(midi, dur, wave="square", cutoff=900.0, pluck=500.0, hpf=1, depth=0.0,
+    top = lead(midi, dur, wave="pulse", cutoff=800.0, pluck=500.0, hpf=1, depth=0.0,
                vib=(4.5, 6.0, 0.6))
     low = lead(midi - 12, dur, wave="saw", cutoff=700.0, pluck=400.0, hpf=0, depth=0.0,
                vib=None, sub=0.5, res=1.0)
@@ -275,7 +275,7 @@ OUT = np.stack([fade(MIX[0], 0.002, 0.03), fade(MIX[1], 0.002, 0.03)], axis=1)
 
 out_dir = pathlib.Path("/workspace/music")
 out_dir.mkdir(parents=True, exist_ok=True)
-wav_path = out_dir / "reliquary_v3.wav"
+wav_path = out_dir / "reliquary_v3.2.wav"
 with wave.open(str(wav_path), "wb") as wf:
     wf.setnchannels(2)
     wf.setsampwidth(2)
