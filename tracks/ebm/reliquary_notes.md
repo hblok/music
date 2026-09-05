@@ -204,3 +204,52 @@ A | A4 - A4 C5 - - D5 - | D5 - - C5 . C5 B4 C5 | B4 - C5 B4 A4 - - - | A4 - - - 
 - **Stereo:** pads, strings and the lead use the Juno's own stereo
   chorus (the modulation inverted between channels — `juno.chorus(...,
   phase=np.pi)` for the right side), not a detune trick.
+
+## v2 amendment (2026-09-05) — the dark cut (`reliquary_v2.py` → `reliquary_v2.wav`)
+
+**The v1 verdict:** "not bad — the structure, the pads, the hooks are
+good. The melody feels like we still haven't left the Frankfurt trance
+area; it does not give the mood of early dark goth EBM." Diagnosis: a
+tenor arch to C5/D5, vibrato + chorus, over an updown two-octave arp
+and the Am–F–G lift — the Frankfurt recipe regardless of the 808 under
+it. Same seed, same 48 bars, same sections and placements; what changes
+is the melodic VOCABULARY:
+
+- **Register:** baritone. The hook lives A2–B♭3 (ceiling B♭3), centred
+  on A3; the pickup is E3; the tag ends on E3.
+- **Vocabulary:** chant-like recitation on the tonic (A3 A3), the
+  **♭2 (B♭3)** as the neighbour, the **♭6 (F3) falling to the 5th**, the
+  ♭7 (G3) held; descending contour (down-steps 0.65); no leap above a
+  4th except the phrase restart; the Q hangs on the LOW E3, the A lands
+  on the **low A2**, doubling the bass for its last bar.
+
+```
+Q | A3 - A3 A3 Bb3 - A3 - | G3 - - - . A3 G3 F3 | E3 - F3 E3 D3 - E3 - | E3 - - - - - . . |
+A | A3 - A3 A3 Bb3 - A3 - | G3 - - - . F3 E3 F3 | G3 - F3 E3 C3 - - - | A2 - - - - - . . |
+tag | A3 - G3 - E3 - - - | - - - - - - . . |
+```
+
+- **Voice:** `dark_lead` — the Juno lead as a hollow SQUARE, cutoff
+  900, HPF 1, NO chorus, shallow slow vibrato (4.5 Hz, 6 cents, 0.6 s
+  in), an octave-below saw "chest" under it (0.45; **0.7 in hook 2 and
+  the tag — the voice deepens** as the development); mono, centre,
+  reverb wet 0.25 instead of 0.45 (drier, in the face).
+- **Harmony:** the ♭VII lift is gone — groove/hook 1 loop
+  **Am–F–Em–Am** (the minor v), hook 2 **Am–F–Am–Em** ending open.
+- **Arp:** one-octave **descending** 16th sequence (`pattern="down",
+  octaves=1`), cutoff table 350/500/600/600/400 — a darker, tighter
+  sequence, not the trance updown.
+- **Hook 2 = pad + strings** (the strings join instead of replacing —
+  the wall), and the **downsweep** (6000 → 150 Hz over one bar, after
+  hit 2) replaces the riser.
+- **Verify additions** (printed as the DARK line): register ceiling
+  ≤ B♭3, down-step fraction ≥ 0.5, max upward leap ≤ 5 semitones, ≥ 2
+  ♭2 onsets; the phrase-end checks read pitch class (Q on an E, A on an
+  A). The hook-2-is-the-peak check failed on the first v2 render (the
+  PWM strings are thinner than the pad, the lead drier) — fixed in the
+  music: the pad stays under hook 2, the chest deepens.
+
+**v3 (2026-09-05, same script → `reliquary_v3.wav`):** the chest was too
+thin. The octave-below layer is fuller (cutoff 700, sub-octave 0.5, Q
+1.0) and much louder (0.8 in hook 1, 1.0 in hook 2 and the tag), the
+lead layer weight 0.34 → 0.38. Nothing else changed.
