@@ -127,37 +127,47 @@ decay), not the check.
    woodcut, glory-to-God-alone; short; English). Alternatives: *Vigil*,
    *Threshold*, *Cold Chapel*. Whatever it is, the song it bookends and
    *Part 2* inherit it.
-   Answer:
+   Answer: Reliquary is good.
+   
 2. **Length.** 48 bars (1:36) recommended — the source interludes are
    1:12–1:53. Or 64 bars (2:06) with a third hook statement? The
    recommendation is the short one: an interlude that overstays is a
    song without a chorus.
-   Answer:
+   Answer: Yes, 48 bars is good.
+   
 3. **Lead register.** Tenor (A4–D5, Groth's register — the Apop colour)
    recommended for this frame; baritone (A3–D4, the VNV colour, argued
    in `EBM_1990s.md`) is the alternative and would make the Juno lead
    read more voice-like. The later song's refrain voice follows this
    choice.
-   Answer:
+   Answer: Yes, tenor.
+   
 4. **Ends open on E.** Recommended — the whole point of a Part 1. The
    alternative is a resolved ending (last chord Am) and Part 2 becomes a
    free reprise instead of the answer.
-   Answer:
+   Answer: Open ending is good.
+   
 5. **Juno bass 8ths under the groove**, or 808 kick only (the sparser,
    more *Arp*-like read)? Recommended: bass in — the 808 kick alone at
    122 reads thin without it, and the bass is the library's least-heard
    Juno preset.
-   Answer:
+   Answer: the juno bass is great!
+   
 6. **No bark in Part 1** (recommended: the interlude is the Juno's
    piece; the barks belong to the songs) — or one low "UH" under each
    orchestral hit as the record's harsh-voice signature?
-   Answer:
+   Answer: No bark.
+   
 7. **Master.** Minimal chain as declared (HP, shelf, tanh, no pump, no
    sub-boom) — recommended, 1993-appropriate and the interlude has no
    4-on-the-floor to pump against. Or the full big-room chain for
    consistency with the songs to come?
-   Answer:
+   Answer: Keep it minimal.
+   
 8. **Part 2 timing.** Write it only after the song it bookends exists
    (recommended), so it can quote what the song did to the hook; or
    write both parts now as a pair?
-   Answer:
+   Answer: No, just the part 1 one.
+
+Extra: I notice the cowbell. I'm really not sure about that. Is it really in style? Does it fit with the dark goth ebm?
+
