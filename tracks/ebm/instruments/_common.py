@@ -9,6 +9,13 @@ Import convention: flat, script-dir-on-sys.path.  Running any module
 directly works; a track script does
     sys.path.insert(0, str(pathlib.Path(__file__).parent / "instruments"))
 and then `from sh101_bass import note`.
+
+Contract of every instrument function: returns ONE event as a mono float
+array, peak 1.0, at SR — the same thing make_kick()/bass_note() return in
+the track scripts, so a track places clips with add_at() into its layer
+buffers and commit()s the layer exactly as before.  The bus (weights,
+pump, reverb, master) stays in the track script.  Cached functions
+return shared arrays: never modify one in place.
 """
 from __future__ import annotations
 
@@ -70,13 +77,29 @@ def steps_buffer(bars, tail=0.5):
     return np.zeros(int((bars * BAR + tail) * SR))
 
 
-def place(buf, x, step, gain=1.0):
-    """Add `x` at 16th-step `step` (float ok), bounds-safe."""
-    i0 = int(round(step * STEP * SR))
+def _add(buf, x, i0, gain):
     if i0 >= len(buf):
         return
     n = min(len(x), len(buf) - i0)
     buf[i0:i0 + n] += gain * x[:n]
+
+
+def add_at(buf, x, start_s, gain=1.0):
+    """Add clip `x` at `start_s` seconds, bounds-safe — the track-script
+    idiom (same signature as every generate_*.py), so instrument clips drop
+    straight into a track's layer buffers ahead of its commit()."""
+    _add(buf, x, int(start_s * SR), gain)
+
+
+def place(buf, x, step, gain=1.0):
+    """Add `x` at 16th-step `step` (float ok) on the BPM grid above."""
+    _add(buf, x, int(round(step * STEP * SR)), gain)
+
+
+def seed(n):
+    """Reseed the shared noise rng (a track does this once, up top)."""
+    global rng
+    rng = np.random.default_rng(n)
 
 
 def write_wav(path, x, peak=0.88):

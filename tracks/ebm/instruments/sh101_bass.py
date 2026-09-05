@@ -17,6 +17,8 @@ lands at 27 Hz, inaudible rumble that eats headroom (measured).
 """
 from __future__ import annotations
 
+import functools
+
 import numpy as np
 from scipy import signal
 
@@ -49,13 +51,14 @@ def svf_lowpass(x, cutoff, q):
     return out
 
 
+@functools.lru_cache(maxsize=None)
 def note(midi=45, dur=STEP, cutoff=(2400.0, 250.0), env=0.05, res=2.5, sub=0.4,
          wave="saw", drive=1.0, hold=2, lowpass=None):
     """One bass note.  dur: sounding length in s (STEP = a 16th; an 8th
     gated 50 % is also STEP); cutoff: (open, floor) Hz of the filter
     envelope; env: its time constant (s); res: filter Q; sub: sub-octave
     square mix; wave: 'saw' | 'square' | 'pulse'; drive: tanh; hold/lowpass:
-    sampler dirt."""
+    sampler dirt.  Cached (pass cutoff as a tuple); do not modify the result."""
     f = midi_to_hz(midi)
     n = int((dur + 0.02) * SR)
     td = np.arange(n) / SR
@@ -77,16 +80,12 @@ def render_cell(cell, root=45, bars=2, gate_frac=0.5, **kw):
     """Sequence a 16-step cell for `bars` bars.  Each note sounds for
     gate_frac of the distance to the next onset (0.5 = the EBM stomp)."""
     onsets = [i for i, ch in enumerate(cell) if ch != "."]
-    cache = {}
     buf = steps_buffer(bars)
     for b in range(bars):
         for j, s in enumerate(onsets):
             nxt = (onsets[j + 1] if j + 1 < len(onsets) else onsets[0] + 16) - s
             m = root + _INTERVAL[cell[s]]
-            key = (m, nxt)
-            if key not in cache:
-                cache[key] = note(m, dur=nxt * STEP * gate_frac, **kw)
-            place(buf, cache[key], b * 16 + s)
+            place(buf, note(m, dur=nxt * STEP * gate_frac, **kw), b * 16 + s)
     return buf
 
 
