@@ -350,10 +350,17 @@ Extra problem: The bark. It sounds stupid: like somebody saying "Aaa" or "Ahhh" 
     psy blips? Knobs in order: level, pitch down an octave (C♯4 — into
     the pad's band, darker), the cell sparser. If they read wrong, the
     verse voice becomes the dark stab alone.
+    Answer: The ticks sound a bit like typing in a code on a numeric keypad, so I think that works. It's small light ticks. It's not psy.
+
 12. **The chorus fix** (07a vs 07b): is the weight back? If not, next is
     the lead level again and a formant peak on the top (a timbre change
     — last resort).
+    Answer: It's not much of a difference. We need a deeper bass, not timbre on top, I think.
+
 13. **The break's organ** (10, second half): keep, or cluster throughout?
+    Answer: keep throughout
+
 14. **The two spoken phrases**: will you record them? (Speaking, not
     singing; the robot chain hides everything but the rhythm of the
     words — which is all that carries.)
+    Recording: I don't have time right now, so let's go without. However, let's keep the idea, and maybe we can come back to it in a v2.
