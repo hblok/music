@@ -227,10 +227,12 @@ A FAIL means fix the music, not the check.
    Access*, *Keycard*. The phrase itself stays "No access / Access
    granted" (your pick) — "Fast forward" and "geradeaus!" are noted as
    spare barks for a later track, not this one.
+   Answer: Let's use "No Access" instead.
 
 2. **Tempo.** 147 (the *Backdraft* jackhammer) recommended. 140 is the
    fallback if the probes read frantic rather than heavy — the probe's
    `--bpm 140` renders the same set; decide from 01/02 at both.
+   Answer: Let's slow it down to 140.
 
 3. **The engine's cell at 147** — gallop (16ths, 51 ms notes) or the
    8th stomp with the drums carrying the 16ths (the blueprint's own
@@ -238,24 +240,29 @@ A FAIL means fix the music, not the check.
    verses, the gallop reserved for the pre-chorus lift; but the ear
    decides, and the chorus's rolling+octave (07) is the same question
    at 16 onsets a bar.
+   Answer: gallop at 140 bpm works best.
 
 4. **Key.** C♯ minor (Backdraft's, and the album's third key after
    Reliquary's A minor) recommended; the bass then sits at C♯3. A minor
    at A2 is heavier by 4 semitones and would make three A-minor pieces
    in a row. Probe 01 vs 03.
+   Answer: c#
 
 5. **The kick under the double figures**: the default slam kick
    (200 ms) or the short hard one (120 ms)? Probe 04 vs 05.
+   Answer: Probe 04, without the shortkick.
 
 6. **Does the verse brood** (06)? If the bed + cluster read as mood
    under the engine, keep; if the engine buries them, the verse drops
    the hats to 8ths (space) rather than turning the bed up.
+   Answer: No, this part we have to re-do. The worst part is the "bark" - see below. We need to get the bark out and come up with something else.
 
 7. **The refrain** (07/08): the stutter-and-echo line on the dark lead.
    If it reads timid at 147, the fixes in order: chest 1.0 from chorus
    1, a slower vibrato onset, longer held ends — not a higher register.
    If the melody itself is wrong, say which bar; the table is the unit
    of iteration.
+   Answer: refrain solo (08) works very well. However, 07 sounds more muted - it loses much of its dark heavy element; can we fix this?
 
 8. **The slot's treatment** (09): band + dirt only (the EPS snippet), or
    the ring mod (the robot), or with the retrigger? Recommended: dirt
@@ -263,11 +270,17 @@ A FAIL means fix the music, not the check.
    the grant cleaner (dirt only) — it is the one that should land as a
    voice. And: will you speak the two phrases? Spoken, not sung; the
    chain hides the speaker. Until a take exists the bark stands in.
+   Answer: hehe, the robot works surprisingly well. It's impossible to hear what it's saying, though. But that really doesn't matter. It does sound like a voice.
 
 9. **The break** (10): the riff alone on 8ths + bed + cluster + low
    barks, kick out for 16 bars — or shorter (8 bars) if 16 stalls?
    Recommended 16 with the retrigger event at its midpoint.
+   Answer: Again the problem with the bark, it must go out. We need a different plan here.
 
 10. **The outro's hard stop** on bar 160 (old-school, recommended) — or
     a strip that fades on the bed like Reliquary? The hard stop is the
     jackhammer's ending; the bed fade is the interlude's.
+    Answer: Let's do a fade out.
+
+Extra problem: The bark. It sounds stupid: like somebody saying "Aaa" or "Ahhh" or even a burp. It's a reather annoying sound, which first of all would take away the rest of the excellent part of this track, but also doesn't seem to fit anywhere in our EBM set. (Now, we don't need to delete the instrument, but we need a different plan for this track).
+
