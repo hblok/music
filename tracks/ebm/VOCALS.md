@@ -217,3 +217,16 @@ The pattern is already proven by `ungeschrieben.py` and documented in
    or heavily doubled/delayed/sampled (the record's own answer)?
    Recommended: heavy, and back it off if it hides too much.
 5. Vocoder on the table at all, or straight voice only?
+
+## Clearance (2026-09-06): the first slot is SPOKEN, not sung
+
+The next track keeps the sung question open and uses the voice as a
+sample instead: "No access" (three times, before each chorus and in the
+break) and "Access granted" (once, on the final chorus) — spoken into a
+phone, dry, dropped into `/workspace/music/vocals/clearance/` as
+`no_access.wav` and `access_granted.wav`, and treated by
+`instruments/machine.py` into a 1993 sampler speech snippet (band, crude
+dirt, ring mod, retrigger). The speaker is never exposed; the bark fills
+the slot while no take exists (`VOICE_GAIN = 0`). Probe 09 in
+`clearance_probe.py` proves the chain on a stand-in voice. Design and
+placement: `clearance_notes.md`.

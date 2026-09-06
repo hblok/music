@@ -21,13 +21,14 @@ from __future__ import annotations
 
 import argparse
 import pathlib
+import sys
 import wave
 
 import numpy as np
 from scipy import signal
 
 SR = 44100
-BPM = 122.0                     # the Soli Deo Gloria "slam" archetype
+BPM = 122.0                     # the Soli Deo Gloria "slam" archetype; set_tempo() for the others
 BEAT = 60.0 / BPM
 STEP = BEAT / 4                 # one 16th
 BAR = 4 * BEAT
@@ -100,6 +101,22 @@ def seed(n):
     """Reseed the shared noise rng (a track does this once, up top)."""
     global rng
     rng = np.random.default_rng(n)
+
+
+def set_tempo(bpm):
+    """Retune the grid (BEAT/STEP/BAR) for a non-122 track.  Call it BEFORE
+    importing any instrument module: they bind BEAT/STEP/BAR — and their
+    `dur=STEP` defaults — at import, so a later call would leave them on
+    the 122 grid.  Asserts that no sibling module is imported yet."""
+    global BPM, BEAT, STEP, BAR
+    here = pathlib.Path(__file__).resolve().parent
+    bound = sorted(n for n, m in sys.modules.items() if n != __name__
+                   and getattr(m, "__file__", None) and pathlib.Path(m.__file__).resolve().parent == here)
+    assert not bound, f"set_tempo({bpm}) after importing {bound}: they already bound the {BPM:g} grid"
+    BPM = float(bpm)
+    BEAT = 60.0 / BPM
+    STEP = BEAT / 4
+    BAR = 4 * BEAT
 
 
 def write_wav(path, x, peak=0.88):

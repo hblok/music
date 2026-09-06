@@ -74,6 +74,14 @@ should carry the same three pieces — copy them, don't reinvent.
   Notes: `reliquary_notes.md` §"v2 amendment" / "v3". Iterating in
   place via `LISTENING.md`'s flags — bump `NAME`, never overwrite a
   kept render.
+- **clearance** — planned 2026-09-06, **probe stage**: the jackhammer
+  archetype (*Backdraft*): 147 BPM, C♯ minor, 160 bars ≈ 4:21, seed 18,
+  the refrain declaimed on `dark_lead` (G♯2–A3), ONE spoken slot
+  ("No access" ×3 / "Access granted" ×1 — the user's own spoken take
+  through `instruments/machine.py`, the bark standing in until then).
+  Notes: `clearance_notes.md`; `clearance_probe.py` renders ten short
+  inspected samples to `/workspace/music/ebm/clearance_probe/` — the
+  track script `clearance.py` is written only after their verdicts.
 
 ## The Frankfurt-trance trap (load-bearing — read before writing a melody)
 
@@ -115,11 +123,12 @@ open, the bed's tinnitus check, the sung-grammar window).
 
 Specific to this directory:
 
-- **The grid is fixed at 122 BPM** (`instruments/_common.py`, the
-  *Soli Deo Gloria* "slam" archetype). A track at the jackhammer (147)
-  or hammer (~109) archetype from `EBM_1990s.md` needs a `set_tempo()`
-  in `_common.py` with every sequencing helper reading it live — add
-  that when the first non-122 track starts, not speculatively.
+- **The grid defaults to 122 BPM** (`instruments/_common.py`, the
+  *Soli Deo Gloria* "slam" archetype). A non-122 track calls
+  `_common.set_tempo(147)` **before importing any instrument module**
+  (they bind BEAT/STEP/BAR and their `dur=STEP` defaults at import;
+  `set_tempo` asserts if a sibling is already imported). Added
+  2026-09-06 for clearance; `clearance_probe.py` shows the order.
 - **Bass register is A2** (midi 45), not A1 — the SH-101 sub-octave
   square lands at 55 Hz at A2 versus 27 Hz (inaudible, headroom-eating)
   at A1. Measured, not a guess; keep new bass writing at A2 unless a

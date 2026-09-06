@@ -41,9 +41,8 @@ user has listened to — new demos get new names).
 
 - **Grid:** `_common.BPM = 122` (the *Soli Deo Gloria* slam), `STEP` = a
   16th, `BAR`; `place(buf, x, step)` on the grid, `add_at(buf, x, s)` in
-  seconds.  Known gap: the tempo is fixed at import — a 147 or 109 track
-  needs a `set_tempo()` with the helpers reading it live (do it when that
-  track starts).
+  seconds.  Another tempo: `_common.set_tempo(147)` BEFORE importing any
+  instrument module (they bind the grid at import; it asserts otherwise).
 - **Register:** bass root **A2** (midi 45) — the SH-101 sub-octave then
   sits at 55 Hz; at A1 it lands at 27 Hz and eats headroom (measured).
 - **Dirt:** `_common.dirt(x, hold, bits, lowpass)` = the Ensoniq EPS:
@@ -71,6 +70,8 @@ user has listened to — new demos get new names).
 | `bark.py` | `bark`, `chant`, `VOWELS` | the harsh-vocal slot, instrumental: consonant onset, morphing formants, falling pitch, fry rasp, distortion, gate | `vowel/vowel2`, `onset` k/d/s, `fall`, `rasp`, `drive` |
 | `kit808.py` | `kick`, `snare`, `hat`, `clap`, `cowbell`, `rim`, `clave`, `maracas`, `tom`, `pattern`, `PATTERN` | the TR-808 for interludes/bookends; six-square-wave metal, analog-clean by default | kick `decay/tone`, snare `snappy`, `hold` |
 | `seethe.py` | `seethe` | the Stitch bed: pink-tilted noise through a slowly swept resonant LP, sub with a slow beat, grit pulse, breath, optional 8th-note `throb`; a long bed, not an event | `sweep`, `rate`, `res`, `sub`, `grit`, `throb` |
+| `dark_lead.py` | `dark_lead` | the 1993 refrain voice (reliquary v2/v3.3, promoted): hollow pulse, no chorus, slow shallow vibrato, an octave-below saw chest | `chest` (0.8 → 1.0 = the voice deepens) |
+| `machine.py` | `machine`, `retrigger` | the vocal-slot TREATMENT (takes any mono array — a spoken take, or a bark): intercom band, crude dirt (hold 3, 8 bits), ring mod, drive; the sequencer retrigger stutter | `band`, `hold/bits`, `ring_hz`, `drive`; `retrigger(x, step_s, n, head)` |
 | `riff.py` | `chug`, `riff` | the one guitar: Karplus-Strong power chord, double-tracked, palm-mute or open, tanh amp, cab, body thump. A texture, one track only (declared) | `drive`, `mute`, `body`, `cab`, cell with x/b/3/5/o |
 
 `_common.py` — SR, BPM/STEP/BAR, `midi_to_hz`, `norm`, `dirt`, `gate`,

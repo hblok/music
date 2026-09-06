@@ -98,6 +98,17 @@ exposed (the lead in hook 1, the bass in the groove, the strings in
 hook 2), solo it for the voice itself, then the same slice in full for
 the balance.
 
+## Before the track exists: the probe script
+
+New for clearance (2026-09-06): `clearance_probe.py` renders the
+track's instruments, drum figures, bed, refrain and vocal-slot
+treatment as ten short samples (4–8 bars) with the same PASS/FAIL
+inspection the track's verify block will carry — so the parameters and
+the checks are heard and settled before the arrangement is written.
+Each probe answers one open question in the notes doc; A/B pairs (01/02,
+01/03, 04/05) go through `ab.py --bpm 147`. A new track in this
+directory starts with its probe, not its script.
+
 ## Housekeeping
 
 - Everything under `/workspace/music/` is ephemeral and never committed;
