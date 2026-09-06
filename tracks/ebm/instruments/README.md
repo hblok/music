@@ -105,7 +105,10 @@ A/B and stem workflow for the track scripts: `../LISTENING.md`.
 ## Verdicts so far (2026-09-05)
 
 - SH-101 bass: keeper.  Juno: keeper, "great potential".  demo_groove:
-  keeper.  Everything after the Juno is awaiting a listen.
+  keeper.  **Bark: rejected on no_access (2026-09-06)** — "like somebody
+  saying Aaa, or a burp; doesn't fit anywhere in our EBM set"; kept in the
+  library, not to be planned on.  `machine` ring mod on a real voice:
+  keeper ("sounds like a voice").  The rest awaits a listen.
 - TR-08 one-shots, when recorded into `/workspace/music/refs/tr08/`, are
   the calibration targets for `kit808.py` — reference only, never sampled
   into a track.

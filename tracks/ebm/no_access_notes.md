@@ -1,4 +1,8 @@
-# Clearance — design notes (2026-09-06, the second tracks/ebm/ track)
+# No Access — design notes (2026-09-06, the second tracks/ebm/ track)
+
+*Working title was **Clearance**; renamed from the Q1 answer. The body
+below is the original plan; the **Amendments** section at the end
+overrides it wherever the answers changed something — read both.*
 
 **The fast one.** A 4:21 song in the mould of *Soli Deo Gloria*'s
 *Backdraft* — the record's **jackhammer** archetype
@@ -284,3 +288,72 @@ A FAIL means fix the music, not the check.
 
 Extra problem: The bark. It sounds stupid: like somebody saying "Aaa" or "Ahhh" or even a burp. It's a reather annoying sound, which first of all would take away the rest of the excellent part of this track, but also doesn't seem to fit anywhere in our EBM set. (Now, we don't need to delete the instrument, but we need a different plan for this track).
 
+## Amendments (2026-09-06, from the answers — these override the plan above)
+
+- **Title *No Access*** (`no_access.py`, `no_access_notes.md`,
+  `no_access_probe.py`; the take directory `/workspace/music/vocals/
+  no_access/`). Same script and probe otherwise.
+- **140 BPM** (bar 1.714 s, 16th 107 ms; 160 bars = 4:34). All tables
+  and times above scale; the probe default is 140 now.
+- **Gallop everywhere the engine plays** — verses AND choruses (the
+  rolling+octave cell is dropped: 16 onsets a bar was half of what
+  buried the refrain). Pre-chorus keeps the offbeat cell; the break the
+  dark 8ths. A gallop note at 140 is 54 ms.
+- **C♯ minor, the slam kick (04)** as declared.
+- **THE BARK IS OUT of this track** ("sounds like somebody saying Aaa,
+  or a burp; doesn't fit anywhere in our EBM set"). The module stays in
+  the library for a track that wants a shout; nothing here calls it.
+  Its three slots are refilled:
+  1. **The verse voice → the counter-sequence.** A second SH-101 line:
+     dry square-wave TICKS (`note(m, STEP*0.35, cutoff=(6000, 1500),
+     env=0.02, res=4.5, sub=0, wave="square")`) on the gallop's rests
+     (`.x...x...x...x..`), pitches C♯5 C♯5 G♯4 D5 (root, root, 5th, ♭2)
+     — the Front 242 second sequencer, interlocking with the bass
+     (checked: no tick on a bass 16th). Plus a **dark stab** (no chorus,
+     cutoff 500, HPF 1) on the "and" of 2 and 4 only; the chorused stab
+     on all four off-8ths is now the pre-chorus/chorus lift. Verse 2's
+     development: the tick cell densifies to `.x...x.x.x...x.x` (two
+     extra ♭2 ticks) and the dark stab opens (cutoff 700).
+  2. **The break's low barks → the ticks sparse + the low Juno organ**
+     (C♯3 G♯3 C♯4, cutoff 600, chorus 0.6) replacing the cluster in the
+     break's second half — the liturgical colour the blueprint expects
+     on the record's slow pieces, used once.
+  3. **The spoken slot's stand-in → the tick phrase retriggered**
+     (`retrigger(tick_phrase(), STEP, 3)`), instrumental. The real
+     content of the slot is the spoken take through the ring mod (Q8:
+     "the robot works surprisingly well… it does sound like a voice") —
+     the chain is proven; it needs a source that is yours. Two phrases,
+     spoken, dry, any phone: `no_access.wav`, `access_granted.wav`.
+     Each missing file falls back to the ticks on its own.
+- **The refrain in context (Q7)** — the diagnosis: the voice is centred
+  on C♯3 (138 Hz); the chorus pad and stabs were voiced G♯3–E4, directly
+  on top of it, and the rolling bass fired 16 notes a bar in the same
+  band as the voice's chest. The fix keeps the voice's timbre (the solo
+  is the sound) and changes the ROOM: pad and stabs voiced an octave up
+  (C♯m 64 68 73, A 64 69 73, G♯m 63 68 71 — lowest note above A3, now a
+  printed check), gallop instead of rolling, lead 0.6 → 0.85, stab
+  0.25 → 0.2. Probe 07a (old) vs 07b (new) is the A/B.
+- **The ending is a fade** (Q10): bars 152–160 strip to bed + riff + the
+  ticks, the bed fades over the last 4 bars, ends on the bed like
+  Reliquary — the album's continuity over the jackhammer's cold stop.
+  Verify 12 becomes: no drum onset after bar 152; the last 4 bars' RMS
+  descending; the final 0.1 s < −60 dB.
+- **Verify 10 (two-voice separation)** now reads: tick onsets in verses
+  + break ≫ choruses (zero in choruses); refrain onsets the reverse.
+- **Re-probed** (`no_access_probe.py`, all at 140, new directory so the
+  listened files stay): 06 verse v2, 07a/07b the chorus A/B, 10 break
+  v2; 01–05, 08, 09 unchanged in content, re-rendered at 140.
+
+### Open questions, round 2
+
+11. **The ticks** (06): do they read as the machine (EBM sequencer) or as
+    psy blips? Knobs in order: level, pitch down an octave (C♯4 — into
+    the pad's band, darker), the cell sparser. If they read wrong, the
+    verse voice becomes the dark stab alone.
+12. **The chorus fix** (07a vs 07b): is the weight back? If not, next is
+    the lead level again and a formant peak on the top (a timbre change
+    — last resort).
+13. **The break's organ** (10, second half): keep, or cluster throughout?
+14. **The two spoken phrases**: will you record them? (Speaking, not
+    singing; the robot chain hides everything but the rhythm of the
+    words — which is all that carries.)

@@ -74,14 +74,17 @@ should carry the same three pieces — copy them, don't reinvent.
   Notes: `reliquary_notes.md` §"v2 amendment" / "v3". Iterating in
   place via `LISTENING.md`'s flags — bump `NAME`, never overwrite a
   kept render.
-- **clearance** — planned 2026-09-06, **probe stage**: the jackhammer
-  archetype (*Backdraft*): 147 BPM, C♯ minor, 160 bars ≈ 4:21, seed 18,
-  the refrain declaimed on `dark_lead` (G♯2–A3), ONE spoken slot
-  ("No access" ×3 / "Access granted" ×1 — the user's own spoken take
-  through `instruments/machine.py`, the bark standing in until then).
-  Notes: `clearance_notes.md`; `clearance_probe.py` renders ten short
-  inspected samples to `/workspace/music/ebm/clearance_probe/` — the
-  track script `clearance.py` is written only after their verdicts.
+- **no_access** (working title *Clearance*) — planned 2026-09-06,
+  **probe stage**: the jackhammer archetype (*Backdraft*): 140 BPM, C♯
+  minor, gallop bass, 160 bars ≈ 4:34, seed 18, the refrain declaimed on
+  `dark_lead` (G♯2–A3), a second SH-101 "tick" counter-sequence as the
+  verse voice (**the bark is out** — verdict: "sounds like a burp"), ONE
+  spoken slot ("No access" ×3 / "Access granted" ×1 — the user's own
+  spoken take through `instruments/machine.py`'s ring mod, the ticks
+  standing in until then). Notes: `no_access_notes.md` (+ amendments);
+  `no_access_probe.py` renders the inspected samples to
+  `/workspace/music/ebm/no_access_probe/` — the track script
+  `no_access.py` is written only after their verdicts.
 
 ## The Frankfurt-trance trap (load-bearing — read before writing a melody)
 
@@ -128,7 +131,7 @@ Specific to this directory:
   `_common.set_tempo(147)` **before importing any instrument module**
   (they bind BEAT/STEP/BAR and their `dur=STEP` defaults at import;
   `set_tempo` asserts if a sibling is already imported). Added
-  2026-09-06 for clearance; `clearance_probe.py` shows the order.
+  2026-09-06 for no_access; `no_access_probe.py` shows the order.
 - **Bass register is A2** (midi 45), not A1 — the SH-101 sub-octave
   square lands at 55 Hz at A2 versus 27 Hz (inaudible, headroom-eating)
   at A1. Measured, not a guess; keep new bass writing at A2 unless a

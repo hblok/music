@@ -1,19 +1,20 @@
 #!/usr/bin/env python3
-"""Clearance — the probes.
+"""No Access — the probes (working title was Clearance).
 
-Short samples at 147 BPM of the engine, the drum figures, the bed, the
-refrain and the vocal-slot treatment, each printed with the inspection
-the track's verify block will print — heard and checked BEFORE
-clearance.py exists.  Notes: clearance_notes.md, "The probes" (which
-probe decides which open question).
+Short samples at 140 BPM of the engine, the drum figures, the bed, the
+verse, the refrain and the vocal-slot treatment, each printed with the
+inspection the track's verify block will print — heard and checked
+BEFORE no_access.py exists.  Notes: no_access_notes.md ("The probes"
+and the 2026-09-06 amendments: the bark is OUT of this track; the
+counter-sequence of SH-101 ticks and a dark stab take its slots).
 
-    python3 clearance_probe.py                 # all, to /workspace/music/ebm/clearance_probe/
-    python3 clearance_probe.py --only 01,02    # a subset
-    python3 clearance_probe.py --bpm 140       # the same set a notch slower (files suffixed _140)
+    python3 no_access_probe.py                 # all, to /workspace/music/ebm/no_access_probe/
+    python3 no_access_probe.py --only 06,07b   # a subset
+    python3 no_access_probe.py --bpm 147       # another tempo (files suffixed _147)
 
 Raw: mono, no master; the refrain probes carry a 0.25 reverb so the
 voice is judged as it will sit.  Seed 18.  A/B any pair with
-    python3 ../../tools/ab.py A.wav B.wav --bpm 147 --bars 2
+    python3 ../../tools/ab.py A.wav B.wav --bpm 140 --bars 2
 """
 from __future__ import annotations
 
@@ -29,45 +30,53 @@ HERE = pathlib.Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE / "instruments"))
 import _common                                                            # noqa: E402
 
-ap = argparse.ArgumentParser(description="Clearance probes — see the docstring")
-ap.add_argument("--bpm", type=float, default=147.0)
-ap.add_argument("--only", default="", help="comma-separated probe numbers, e.g. 01,07")
-ap.add_argument("--out", default="/workspace/music/ebm/clearance_probe")
+ap = argparse.ArgumentParser(description="No Access probes — see the docstring")
+ap.add_argument("--bpm", type=float, default=140.0)
+ap.add_argument("--only", default="", help="comma-separated probe ids, e.g. 01,07b")
+ap.add_argument("--out", default="/workspace/music/ebm/no_access_probe")
 ARGS = ap.parse_args()
 _common.set_tempo(ARGS.bpm)                     # BEFORE the instrument imports (they bind the grid)
 _common.seed(18)
 from _common import BAR, BEAT, SR, STEP, midi_to_hz, norm, place, steps_buffer, write_wav  # noqa: E402
-from bark import bark, chant                                              # noqa: E402
 from dark_lead import dark_lead                                           # noqa: E402
 from eps_hit import hit                                                   # noqa: E402
 from eps_kick import kick                                                 # noqa: E402
 from eps_snare import snare                                               # noqa: E402
 from hats import hat                                                      # noqa: E402
-from juno import noise_sweep, pad, stab                                   # noqa: E402
+from juno import noise_sweep, organ, pad, stab                            # noqa: E402
 from machine import machine, retrigger                                    # noqa: E402
 from seethe import seethe                                                 # noqa: E402
-from sh101_bass import CELLS, render_cell                                 # noqa: E402
+from sh101_bass import CELLS, note, render_cell                           # noqa: E402
 
 # ------------------------------------------------------------- the material
 CS3, A2, GS2 = 49, 45, 44
-CSM, A_, GSM = (56, 61, 64), (57, 61, 64), (56, 59, 63)      # C#m, A, G#m — close voicings, shared tones
-CLUSTER = (56, 61, 62)                                        # G#3 C#4 D4: the flat-2 cluster (verses)
+CLUSTER = (56, 61, 62)                                        # G#3 C#4 D4: the flat-2 cluster (verses, low)
+CSM, A_, GSM = (64, 68, 73), (64, 69, 73), (63, 68, 71)      # C#m, A, G#m — an octave ABOVE the voice (chorus)
+CSM_LOW, A_LOW, GSM_LOW = (56, 61, 64), (57, 61, 64), (56, 59, 63)   # the 147-probe voicings (07a, for the A/B)
 HIT_CHORD = (49, 56, 61, 64)
+ORGAN = (49, 56, 61)                                          # C#3 G#3 C#4, the break's organ
 CHORUS_LOOP = [CSM, CSM, A_, GSM, CSM, CSM, A_, CSM]          # i i VI v | i i VI i
-ROOT = {CSM: CS3, A_: A2, GSM: GS2}
+CHORUS_LOOP_LOW = [CSM_LOW, CSM_LOW, A_LOW, GSM_LOW, CSM_LOW, CSM_LOW, A_LOW, CSM_LOW]
+ROOT = {CSM: CS3, A_: A2, GSM: GS2, CSM_LOW: CS3, A_LOW: A2, GSM_LOW: GS2}
 
 KICK_FIG = {"A": "x...x...x...x...", "B": "x...x...x...x.x.", "C": "x..xx...x...x.x."}
 SNARE_P = "....x.......x..."
 RUN_P = "............xxxx"                                    # the machine-gun on beat 4, bars 4n+3
 HAT_ACC = (1.0, 0.5, 0.7, 0.5)
 OPEN_STEPS = (2, 6, 10, 14)
+DARK_STAB_STEPS = (6, 14)                                     # the verse stab: the "and" of 2 and 4 only
+
+TICK_CELL = ".x...x...x...x.."                                # the counter-sequence: the gallop's rests
+TICK_PITCHES = (73, 73, 68, 74)                               # C#5 C#5 G#4 D5: root root 5th flat-2
+TICK_BREAK_CELL = ".x.......x......"
 
 NOTE = {"G#2": 44, "A2": 45, "B2": 47, "C#3": 49, "D3": 50, "E3": 52, "F#3": 54, "G#3": 56, "A3": 57}
 HOOK = ["C#3 C#3 C#3 - E3 - D3 -", "C#3 - . C#3 - - - -", "E3 - E3 E3 F#3 - E3 -", "G#2 - . G#2 - - - -",
         "C#3 C#3 C#3 - E3 - D3 -", "C#3 - - - . E3 F#3 G#3", "A3 - G#3 - F#3 - E3 -", "C#3 - - - - - . ."]
 
 GAIN = {"kick": 1.0, "snare": 0.9, "ch": 0.28, "oh": 0.32, "bass": 0.75, "bed": 0.45, "pad": 0.22,
-        "stab": 0.25, "hit": 0.7, "bark": 0.5, "lead": 0.6, "voice": 0.7, "riser": 0.3}
+        "stab": 0.2, "dark_stab": 0.22, "ticks": 0.22, "organ": 0.28, "hit": 0.7, "lead": 0.85,
+        "voice": 0.7, "riser": 0.3}
 
 
 def figure_for(b):
@@ -120,18 +129,43 @@ def bassline(bars, cell, roots, **kw):
     return buf
 
 
-def pads(chords, bars_each=1, **kw):
-    buf = steps_buffer(len(chords) * bars_each)
-    for i, ch in enumerate(chords):
-        mix(buf, pad(ch, bars_each * BAR, depth=0.0, **kw), i * bars_each)
+def tick(midi):
+    """The counter-sequence voice: the SH-101 as a dry square blip — high,
+    resonant, 35 % of a 16th, no sub.  The bark's replacement."""
+    return note(midi, dur=STEP * 0.35, cutoff=(6000.0, 1500.0), env=0.02, res=4.5, sub=0.0, wave="square")
+
+
+def ticks(bars, cell=TICK_CELL, pitches=TICK_PITCHES):
+    buf = steps_buffer(bars)
+    k = 0
+    for b in range(bars):
+        for s, ch in enumerate(cell):
+            if ch != ".":
+                place(buf, tick(pitches[k % len(pitches)]), b * 16 + s)
+                k += 1
     return buf
 
 
-def stabs(chords):
+def tick_phrase():
+    """Four ticks on 16ths — the instrumental stand-in for a spoken phrase."""
+    buf = steps_buffer(0, tail=4 * STEP + 0.1)
+    for i, m in enumerate(TICK_PITCHES):
+        place(buf, tick(m), i)
+    return norm(buf)
+
+
+def pads(chords, bars_each=1, fn=pad, **kw):
+    buf = steps_buffer(len(chords) * bars_each)
+    for i, ch in enumerate(chords):
+        mix(buf, fn(ch, bars_each * BAR, **kw), i * bars_each)
+    return buf
+
+
+def stabs(chords, steps=OPEN_STEPS, **kw):
     buf = steps_buffer(len(chords))
     for b, ch in enumerate(chords):
-        x = stab(ch)
-        for s in OPEN_STEPS:
+        x = stab(ch, **kw)
+        for s in steps:
             place(buf, x, b * 16 + s)
     return buf
 
@@ -170,14 +204,6 @@ def reverb(x, wet=0.25, seconds=2.5, decay=1.0):
 
 def bed(bars, throb=0.4):
     return seethe(CS3, bars * BAR + 0.5, throb=throb, grit=0.3)
-
-
-def sparse_barks(bars, every=2):
-    buf = steps_buffer(bars)
-    for i, b in enumerate(range(0, bars, every)):
-        x = bark(CS3, dur=0.25, vowel="u" if i % 2 == 0 else "a", onset="d" if i % 2 == 0 else "k", fall=4.0)
-        place(buf, x, b * 16)
-    return buf
 
 
 def stand_in_voice(seconds=1.2):
@@ -230,6 +256,12 @@ def bass_report(cell, name, gate_frac=0.5):
         check("offbeat: bass never on a kick 16th", not any(cell[s] != "." for s in kick_steps))
 
 
+def ticks_report(cell, bass_cell):
+    clash = [s for s, ch in enumerate(cell) if ch != "." and bass_cell[s] != "."]
+    print(f"    ticks {cell} over bass {bass_cell}: {cell.count('x')} per bar, pitches {TICK_PITCHES}")
+    check("ticks only in the bass cell's rests (interlocking)", not clash, f"(clashes at {clash})" if clash else "")
+
+
 def drums_report(hits, cuts):
     for fig, p in KICK_FIG.items():
         check(f"figure {fig}: kick on every quarter", all(p[s] == "x" for s in (0, 4, 8, 12)), p)
@@ -268,6 +300,13 @@ def refrain_report():
     check("descending contour: down-steps >= 0.5", downs >= 0.5)
     check("no soaring leap: max upward <= 5 st", max(steps) <= 5)
     check("the flat 2nd colours the refrain", flat2 >= 2)
+
+
+def room_report(chords):
+    """The chorus pad must sit ABOVE the refrain's band (the 07 lesson)."""
+    lowest = min(min(ch) for ch in chords)
+    print(f"    pad/stab lowest note midi {lowest} ({midi_to_hz(lowest):.0f} Hz); refrain ceiling A3 = 57 (220 Hz)")
+    check("pad and stabs voiced above the refrain (lowest note > A3)", lowest > 57)
 
 
 def bed_report(x):
@@ -327,26 +366,47 @@ def p05():
 
 
 def p06():
-    x, _ = engine(8, "gallop", CS3, runs=False)
+    """The verse, v2: the bark is out; the counter-sequence of ticks and a
+    dark stab on the 'and' of 2 and 4 take its slot."""
+    x, _ = engine(8, "gallop", CS3, runs=True)
     the_bed = bed(8)
     mix(x, the_bed, 0, GAIN["bed"])
-    mix(x, pads([CLUSTER] * 4, bars_each=2, cutoff=600.0), 0, GAIN["pad"])
-    mix(x, sparse_barks(8), 0, GAIN["bark"])
-    timeline((0, "engine (gallop) + bed (throb 0.4) + the flat-2 cluster pad"), (0, "barks UH / KAH every 2 bars"))
+    mix(x, pads([CLUSTER] * 4, bars_each=2, cutoff=600.0, depth=0.0), 0, GAIN["pad"])
+    mix(x, stabs([CSM_LOW] * 8, steps=DARK_STAB_STEPS, depth=0.0, cutoff=500.0, hpf=1), 0, GAIN["dark_stab"])
+    mix(x, ticks(8), 4, GAIN["ticks"])
+    timeline((0, "engine (gallop) + bed (throb 0.4) + the flat-2 cluster pad + the dark stab on the & of 2 and 4"),
+             (4, "+ the counter-sequence: SH-101 ticks on the gallop's rests (C#5 C#5 G#4 D5)"))
+    ticks_report(TICK_CELL, CELLS["gallop"])
     bed_report(the_bed)
     return x, 8
 
 
-def p07():
-    x, _ = engine(8, "rolling", [ROOT[c] for c in CHORUS_LOOP], open_from=0, runs=False)
+def _chorus(loop, cell, stab_gain, lead_gain, stab_kw):
+    x, _ = engine(8, cell, [ROOT[c] for c in loop], open_from=0, runs=False)
     mix(x, bed(8), 0, GAIN["bed"] * 0.7)
-    mix(x, pads(CHORUS_LOOP), 0, GAIN["pad"])
-    mix(x, stabs(CHORUS_LOOP), 0, GAIN["stab"])
+    mix(x, pads(loop, depth=0.0), 0, GAIN["pad"])
+    mix(x, stabs(loop, **stab_kw), 0, stab_gain)
     place(x, hit(HIT_CHORD), 0, GAIN["hit"])
-    mix(x, reverb(refrain(chest=0.8)), 0, GAIN["lead"])
-    timeline((0, "hit; rolling bass on the roots C#3 C#3 A2 G#2 | C#3 C#3 A2 C#3; pad i i VI v | i i VI i; stabs"),
+    mix(x, reverb(refrain(chest=0.8)), 0, lead_gain)
+    return x
+
+
+def p07a():
+    """The 147-probe chorus as it was (for the A/B): rolling bass, pad and
+    stabs voiced G#3-E4 — right on top of the voice — lead 0.6."""
+    x = _chorus(CHORUS_LOOP_LOW, "rolling", 0.25, 0.6, {})
+    timeline((0, "OLD: rolling bass; pad/stabs at G#3-E4 (on the voice); lead 0.6"))
+    return x, 8
+
+
+def p07b():
+    """The fix: gallop (12 onsets, not 16); pad and stabs an octave up,
+    out of the voice's band; the lead forward.  Same timbre."""
+    x = _chorus(CHORUS_LOOP, "gallop", GAIN["stab"], GAIN["lead"], {})
+    timeline((0, "NEW: gallop bass on the roots C#3 C#3 A2 G#2 | C#3 C#3 A2 C#3; pad/stabs at E4-C#5 (above the voice); lead 0.85"),
              (0, "the refrain Q (bars 0-3), A (bars 4-7), chest 0.8"))
-    bass_report(CELLS["rolling"], "rolling")
+    bass_report(CELLS["gallop"], "gallop")
+    room_report(CHORUS_LOOP)
     refrain_report()
     return x, 8
 
@@ -360,7 +420,7 @@ def p09():
     if v is None:
         print("    no stand-in voice at /workspace/music/vocaltest/00_source.wav — probe skipped")
         return None, 0
-    x, _ = engine(4, "stomp", CS3, runs=False)
+    x, _ = engine(4, "gallop", CS3, runs=False)
     root_hz = midi_to_hz(CS3)
     variants = [("band + dirt", machine(v)), (f"+ ring mod at the root ({root_hz:.0f} Hz)", machine(v, ring_hz=root_hz)),
                 ("+ retrigger x3 on 16ths", retrigger(machine(v, ring_hz=root_hz), STEP, 3))]
@@ -372,28 +432,31 @@ def p09():
 
 
 def p10():
+    """The break, v2: no barks.  Bed + cluster + the riff on dark 8ths +
+    sparse ticks; the second half adds the low organ; the retrigger event
+    is the tick phrase (the instrumental stand-in for NO ACCESS)."""
     x = steps_buffer(8)
     mix(x, bed(8, throb=0.6), 0, GAIN["bed"] * 1.2)
-    mix(x, pads([CLUSTER] * 4, bars_each=2, cutoff=500.0), 0, GAIN["pad"])
+    mix(x, pads([CLUSTER] * 2, bars_each=2, cutoff=500.0, depth=0.0), 0, GAIN["pad"])
+    mix(x, pads([ORGAN] * 2, bars_each=2, fn=organ, cutoff=600.0, depth=0.6), 4, GAIN["organ"])
     mix(x, bassline(8, "x.x.x.x.x.x.x.x.", CS3, cutoff=(900.0, 250.0)), 0, GAIN["bass"] * 0.8)
-    mix(x, chant("x...........l...", root=CS3, vowels="ou", bars=8, onset="d", fall=4.0), 0, GAIN["bark"] * 0.8)
-    stutter = retrigger(bark(CS3, dur=0.3, vowel="a", vowel2="e", onset="k"), STEP, 3)
-    place(x, stutter, 4 * 16, GAIN["bark"])
-    timeline((0, "kick out: bed (throb 0.6) + cluster + the riff on dark 8ths + low barks"),
-             (4, "the retrigger event (a bark stands in for NO ACCESS)"))
+    mix(x, ticks(8, cell=TICK_BREAK_CELL), 0, GAIN["ticks"])
+    place(x, retrigger(tick_phrase(), STEP, 3, head=0.08), 4 * 16, GAIN["ticks"] * 1.4)
+    timeline((0, "kick out: bed (throb 0.6) + cluster + the riff on dark 8ths + sparse ticks"),
+             (4, "the low organ replaces the cluster; the retrigger event (the tick phrase stands in for NO ACCESS)"))
     bass_report("x.x.x.x.x.x.x.x.", "8ths dark")
     return x, 8
 
 
 PROBES = [("01", "engine_gallop_cs3", p01), ("02", "engine_stomp_cs3", p02), ("03", "engine_gallop_a2", p03),
-          ("04", "drums_jackhammer", p04), ("05", "drums_jackhammer_shortkick", p05), ("06", "brood_verse", p06),
-          ("07", "refrain_chorus", p07), ("08", "refrain_solo", p08), ("09", "machine_voice", p09),
-          ("10", "break_riff", p10)]
+          ("04", "drums_jackhammer", p04), ("05", "drums_jackhammer_shortkick", p05), ("06", "verse_v2", p06),
+          ("07a", "refrain_chorus_old", p07a), ("07b", "refrain_chorus_v2", p07b), ("08", "refrain_solo", p08),
+          ("09", "machine_voice", p09), ("10", "break_v2", p10)]
 
 if __name__ == "__main__":
     only = {x.strip() for x in ARGS.only.split(",") if x.strip()}
     out_dir = pathlib.Path(ARGS.out)
-    suffix = "" if ARGS.bpm == 147.0 else f"_{ARGS.bpm:g}"
+    suffix = "" if ARGS.bpm == 140.0 else f"_{ARGS.bpm:g}"
     print(f"grid {ARGS.bpm:g} BPM: bar {BAR:.3f} s, 16th {STEP * 1000:.0f} ms;  C#3 = {midi_to_hz(CS3):.1f} Hz")
     for nn, name, fn in PROBES:
         if only and nn not in only:

@@ -218,15 +218,17 @@ The pattern is already proven by `ungeschrieben.py` and documented in
    Recommended: heavy, and back it off if it hides too much.
 5. Vocoder on the table at all, or straight voice only?
 
-## Clearance (2026-09-06): the first slot is SPOKEN, not sung
+## No Access (2026-09-06): the first slot is SPOKEN, not sung
 
 The next track keeps the sung question open and uses the voice as a
 sample instead: "No access" (three times, before each chorus and in the
 break) and "Access granted" (once, on the final chorus) — spoken into a
-phone, dry, dropped into `/workspace/music/vocals/clearance/` as
+phone, dry, dropped into `/workspace/music/vocals/no_access/` as
 `no_access.wav` and `access_granted.wav`, and treated by
 `instruments/machine.py` into a 1993 sampler speech snippet (band, crude
-dirt, ring mod, retrigger). The speaker is never exposed; the bark fills
-the slot while no take exists (`VOICE_GAIN = 0`). Probe 09 in
-`clearance_probe.py` proves the chain on a stand-in voice. Design and
-placement: `clearance_notes.md`.
+dirt, ring mod, retrigger). The speaker is never exposed; the SH-101 tick
+phrase fills the slot while no take exists (`VOICE_GAIN = 0`). Probe 09
+in `no_access_probe.py` proves the chain on a stand-in voice — verdict:
+"the robot works surprisingly well; impossible to hear what it's saying,
+but it sounds like a voice", which is all the slot needs. Design and
+placement: `no_access_notes.md`.
