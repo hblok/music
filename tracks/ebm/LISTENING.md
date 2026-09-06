@@ -93,6 +93,19 @@ and composed event (`=== SECTION MAP ===`). For Reliquary:
 | hook 2 (pad + strings, the heavier chest) | 32–40 | `32 40` |
 | the cut, the tag, the out | 40–48 | `40 48` |
 
+For No Access (`no_access.py`; layers `bed pad organ stab ticks bass
+drums lead double hit voice fx`; the tempo is fixed at 140, no flag):
+
+| what | bars | `--slice` |
+|---|---|---|
+| the riff naked, the kick, the engine + hit 1 | 0–16 | `0 16` |
+| verse 1 (cluster, dark stab, the ticks from bar 20) | 16–32 | `16 32` |
+| pre-chorus 1 → chorus 1 (offbeat bass, roll, NO ACCESS, hit, refrain) | 32–56 | `32 56` |
+| chorus 1 alone (the refrain in context — the deeper-bass question) | 40–56 | `40 56` |
+| the break (organ, the riff on 8ths, the retrigger, the silent beat) | 96–112 | `96 112` |
+| the final (ACCESS GRANTED, chest 1.3; the double + the arp from 128) | 112–144 | `112 144` |
+| the outro and the fade | 144–160 | `144 160` |
+
 Rule of thumb: slice the section where the changed layer is most
 exposed (the lead in hook 1, the bass in the groove, the strings in
 hook 2), solo it for the voice itself, then the same slice in full for

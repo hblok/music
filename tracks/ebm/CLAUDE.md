@@ -74,17 +74,23 @@ should carry the same three pieces — copy them, don't reinvent.
   Notes: `reliquary_notes.md` §"v2 amendment" / "v3". Iterating in
   place via `LISTENING.md`'s flags — bump `NAME`, never overwrite a
   kept render.
-- **no_access** (working title *Clearance*) — planned 2026-09-06,
-  **probe stage**: the jackhammer archetype (*Backdraft*): 140 BPM, C♯
-  minor, gallop bass, 160 bars ≈ 4:34, seed 18, the refrain declaimed on
-  `dark_lead` (G♯2–A3), a second SH-101 "tick" counter-sequence as the
-  verse voice (**the bark is out** — verdict: "sounds like a burp"), ONE
-  spoken slot ("No access" ×3 / "Access granted" ×1 — the user's own
-  spoken take through `instruments/machine.py`'s ring mod, the ticks
-  standing in until then). Notes: `no_access_notes.md` (+ amendments);
-  `no_access_probe.py` renders the inspected samples to
-  `/workspace/music/ebm/no_access_probe/` — the track script
-  `no_access.py` is written only after their verdicts.
+- **no_access** (working title *Clearance*) — `no_access.py` →
+  `no_access.wav` (v1, 2026-09-06): the jackhammer archetype
+  (*Backdraft*): 140 BPM, C♯ minor, gallop bass, 160 bars = 4:34, seed
+  18, hook target 8. The refrain declaimed on `dark_lead` (G♯2–A3, chest
+  1.0 → 1.3); a second SH-101 "tick" counter-sequence as the verse voice
+  (**the bark is out** — verdict: "like a burp; doesn't fit anywhere in
+  our EBM set"); the ♭2 cluster in the verses, the pad and stabs an
+  octave ABOVE the voice in the choruses (the probe-07 lesson: a
+  baritone voice under a pad reads muted); the low organ through the
+  break; the deeper bass via the SH-101 sub square + a low shelf; a
+  fade. ONE spoken slot ("No access" ×3 / "Access granted" ×1) —
+  instrumental in v1 (the tick phrase retriggered / plain, `VOICE_GAIN
+  = 0`), wired for the user's own spoken take through
+  `instruments/machine.py`'s ring mod in a v2. Notes:
+  `no_access_notes.md` (plan + amendments + the v1 render note);
+  probes: `no_access_probe.py` → `/workspace/music/ebm/no_access_probe/`.
+  Listen verdict pending.
 
 ## The Frankfurt-trance trap (load-bearing — read before writing a melody)
 

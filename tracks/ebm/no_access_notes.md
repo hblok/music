@@ -364,3 +364,42 @@ Extra problem: The bark. It sounds stupid: like somebody saying "Aaa" or "Ahhh" 
     singing; the robot chain hides everything but the rhythm of the
     words — which is all that carries.)
     Recording: I don't have time right now, so let's go without. However, let's keep the idea, and maybe we can come back to it in a v2.
+
+## v1 render (2026-09-06) — `no_access.py` → `no_access.wav`
+
+From the round-2 answers: the ticks kept ("typing a code on a numeric
+keypad"); the organ throughout the break; the spoken slot instrumental
+(`VOICE_GAIN = 0`; the tick phrase retriggered = denied, plain =
+granted — Q14: the takes maybe in a v2, the chain is wired); **the
+deeper bass (Q12)** done in the instruments and the bus, not in the
+refrain's timbre: the SH-101 sub square 0.4 → 0.6 (verses, pre, break,
+outro) and 0.85 (choruses and the turnaround), the kick body longer
+(`decay=6`), weights bed 0.26 → 0.30 / bass 0.36 → 0.40 / drums 0.42 →
+0.44, and a +2.5 dB low shelf below 90 Hz on the master (the reliquary
+chain plus one shelf; still no pump, no sub-boom). The refrain's chest
+1.0 (chorus 1) → 1.2 (chorus 2) → 1.3 (final).
+
+**Verify 13 re-aimed, together with this note (VERIFY.md).** The first
+render measured sub-60 share 0.13–0.21 where the kick plays; after the
+levers 0.19 (verses) to 0.31 (choruses). The 60 Hz line splits the key:
+C♯3's sub square sits at 69 Hz (above the line), A2's and G♯2's at 55
+and 52 Hz (below it), so a verse on the C♯ pedal can only score with the
+kick's tail while a chorus scores whenever the loop visits A and G♯m.
+The line was the artefact, not the weight: the same render measures
+**sub-80 share 0.56–0.67** where the kick plays (verses 0.58, choruses
+0.67 — the arc intact). The check is now sub-80 in 0.45–0.75 where the
+kick plays (the ceiling guards against mud); sub-60 stays printed.
+
+Other v1 details not in the plan: figure C is not used under the
+offbeat cell (its 16th pickup would land on a bass note and fail the
+check by construction); pre-chorus and outro stabs at 0.8, chorus 2 and
+the final at 1.0 (what makes chorus 2 > chorus 1, since every voice is
+peak-normalised); the roll's first bar is 8ths, its second 16ths →
+32nds; a one-bar downsweep after each chorus hit; the silent beat and
+the fade are applied to the mastered mix (bar 111.75–112; bars
+156–160). All 40 checks pass. Render time ≈ 45 s. Integrated loudness
+−13.2 LUFS (reliquary v3.3: −14.9; the streaming target is about −14 —
+a notch hot, which is the jackhammer, not a fault; the tanh glue holds
+the true peak at 0.92 and the final-chorus crest at 4.1).
+
+**Listen verdict: pending.** Slices per section: `LISTENING.md`.
