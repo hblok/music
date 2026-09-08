@@ -403,3 +403,11 @@ a notch hot, which is the jackhammer, not a fault; the tanh glue holds
 the true peak at 0.92 and the final-chorus crest at 4.1).
 
 **Listen verdict: pending.** Slices per section: `LISTENING.md`.
+
+Ticks: The typing ticks are still fun. However, there is too much and they last too long (30 to 40 seconds). First of all, it is a kind of intruding sound, so it gets tedious to listen to. However, WE SHOULD NOT change the sound. It works well. Rather, we should slim it down. Now, let's think about analogy: Access: one would type in a short PIN code or maybe a password, that's just a handful or dozen of ticks or keys (a few seconds at most). And in there, it would be good if there was an "answer" sound; a similar tick, but going up or down according "access denied" or "access granted". That similar to what we already have, where the ticks become part of the melody.
+
+Bass: The bass is still missing. Or rather, maybe the bass is ok, but what is missing is an actual beat (apart from the drums, which are fine). Anyway, we had a simmilar problem in silver_wire_v3 (tracks/trance/silver_wire_v2_notes.md). Read the notes there and maybe the script to see how we managed to add a much deeper full bass. I think that should work here as well.
+
+Voice: Well, here there are more ticks. I thought we had an inaudible computer voice somewhere? In the probes? Well, I promised to say a few words, but still to ready, so let's try a TTL voice.
+
+Other things which are already good: bed; pads; stabs; drums (and hi hat). The lead - love the melody and darkness here. Organ (but there isn't much of it, could be more). 

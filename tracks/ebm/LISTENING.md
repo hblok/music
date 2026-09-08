@@ -111,6 +111,22 @@ exposed (the lead in hook 1, the bass in the groove, the strings in
 hook 2), solo it for the voice itself, then the same slice in full for
 the balance.
 
+## Layer vs. stem options
+
+They're the same twelve things looked at two different ways. A layer is a group of instruments in the script; both flags select from the same LAYER_NAMES list (bed pad organ stab ticks bass drums lead double hit voice fx). The difference is what gets written and what has been applied to it.
+ 
+--solo lead,bass renders one mix file containing only those layers, run through the full master (highpass, both shelves, the tanh glue, the fade, the silent beat). Everything else is skipped entirely, so it is also faster. The result is peak-normalised on its own, so its level is not the in-context level. This is the "hear the voice as the master treats it" option, and it pairs with --slice for a section and --suffix so the file gets a distinct name.
+ 
+--stems renders the full mix as usual and additionally writes one file per layer into no_access_stems/. Each stem is post-reverb and weighted (the layer's WEIGHTS value applied) but pre-master. The stems are the exact pieces that were summed into the mix, so you can drop them into a DAW and rebalance, but they do not add up bit-for-bit to the mix because the master's tanh and shelves were applied to the sum, not to each stem.
+
+In practice:
+- Judging a voice's timbre or a melody: --solo, because the master is part of how it sounds.
+- Judging balance, or checking what a layer contributes at its real level: --stems, because the weights are baked in and nothing is renormalised.
+- Both are partial renders in the sense that the checks are skipped for --solo, --mute and --slice. --stems does not skip the checks, since the piece itself is still fully rendered.
+   
+The flags combine, so --solo lead --slice 40 56 --suffix _leadA is the usual A/B call, and --stems --slice 40 56 gives you the layers of chorus 1 only.
+
+
 ## Before the track exists: the probe script
 
 New for no_access (2026-09-06): `no_access_probe.py` renders the
