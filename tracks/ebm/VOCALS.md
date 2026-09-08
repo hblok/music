@@ -81,6 +81,9 @@ In descending order of how much it actually matters:
 3. **Doubling and harmony.** A detuned copy, an octave-below or
    fifth-above generated from the take (VNV's baritone frequently sits
    under an octave double), the second real take where one exists.
+   Taken to its limit this is the Enya method — one voice stacked
+   hundreds of times into a choir, then a cathedral hall: parked in
+   `../../inspiration/Enya_vocal_stack.md` for a later track.
 4. **Vocoder / talkbox** (optional). The voice as modulator against a
    Juno carrier. Genre-legitimate, more futurepop than 1993, and a
    useful middle path if the user would rather not be exposed —
