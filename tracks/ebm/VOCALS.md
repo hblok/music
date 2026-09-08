@@ -232,3 +232,12 @@ in `no_access_probe.py` proves the chain on a stand-in voice — verdict:
 "the robot works surprisingly well; impossible to hear what it's saying,
 but it sounds like a voice", which is all the slot needs. Design and
 placement: `no_access_notes.md`.
+
+**Amended 2026-09-08 (no_access v2).** No take yet ("still not ready"),
+and the user chose a TTS voice for the slot instead: edge-tts
+`en-GB-SoniaNeural`, cached once, through `machine.py` — the denials
+ring-modulated (the robot), the grant clean. This narrows the "TTS is
+ruled out" above to what it was always about: TTS *singing* and TTS as
+a *performer*. A machine saying two words in a sample slot is the slot
+working as designed. The own-take path is unchanged and takes priority
+whenever a file appears in `/workspace/music/vocals/no_access/`.

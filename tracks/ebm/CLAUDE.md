@@ -74,8 +74,9 @@ should carry the same three pieces — copy them, don't reinvent.
   Notes: `reliquary_notes.md` §"v2 amendment" / "v3". Iterating in
   place via `LISTENING.md`'s flags — bump `NAME`, never overwrite a
   kept render.
-- **no_access** (working title *Clearance*) — `no_access.py` →
-  `no_access.wav` (v1, 2026-09-06): the jackhammer archetype
+- **no_access** (working title *Clearance*) — `no_access_v2.py` →
+  `no_access_v2.wav` (current; `no_access.py` → `no_access.wav` is v1,
+  kept for its verdict): the jackhammer archetype
   (*Backdraft*): 140 BPM, C♯ minor, gallop bass, 160 bars = 4:34, seed
   18, hook target 8. The refrain declaimed on `dark_lead` (G♯2–A3, chest
   1.0 → 1.3); a second SH-101 "tick" counter-sequence as the verse voice
@@ -87,8 +88,12 @@ should carry the same three pieces — copy them, don't reinvent.
   fade. ONE spoken slot ("No access" ×3 / "Access granted" ×1) —
   instrumental in v1 (the tick phrase retriggered / plain, `VOICE_GAIN
   = 0`), wired for the user's own spoken take through
-  `instruments/machine.py`'s ring mod in a v2. Notes:
-  `no_access_notes.md` (plan + amendments + the v1 render note);
+  `instruments/machine.py`'s ring mod in a v2. **v2 (2026-09-08):** the
+  ticks became six PIN attempts with a falling/rising answer (a keypad,
+  not a carpet); the silver_wire pump + sub-boom for "an actual beat"
+  (a declared deviation from 1993); the slot filled by a cached edge-tts
+  phrase through the robot chain; organ under the pre-choruses and the
+  fade. Notes: `no_access_notes.md` (plan + amendments + v1 + v2 notes);
   probes: `no_access_probe.py` → `/workspace/music/ebm/no_access_probe/`.
   Listen verdict pending.
 
@@ -152,9 +157,13 @@ Specific to this directory:
 - **Seeds are thematic**: `1993` (the album), `1991` (the *Ashes to
   Ashes* single, reserved for a future track built on that archetype),
   `18` (TATCD 018).
-- English titles. Instrumental only — no spoken drop, no TTS singing
-  (the repo-wide rule; the harsh-vocal slot is `instruments/bark.py`,
-  a synthesized shout-shape, never speech).
+- English titles. The voice: see `VOCALS.md`. As of 2026-09-08 (no_access
+  v2) **TTS is allowed for the SAMPLE slot only** — a short machine phrase
+  through `instruments/machine.py`, cached once under
+  `/workspace/music/vocals/<track>/tts/`, a user's own take taking
+  priority; TTS singing stays dead (the `../trance/unsung.py` verdict).
+  The bark (`instruments/bark.py`) is a library sound, not to be planned
+  on ("like a burp", 2026-09-06).
 - Revisions: same conventions as `../trance` — a new WAV name per
   iteration, never overwrite a render the user has listened to. In
   this directory that name comes from the `NAME` constant + `--suffix`

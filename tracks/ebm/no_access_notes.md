@@ -411,3 +411,71 @@ Bass: The bass is still missing. Or rather, maybe the bass is ok, but what is mi
 Voice: Well, here there are more ticks. I thought we had an inaudible computer voice somewhere? In the probes? Well, I promised to say a few words, but still to ready, so let's try a TTL voice.
 
 Other things which are already good: bed; pads; stabs; drums (and hi hat). The lead - love the melody and darkness here. Organ (but there isn't much of it, could be more). 
+
+## v2 amendment (2026-09-08) — `no_access_v2.py` → `no_access_v2.wav`
+
+**The v1 verdict** (above): the ticks "still fun" but too much and too
+long — "a PIN code is a handful or a dozen keys, a few seconds, and then
+an ANSWER sound going up or down"; the bass "still missing — or rather,
+what is missing is an actual beat", pointing at `silver_wire_v3`; the
+voice slot "more ticks — I thought we had a computer voice? let's try a
+TTS voice"; the organ "could be more"; bed, pads, stabs, drums, the
+lead and its melody: good. Same seed, bars, form, refrain, harmony.
+
+1. **The keypad — ticks as events.** The carpet (30–40 s stretches) is
+   gone. Six **PIN attempts**, the same sound: eight keys on 16ths
+   (`x.xx.x.xx.xx....`, the code C♯5 G♯4 D5 C♯5 G♯4 C♯5 D5 G♯4 every
+   time) then the **answer** on beat 4 — two longer ticks **falling**
+   D5 → G♯4 (the tritone: denied) or **rising** G♯4 → C♯5 held (the
+   tonic: granted). Attempts at bars 24, 38, 64, 78, 103 (denied) and
+   111 (the code typed on beats 1–3, the silent beat, the rising answer
+   ON the final chorus's downbeat: granted). Ticks now sound 3.6 s of
+   275 s; each attempt ≤ 2.3 s. The answer is what the verdict asked
+   for: the tick becoming part of the music, not a texture.
+2. **The beat — the silver_wire_v3 recipe**, a declared deviation from
+   the 1993 "no pump, no sub-boom" (§5 of the Apop blueprint): the
+   user's ear over the blueprint. A **sidechain pump** on the sustained
+   layers (bed, pads, organ, stabs, bass — never the lead, the double,
+   the voice, the ticks, the hit), 55 % dip per 4-on-the-floor kick,
+   `1 − 0.55·e^(−t/0.10)`, floor 0.30 (never reached: 0.45), roll bars
+   excluded; 512 ducked beats, mean 0.87 in a chorus, 1.00 in the break
+   (the kick is out, so the bed stands still there — the contrast is
+   the point). A **sub-boom** sine (own layer, weight 0.18, not pumped,
+   dry) on every ducked beat, an octave under the bass root (69 / 55 /
+   52 Hz), 0.40 s with a short pitch drop and a hard release — the
+   kick's low end. Master unchanged (HP 30, +2.5 dB below 90 Hz, +0.22
+   above 3 kHz, tanh 1.12, 0.92). Measured: sub-80 share 0.71–0.73 in
+   the choruses (v1: 0.67; the 0.75 ceiling holds), crest 3.9 (no
+   growl), true peak 0.92.
+3. **The voice — TTS in the slot.** The user's decision (Q14 revisited):
+   "let's try a TTS voice". edge-tts `en-GB-SoniaNeural` at −10 %,
+   synthesized ONCE and cached in `/workspace/music/vocals/no_access/
+   tts/` (the first render needs the network; after that the file is
+   the asset — the render is reproducible given it). A user's own take
+   at `/workspace/music/vocals/no_access/<name>.wav` takes priority.
+   Treatment: the denials ring-modulated at C♯3 (the robot the probe
+   verdict liked), the grant through the intercom band and dirt only
+   (intelligible — the payoff should be understood). The "No access"
+   trims to 1.0 s, "Access granted" to 1.3 s. Placement: denied → the
+   voice on the next downbeat (39, 79; 104 retriggered ×3, the code
+   jams); granted → the rising answer and the hit on 112, the voice on
+   beat 2. `VOICE_GAIN = 0` renders the answers alone; a missing voice
+   (offline, no cache) is printed, not failed.
+   **Rule change, tracks/ebm only:** TTS is allowed for the SAMPLE slot
+   (short machine phrases through `machine.py`), because the slot wants
+   a machine; TTS singing stays dead (`../trance/unsung.py`).
+4. **More organ.** Besides the break: under both pre-choruses (open
+   fifths following C♯m / A / G♯m, one bar each, 0.8) and under the
+   outro's fade (152–160, the low i at cutoff 500 — the piece ends on
+   organ + bed + the riff). Organ weight 0.24 → 0.26. Not in the
+   choruses: the refrain's room.
+
+Verify additions (all printed, all pass): the keypad block (6 attempts,
+5 denied then 1 granted, every attempt < 3 s, ticks sounding < 20 s);
+the two-voice separation now excepts the granted answer on bar 112;
+the beat block (pump floor / ducked beats / mean in chorus 1 between
+0.75 and 0.95 and exactly 1.00 in the break; one boom per ducked beat;
+no boom after the drums stop); the slot block prints the source of
+each phrase. -13.0 LUFS integrated (v1: −13.2).
+
+**Listen verdict: pending.**
