@@ -49,7 +49,11 @@ user has listened to — new demos get new names).
   zero-order-hold decimation (`hold=2` ≈ a 22 kHz sample, 3 ≈ 15 kHz),
   13-bit quantise, optional lowpass.  Sampled things default `hold=2`
   (drums, bass, hit uses 3); analog things default `hold=1` (Juno, 808,
-  guitar).
+  guitar).  **The 1999 dialect turns it off**: `hold=1`
+  and the per-instrument `lowpass` ceiling lifted is the whole era move
+  from Groth's 13-bit mono EPS to Harris's ASR-10 (`demo_rom.py`).  The
+  13-bit quantise always runs and is not exposed by any instrument; it
+  is cosmetic, so it stays unexposed until a listen says otherwise.
 - **Caching:** `note`, `voice`, `hit`, `chug`, `bark` and the 808 hits are
   `lru_cache`d — pass tuples, never modify a returned array.
 - **Randomness:** one shared `_common.rng` (seed 1993); a track calls
@@ -72,6 +76,7 @@ user has listened to — new demos get new names).
 | `seethe.py` | `seethe` | the Stitch bed: pink-tilted noise through a slowly swept resonant LP, sub with a slow beat, grit pulse, breath, optional 8th-note `throb`; a long bed, not an event | `sweep`, `rate`, `res`, `sub`, `grit`, `throb` |
 | `dark_lead.py` | `dark_lead` | the 1993 refrain voice (reliquary v2/v3.3, promoted): hollow pulse, no chorus, slow shallow vibrato, an octave-below saw chest | `chest` (0.8 → 1.0 = the voice deepens) |
 | `machine.py` | `machine`, `retrigger` | the vocal-slot TREATMENT (takes any mono array — a spoken take, or a bark): intercom band, crude dirt (hold 3, 8 bits), ring mod, drive; the sequencer retrigger stutter | `band`, `hold/bits`, `ring_hz`, `drive`; `retrigger(x, step_s, n, head)` |
+| `rom.py` | `strings`, `choir`, `voice` | the 1999 ROM orchestra (VNV's four sample modules): a detuned unison saw stack, slow attack, static filter — bowed, or sung through formants. Stiff by construction (fixed detune phases), no flutter, no drift, no chorus. `hold=1` by default | `voices`/`detune` (the stack), `attack`, `cutoff`, `octave`, `bow`, `vowel`/`q` (choir), `hold`/`lowpass` (era) |
 | `riff.py` | `chug`, `riff` | the one guitar: Karplus-Strong power chord, double-tracked, palm-mute or open, tanh amp, cab, body thump. A texture, one track only (declared) | `drive`, `mute`, `body`, `cab`, cell with x/b/3/5/o |
 
 `_common.py` — SR, BPM/STEP/BAR, `midi_to_hz`, `norm`, `dirt`, `gate`,
@@ -88,6 +93,7 @@ user has listened to — new demos get new names).
 | `demo_arp808.py` | the *Arp (808 Edit)* archetype: 808 pattern under a Juno updown arp + pad |
 | `demo_seethe.py` | the *Stitch* archetype: half-time, slam on 3, seethe bed, cluster pad, low barks |
 | `demo_riff.py` | the *Burnin' Heretic* archetype: chugs as texture from bar 5, open chord last |
+| `demo_rom.py` | **the 1999 dialect**: the ROM orchestra over the kit with its dirt off; bars 5-8 are the registral lift (same chords, strings an octave up, chant under). Prints the <400 Hz share that proves the register moved |
 
 Raw on purpose: no reverb, no sidechain, no master — those are the track's.
 
