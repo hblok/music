@@ -119,8 +119,9 @@ should carry the same three pieces — copy them, don't reinvent.
   `procession_probe.py` → `/workspace/music/ebm/procession_probe/`
   renders the 16 probes; no track script until they are heard.
 
-- **litany** (working title) — **planned, in review**:
-  `litany_notes.md` is the design doc for the fourth track, the
+- **ruin** (titled 2026-09-11, was *Litany* until it collided with
+  `../dune/generate_litany_against_fear.py`) — **planned, in review**:
+  `ruin_notes.md` is the design doc for the fourth track, the
   *Spiritual Reality* **hammer** archetype (109 BPM, F♯ minor, ~3:58),
   which closes the 1993 set: slam 122, jackhammer 140, hammer 109. No
   new instruments — the whole track is library calls. Its load-bearing

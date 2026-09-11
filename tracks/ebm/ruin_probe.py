@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
-"""Litany — the probes (the hammer, tracks/ebm's fourth track).
+"""Ruin — the probes (the hammer, tracks/ebm's fourth track).
 
-Twelve short samples at 109 BPM of the drone argument, the sub at F#,
+Thirteen short samples at 109 BPM of the drone argument, the sub at F#,
 the hats question, the chorus roots, the hammer snare, the space, the
-petition, the toll and the final's kick — each printed with the
+petition, the final's kick and — after the toll was rejected — three
+candidate openings — each printed with the
 inspection the track's verify block will print, heard and checked
-BEFORE litany.py exists.  Notes: litany_notes.md ("The probes").
+BEFORE ruin.py exists.  Notes: ruin_notes.md ("The probes").
 
 The recommendations in the notes are the DEFAULT state here, and every
 ladder keeps the alternative next to it, so answering the ten questions
@@ -16,9 +17,9 @@ One refinement on the notes: the engine cell is `hammer`
 "and" of 4, which would be a pitch event, and this archetype's whole
 claim is that the pitch never moves.  The notes are amended to match.
 
-    python3 litany_probe.py                   # all, to /workspace/music/ebm/litany_probe/
-    python3 litany_probe.py --only 01a,01b    # a subset
-    python3 litany_probe.py --bpm 100         # another tempo (files suffixed _100)
+    python3 ruin_probe.py                   # all, to /workspace/music/ebm/ruin_probe/
+    python3 ruin_probe.py --only 01a,01b    # a subset
+    python3 ruin_probe.py --bpm 100         # another tempo (files suffixed _100)
 
 Raw: mono, no master; the refrain probes carry a 0.25 reverb so the
 voice is judged as it will sit.  Seed 2018.  A/B any pair with
@@ -37,10 +38,10 @@ HERE = pathlib.Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE / "instruments"))
 import _common                                                            # noqa: E402
 
-ap = argparse.ArgumentParser(description="Litany probes — see the docstring")
+ap = argparse.ArgumentParser(description="Ruin probes — see the docstring")
 ap.add_argument("--bpm", type=float, default=109.0)
 ap.add_argument("--only", default="", help="comma-separated probe ids, e.g. 01a,04")
-ap.add_argument("--out", default="/workspace/music/ebm/litany_probe")
+ap.add_argument("--out", default="/workspace/music/ebm/ruin_probe")
 ARGS = ap.parse_args()
 _common.set_tempo(ARGS.bpm)                     # BEFORE the instrument imports (they bind the grid)
 _common.seed(2018)                              # the year the record was remastered from the tapes
@@ -50,7 +51,7 @@ from eps_hit import hit                                                   # noqa
 from eps_kick import kick                                                 # noqa: E402
 from eps_snare import snare                                               # noqa: E402
 from hats import hat                                                      # noqa: E402
-from juno import organ, pad                                               # noqa: E402
+from juno import noise_sweep, organ, pad                                  # noqa: E402
 from seethe import seethe                                                 # noqa: E402
 from sh101_bass import CELLS, note                                        # noqa: E402
 
@@ -65,7 +66,7 @@ ROOT_OF = {FSM_HI: FS2, D_HI: D2, CSM_HI: CS2}
 HIT_CHORD = (42, 49, 54, 57)                        # F#2 C#3 F#3 A3
 ORGAN_LOW = (42, 49, 54)
 
-# the petition (bars 1-4) and its response (bars 5-8) — litany_notes.md
+# the petition (bars 1-4) and its response (bars 5-8) — ruin_notes.md
 HOOK = ["F#3 - F#3 F#3 G3 - F#3 -", "E3 - - - . F#3 E3 C#3", "D3 - C#3 D3 E3 - D3 -", "C#3 - - - - - . .",
         "F#3 - F#3 F#3 G3 - F#3 -", "E3 - - - . D3 C#3 D3", "E3 - D3 C#3 A2 - - -", "F#2 - - - - - . ."]
 PETITION = HOOK[:4]
@@ -494,12 +495,75 @@ def p09():
     return x, 6
 
 
+def p10():
+    """THE OPENING, take two.  The toll was rejected ("not great",
+    2026-09-11) and it was the whole of bars 0-8, so this is three
+    candidates with nothing decided between them — try something, adjust
+    later.  Each is 8 bars and each ends the same way, with the engine
+    running, so only the way IN differs.
+
+    a) THE NAKED BLOW: the hammer announces itself.  Kick and slam
+       together on beats 1 and 3, nothing else, 1.1 s of silence between
+       blows at this tempo.  The bed creeps in at bar 2, the pedal at 4.
+       No other track in the directory opens on a bare drum.
+    b) THE WAY IN: no_access v3's device, which the ear has already
+       passed ("works quite well").  The bed swells from silence, one low
+       organ chord, one slow noise swell; the kick lands at bar 4.
+    c) NO OPENING: the engine simply starts, full hammer at bar 0.  The
+       "skip long intros" rule taken to its limit — and the reading that
+       risks repeating the "starts abruptly" verdict."""
+    x = steps_buffer(24)
+    blow_steps = (0, 8)
+
+    # (a) the naked blow
+    K, S = kick(decay=5.0), snare(plate_decay=3.0, cut=PLATE_CUT)
+    for b in range(2):
+        for st in blow_steps:
+            place(x, K, b * 16 + st, GAIN["kick"])
+            place(x, S, b * 16 + st, GAIN["snare"])
+    ramp = bed(6)
+    n = int(2 * BAR * SR)
+    ramp[:n] *= 0.5 - 0.5 * np.cos(np.pi * np.arange(n) / n)       # creeping in over bars 2-3
+    mix(x, ramp, 2, GAIN["bed"])
+    mix(x, bassline(4, FS2), 4, GAIN["bass"])
+    d, _ = drums(4)
+    mix(x, d, 4)
+    mix(x, line_on(PETITION[:2], 4, fn=organ), 6, GAIN["organ"])
+
+    # (b) the way in
+    swell = bed(8)
+    n = int(2 * BAR * SR)
+    swell[:n] *= 0.5 - 0.5 * np.cos(np.pi * np.arange(n) / n)
+    mix(x, swell, 8, GAIN["bed"])
+    mix(x, organ(ORGAN_LOW, 3 * BAR, depth=0.0), 8, GAIN["organ"] * 0.8)
+    mix(x, noise_sweep(3 * BAR, f0=150.0, f1=2500.0, res=2.0), 8, 0.12)
+    d, _ = drums(4)
+    mix(x, d, 12)
+    mix(x, bassline(4, FS2), 12, GAIN["bass"])
+    mix(x, line_on(PETITION[:2], 4, fn=organ), 14, GAIN["organ"])
+
+    # (c) no opening
+    seg, _ = verse(8, hat_steps=HAT_8)
+    mix(x, seg, 16)
+
+    for i, what in enumerate(("a) the naked blow", "b) the way in (no_access v3's device)", "c) no opening at all")):
+        print(f"    bars {8 * i}-{8 * i + 7}: {what}")
+    lvl = [20 * np.log10(np.sqrt(np.mean(x[int((8 * i) * BAR * SR): int((8 * i + 2) * BAR * SR)] ** 2)) + 1e-12)
+           for i in range(3)]
+    print(f"    first two bars, RMS dBFS: {[round(v, 1) for v in lvl]}  (the way in should be the quietest)")
+    check("the three openings are genuinely different in level", max(lvl) - min(lvl) > 6.0,
+          f"({max(lvl) - min(lvl):.1f} dB spread)")
+    print("    no eps_hit in any reading: the toll is out of all three")
+    return x, 24
+
+
 PROBES = [("01a", "drone_flat_cell", p01a), ("01b", "drone_as_phrase", p01b),
           ("01c", "phrase_with_moving_pitch", p01c), ("02", "sub_at_fsharp", p02),
           ("03", "hats_none_8ths_16ths", p03), ("04", "chorus_roots", p04),
           ("05", "hammer_snare", p05), ("06", "the_space", p06),
           ("07a", "petition", p07a), ("07b", "petition_and_response", p07b),
-          ("08", "the_toll", p08), ("09", "final_kick_to_8ths", p09)]
+          ("08", "the_toll", p08), ("09", "final_kick_to_8ths", p09),
+          ("10", "the_opening_take_two", p10)]
 
 if __name__ == "__main__":
     only = {x.strip() for x in ARGS.only.split(",") if x.strip()}

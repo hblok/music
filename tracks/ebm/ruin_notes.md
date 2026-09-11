@@ -1,4 +1,4 @@
-# Litany — design notes (2026-09-11, the fourth tracks/ebm/ track)
+# Ruin — design notes (2026-09-11, the fourth tracks/ebm/ track)
 
 **The hammer.** A ~3:58 song in the mould of *Soli Deo Gloria*'s
 *Spiritual Reality* — the record's **hammer** archetype and the last
@@ -15,13 +15,16 @@ collected so far was about something dragging; at 109 the drag risk is
 structural, not incidental, so the counter-measures are declared up
 front rather than patched in later.
 
-**The title.** A litany is a prayer of repeated petitions with a fixed
-response — which is exactly what a mechanical 8th-note bass that never
-leaves the root *is*. The form names the mechanism. Liturgical, like
-`reliquary` and `procession`, and English. Alternatives in Q1.
+**The title: Ruin** (answered 2026-09-11). The working title was
+*Litany* — a prayer of repeated petitions with a fixed response, which
+is exactly what a mechanical 8th-note bass that never leaves the root
+*is* — but it collided with `../dune/generate_litany_against_fear.py`.
+*Ruin* keeps the register: English, one word, and what a hammer leaves
+behind. The petition/response vocabulary below is unchanged; it names
+the refrain's two halves, not the track.
 
 **Workflow — probe first** (the standing rule): nothing is rendered as
-a track until it has been heard small. `litany_probe.py` renders ~11
+a track until it has been heard small. `ruin_probe.py` renders ~11
 short samples at 109 and prints the inspection the track's verify block
 will print; every probe is tied to a numbered question below. The track
 script is written only after the probe verdicts.
@@ -37,7 +40,7 @@ script is written only after the probe verdicts.
   free here — the directory holds A minor (`reliquary`, `procession`)
   and C♯ minor (`no_access`). 109 is free repo-wide; the nearest
   neighbours are 104 (`night_pursuit`) and 112 (`kanly`).
-- **Script** `tracks/ebm/litany.py` → `/workspace/music/litany.wav`
+- **Script** `tracks/ebm/ruin.py` → `/workspace/music/ruin.wav`
   + `.flac`, one `NAME` constant, the `LISTENING.md` flags (`--solo`,
   `--mute`, `--slice`, `--suffix`, `--stems`), imports from
   `instruments/`, checks skipped on a partial render. Everything else
@@ -51,7 +54,7 @@ script is written only after the probe verdicts.
   strings, no arp wall, no supersaw, no 808 (that kit is the
   interlude/bookend frame and `procession` owns the device).
 - **The refrain is new material** — unlike `procession`, which quotes
-  Reliquary's hook. Litany is not part of the Part 1 / Part 2 pair;
+  Reliquary's hook. Ruin is not part of the Part 1 / Part 2 pair;
   it is a standalone song in a third key.
 - **One continuous cursor**: the seethe bed runs unbroken from bar 0 to
   the tail; every seam is crossed by it plus one named device. The
@@ -129,7 +132,7 @@ pedal (the EBM tell); choruses follow the loop bar by bar.
 
 | bars | time | section | what enters |
 |---|---|---|---|
-| 0–8 | 0:00 | **THE TOLL** | the bed alone, then one struck hit on each downbeat; the kick lands at bar 4; the petition quoted once on the organ from bar 6 (thesis, uncounted) |
+| 0–8 | 0:00 | **THE OPENING** (device undecided, probe `10`) | the toll is rejected; three candidates render as (a) the naked blow, (b) the way in, (c) no opening. All three land the kick by bar 4 and quote the petition on the organ from bar 6 (thesis, uncounted) |
 | 8–24 | 0:17 | VERSE 1 (16) | the pedal engine + kick every beat + the slam on 2 and 4; no hats for the first 8 (Q3); pad on the pedal from bar 16 |
 | 24–32 | 0:52 | PRE 1 (8) | the organ enters; the bass to half-time; the hole on beat 4 of bar 31 |
 | 32–48 | 1:10 | CHORUS 1 (16) | the petition ×4, chest 1.0; the roots move F♯–D–C♯–F♯; choir hit on each downbeat of 8 |
@@ -182,7 +185,7 @@ F♯2 under the moving chords. Probe 04 settles it.
 
 No `kit808`, no `riff`, no `bark`, no `machine`.
 
-## The probes (`litany_probe.py` → `/workspace/music/ebm/litany_probe/`)
+## The probes (`ruin_probe.py` → `/workspace/music/ebm/ruin_probe/`)
 
 ~11 samples, 6–24 s, mono, no master; the refrain probes carry a 0.25
 reverb so the voice is judged as it will sit. Seed per Q1, `--bpm` to
@@ -202,6 +205,7 @@ move the grid, `--only` for a subset.
 | `07b` | the full 8-bar Q/A (petition + response), chest 1.3 — the final chorus's voice |
 | `08` | **the toll** — the chopped choir hit at `dur` 0.25 / 0.45 / 0.80 s under a lone kick. Does a struck bell need to exist, or is the EPS hit the toll? (Q6) |
 | `09` | **the final's kick to 8ths** — the same chorus bars with quarters, then 8ths (Q7) |
+| `10` | **the opening, take two** — the naked blow / the way in / no opening at all, 8 bars each, after the toll was rejected |
 
 Ladders to listen in: `01a` → `01b` → `01c`, the three levels inside
 `02`, `03`, `05` and `08`, the three root choices inside `04`.
@@ -263,6 +267,20 @@ truncation, master guardrails) plus, specific to this track:
    probe 08 says it reads as a stab and not a bell, the fallback is a
    detuned `eps_kick` at 55 Hz doubling it, still no new module.
    Answer: No - the toll was not great.
+   **Take two (2026-09-11): "no ideas right now — let's just try
+   something and adjust later."** Probe `10` renders three candidate
+   openings with nothing decided between them, each 8 bars ending with
+   the engine running, so only the way in differs: **(a) the naked
+   blow** — kick and slam together on beats 1 and 3, nothing else, 1.1 s
+   of silence between blows, the bed creeping in at bar 2 and the pedal
+   at 4; **(b) the way in** — no_access v3's device, which the ear has
+   already passed, the bed swelling from silence under one low organ
+   chord and a slow noise sweep, kick at bar 4; **(c) no opening at
+   all** — the engine simply starts, the "skip long intros" rule taken
+   to its limit, and the reading that risks repeating the "starts
+   abruptly" verdict. Measured first two bars: **-10.4 / -24.1 / -5.7
+   dBFS**, an 18.4 dB spread, so they are genuinely three different
+   proposals and not three mixes of one. No `eps_hit` in any of them.
 
 7. **The kick to 8ths in the final chorus.** Recommended yes, final
    only — at this tempo it is the one energy move available that adds
@@ -289,8 +307,8 @@ truncation, master guardrails) plus, specific to this track:
 
 ## Probe amendments (2026-09-11, written and rendered, before any listening)
 
-`litany_probe.py` is written and its 13 files are rendered to
-`/workspace/music/ebm/litany_probe/`; all probe checks pass. The
+`ruin_probe.py` is written and its 13 files are rendered to
+`/workspace/music/ebm/ruin_probe/`; all probe checks pass. The
 recommendations above are the probe's DEFAULT state and every ladder
 keeps its alternative, so answering the ten questions later costs one
 re-render. Three things changed on the way, and the plan changes with
@@ -341,5 +359,5 @@ is real rather than assumed.
    drone-as-phrase is good, phrase with moving pitch is als good.
 
 2. Answer the ten questions above, now that the alternatives are audible.
-3. Only then `litany.py`.
+3. Only then `ruin.py`.
 

@@ -116,10 +116,10 @@ and uneasy at once.
   opening upward into strings. The lift is *registral*, not harmonic —
   the chords need not go anywhere for "the heavens" to emerge; the
   orchestra simply arrives an octave up.
-- **Repo shape:** ~108 is almost exactly `litany`'s 109 (the Apop
-  hammer, `tracks/ebm/litany_notes.md`). **Do not build both.** If a
+- **Repo shape:** ~108 is almost exactly `ruin`'s 109 (the Apop
+  hammer, `tracks/ebm/ruin_notes.md`). **Do not build both.** If a
   VNV track comes from *Kingdom*, either space it well away from
-  Litany in the set or take only its registral-lift device and put it
+  `ruin` in the set or take only its registral-lift device and put it
   on a different tempo.
 
 ### 3. Rubicon — 6:20
@@ -131,7 +131,7 @@ Reviewers note "slight repetitiveness" across six minutes.
   the warning: six minutes of it drew the repetitiveness complaint,
   which is this repo's standing failure mode too.
 - **Repo shape:** a heartbeat kick figure (two blows, not four) with
-  the phrase built into the filter, per the `litany` counter-measure.
+  the phrase built into the filter, per the `ruin` counter-measure.
   Length capped at four minutes.
 
 ### 4. Saviour — 6:59
@@ -302,7 +302,7 @@ directory can open.
 | archetype | model | shape | why |
 |---|---|---|---|
 | **the ascent** | *Saviour* | a long instrumental build to a warm pad-stack refrain, then sustained momentum | the repo is instrumental; so is this track. The highest-value target on the record |
-| **the throb** | *Kingdom* | ~108, heavy low end, chorus lifts the orchestra an octave | strong, but collides with `litany` (109) — space them or move one |
+| **the throb** | *Kingdom* | ~108, heavy low end, chorus lifts the orchestra an octave | strong, but collides with `ruin` (109) — space them or move one |
 | **the pulse** | *Rubicon* | a heartbeat figure carrying the engine, capped at four minutes | good device, proven failure mode; the cap is the fix |
 | *(avoid)* | *Darkangel*, *Legion*, *Standing* | club singles | §5 |
 

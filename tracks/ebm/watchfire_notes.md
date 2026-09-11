@@ -8,7 +8,7 @@ without vocals."* A vocal band arriving at this repo's constitution on
 its own is the whole reason to build it.
 
 This is the directory's **third dialect** and its first track: 1993
-dark-electro is `reliquary` / `no_access` / `procession` / `litany`,
+dark-electro is `reliquary` / `no_access` / `procession` / `ruin`,
 and this is 1999. The era move is one knob on the existing kit plus one
 voice, both now in place — `instruments/rom.py` and `demo_rom.py`,
 rendered 2026-09-11, **verdict pending**. Nothing below survives a bad
@@ -75,7 +75,7 @@ enters underneath at bar 8 and the bass at bar 12, so the groove arrives
 
 This gives the track an opening unlike anything else in the directory —
 `reliquary` opens on a bed, `no_access` on a riff, `procession` on an
-808 quote, `litany` on a struck hit — and it satisfies the thesis-early
+808 quote, `ruin` on a struck hit — and it satisfies the thesis-early
 rule natively, because the thesis is literally what is being built.
 
 ## The refrain — the line that ascends

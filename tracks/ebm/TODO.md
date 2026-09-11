@@ -30,18 +30,22 @@ the A/B and stem workflow, `CLAUDE.md` the directory rules.
 | track | state | what is left |
 |---|---|---|
 | **Procession** (the slam, 122, A minor) | 10 answers + probe verdicts in. The refrain solo `04c` was *"really cool — love it!"*, the beat is `06b`, the bookend stays open | one knob: the slam's snare weight was never picked from 0.90 / 1.15 / 1.40 |
-| **Ruin** (the hammer, 109, F♯ minor; renamed from *Litany*, which collided with a dune track) | 10 answers in; the engine ladder came back *"drone-as-phrase is good, phrase with moving pitch is also good"* | **the toll is rejected**, plus two smaller calls. See below |
+| **Ruin** (the hammer, 109, F♯ minor; renamed from *Litany*, which collided with a dune track) | 10 answers in; the engine ladder came back *"drone-as-phrase is good, phrase with moving pitch is also good"*. Files and script renamed to `ruin_*` | pick an opening from probe `10`, plus two smaller calls. See below |
 | **Watchfire** (the ascent, 126, B minor) | all 8 answers in, every recommendation taken: 126, keep the A4 peak, no arp, rising bass, 16-bar trough | nothing blocking. One genre remark to settle if you want to |
 
 ---
 
 ## 3. The five decisions
 
-1. **Ruin's opening has no device.** Question 6 came back *"No — the
-   toll was not great."* The toll is bars 0–8, the whole opening, and
-   the proposed fallback was a detuned kick doubling the hit. The
-   section needs a new idea before the script can be written. **This is
-   the only true blocker in the directory.**
+1. **Ruin's opening: pick one of three.** The toll was rejected and no
+   replacement idea was to hand, so probe `10` renders three candidates
+   instead of guessing: **(a) the naked blow**, kick and slam together
+   with 1.1 s of silence between them, which no other track here does;
+   **(b) the way in**, no_access v3's swell-organ-sweep device, already
+   passed by ear on that track; **(c) no opening at all**, the engine
+   starting cold. Measured at -10.4, -24.1 and -5.7 dBFS across their
+   first two bars, so they are three different proposals rather than
+   three mixes of one. No longer a blocker — a listen.
 2. **Ruin: does the pitch move or not?** Both `01b` (the phrase, pitch
    fixed) and `01c` (the phrase with a walking pedal) were called good.
    That makes the track's stated load-bearing decision — the pitch never
