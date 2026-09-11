@@ -2,12 +2,16 @@
 
 1990s EBM / dark-electro / futurepop generators. Blueprints:
 `../../inspiration/EBM_1990s.md` (the genre, the 1996–2000 futurepop
-hinge) and `../../inspiration/Apop_Soli_Deo_Gloria.md` (the 1993
-dark-electro root — the palette this directory is currently mining).
-Read whichever blueprint the track's era targets before writing a note
-doc; both are argued from genre knowledge, not measured audio, so treat
-their BPM/key figures as ranges until an inspector run confirms them
-(`Apop_Soli_Deo_Gloria.md` §7 has the calibration commands).
+hinge), `../../inspiration/Apop_Soli_Deo_Gloria.md` (the 1993
+dark-electro root — the palette this directory has mined so far) and
+`../../inspiration/VNV_Empires.md` (the 1999 VNV record — a third,
+unopened dialect; **read its §5 first**, it splits that album into what
+to take and what to leave, because *Empires* is where the Frankfurt
+trap below actually lives). Read whichever blueprint the track's era
+targets before writing a note doc; all three are argued from genre
+knowledge, not measured audio, so treat their BPM/key figures as ranges
+until an inspector run confirms them (`Apop_Soli_Deo_Gloria.md` §7 and
+`VNV_Empires.md` §7 have the calibration commands).
 
 ## This directory IMPORTS — the one exception in the repo
 
@@ -106,6 +110,16 @@ should carry the same three pieces — copy them, don't reinvent.
   questions are answered (2026-09-11, yes to every recommendation) and
   `procession_probe.py` → `/workspace/music/ebm/procession_probe/`
   renders the 16 probes; no track script until they are heard.
+
+- **litany** (working title) — **planned, in review**:
+  `litany_notes.md` is the design doc for the fourth track, the
+  *Spiritual Reality* **hammer** archetype (109 BPM, F♯ minor, ~3:58),
+  which closes the 1993 set: slam 122, jackhammer 140, hammer 109. No
+  new instruments — the whole track is library calls. Its load-bearing
+  decision: the archetype wants a bass that never leaves the root and
+  the v3 verdict says a repeated cell drones, so **the pitch stays put
+  and the phrase moves through the filter, the gate and the accent**.
+  Questions unanswered; no probe script yet.
 
 ## The Frankfurt-trance trap (load-bearing — read before writing a melody)
 
