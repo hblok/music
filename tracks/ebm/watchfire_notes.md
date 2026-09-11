@@ -245,10 +245,52 @@ this track's own claims:
    single warm sustained voice rather than the section on one note. The
    module deliberately does not have one yet. Probe 01a answers it.
 
+## Probe amendments (2026-09-11, written and rendered, before any listening)
+
+`watchfire_probe.py` is written and its 11 files are rendered to
+`/workspace/music/ebm/watchfire_probe/`; all probe checks pass. It was
+written **out of order on request** — every probe in it uses `rom.py`,
+whose audition has not been heard, so a bad verdict there rebuilds this
+script rather than retuning it. Four things to record:
+
+1. **The chord voicings are inversions, and the root check has to know
+   that.** `Bm` is voiced F♯3–B3–D4, `D` is F♯3–A3–D4, `Em` is
+   G3–B3–E4. The first version of the anti-♭VII check read the lowest
+   note as the root and reported the loop as "F♯ G F♯ G", passing for
+   entirely the wrong reason. The roots now come from a declared map,
+   and the track script's verify block must do the same. A check that
+   passes by accident is worse than no check.
+2. **The refrain measures better than the notes claimed.** Held
+   fraction is **0.85**, not the ~0.5 estimated above, and the longest
+   run of short notes is **1**, not 2. Up-steps 0.58, max upward leap 4
+   semitones, max downward 7 (the drop back to restate the petition).
+   So the line climbs in steps and never leaps — which is the honest
+   answer to "is this the Frankfurt arch?", since an arch leaps.
+3. **The octave doubling works, but modestly.** Measured on the line
+   alone, energy below 400 Hz goes from 0.43 undoubled to **0.54**
+   doubled, and the centroid from 2071 Hz to 1956 Hz. It moves the
+   centre of mass in the right direction, but it is not dramatic, and
+   probe 01a/01b/01c is where the ear decides whether it is enough.
+4. **The era move may be subtler than the premise assumes.** Probe 06
+   measures the same four bars clean against 1993's decimation:
+   centroid **3068 Hz versus 2812 Hz**, about an 8 % shift. That is a
+   real difference but not an obvious one, and the whole 1999 dialect
+   rests on it being audible. This probe, with `demo_rom.wav`, is the
+   one that can invalidate the plan.
+
+**One weak spot in the rising-roots reading** (probe 03): G2's sub
+square lands at 49 Hz, under the directory's measured-good 55 Hz
+centre. B2, D3 and E3 are all comfortable at 61.7, 73.4 and 82.4 Hz, so
+the loop has exactly one soft chord in the low end. The pedal reading
+is rendered beside it.
+
 ## Next
 
 1. **Listen to `rom.wav` and `demo_rom.wav` first.** Everything here is
-   downstream of those two verdicts.
-2. Answer the questions above.
-3. Write `watchfire_probe.py`, render, inspect, listen.
+   downstream of those two verdicts, probe 06 most of all.
+2. Then the probe ladders: `01a → 01b → 01c` (the anti-trap argument),
+   `02` (the ascent as an opening), `03`, `04`, `05` (the chant against
+   the arp), `06` (the era), `07`, `08`, `09`.
+3. Answer the eight questions above, now that the alternatives are
+   audible.
 4. Only then `watchfire.py`.
