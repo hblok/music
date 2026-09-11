@@ -25,13 +25,13 @@ the A/B and stem workflow, `CLAUDE.md` the directory rules.
 
 ---
 
-## 2. Ready to build, once the decisions below land
+## 2. Tracks — one built, two waiting on decisions
 
 | track | state | what is left |
 |---|---|---|
 | **Procession** (the slam, 122, A minor) | 10 answers + probe verdicts in. The refrain solo `04c` was *"really cool — love it!"*, the beat is `06b`, the bookend stays open | one knob: the slam's snare weight was never picked from 0.90 / 1.15 / 1.40 |
 | **Ruin** (the hammer, 109, F♯ minor; renamed from *Litany*, which collided with a dune track) | 10 answers in; the engine ladder came back *"drone-as-phrase is good, phrase with moving pitch is also good"*. Files and script renamed to `ruin_*` | pick an opening from probe `10`, plus two smaller calls. See below |
-| **Watchfire** (the ascent, 126, B minor) | all 8 answers in, every recommendation taken: 126, keep the A4 peak, no arp, rising bass, 16-bar trough | nothing blocking. One genre remark to settle if you want to |
+| **Watchfire** (the ascent, 126, B minor) | **BUILT 2026-09-11** — `watchfire.py` → `/workspace/music/watchfire.wav`, 136 bars, 4:22, all checks pass | a listen. One genre remark to settle if you want to |
 
 ---
 

@@ -306,6 +306,34 @@ centre. B2, D3 and E3 are all comfortable at 61.7, 73.4 and 82.4 Hz, so
 the loop has exactly one soft chord in the low end. The pedal reading
 is rendered beside it.
 
+## Built (2026-09-11) — `watchfire.py` → `/workspace/music/watchfire.wav`
+
+136 bars, 4:22, all checks pass. Every answer above is followed as
+given. Two things the plan did not anticipate, both found by the verify
+block rather than by ear:
+
+1. **The rises were quieter than the verses they build out of.** The
+   drum code swapped the closed 16th carpet for open hats instead of
+   *adding* the open hat to it, so a rise lost twelve onsets a bar and
+   measured *below* its verse. `EBM_1990s.md` §6 is explicit that the
+   carpet runs and the open hat is added on the off-8ths; fixed to match.
+2. **The arc was flat: verse to chorus measured +0.3 dB.** Drums and
+   bass ran at full weight everywhere and they dominate the mix, so the
+   chorus's extra layers barely moved the level. A per-section gain now
+   sits the engine back in the verses (0.82 / 0.84) and restores it for
+   the rises and choruses. The stomp never stops, it leans. **The check
+   that let this through only tested ordering**, so it now requires the
+   chorus to clear its verse by 1.5 dB and the rise to build out of it.
+
+Measured arc: **verse 1 → chorus 1 +1.7 dB**, verse 1 → rise 1 +0.7 dB,
+chorus 2 → trough −7.9 dB. The first full refrain lands at 1:16, inside
+the first third. Eight statements, one resolution, and it is the last.
+
+**Declared beyond the notes:** a light sidechain pump (0.30) on bed,
+orchestra and chant only, never the refrain carrier and never the bass,
+per `EBM_1990s.md` §9's lighter-duck rule for this era. Argue it or
+remove it.
+
 ## Next
 
 1. **Listen to `rom.wav` and `demo_rom.wav` first.** Everything here is
