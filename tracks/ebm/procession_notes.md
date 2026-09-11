@@ -157,9 +157,10 @@ rather than sitting on A for sixteen.
 
 ## The probes (`procession_probe.py` → `/workspace/music/ebm/procession_probe/`)
 
-Written and rendered 2026-09-11, after the answers below; 02a, 02c,
-03a–c and 07 re-rendered and 02d / 03d added the same day after the
-measurements (below). 18 samples, 6–24 s each, mono, no master; the
+Written and rendered 2026-09-11, after the answers below; re-rendered
+the same day with the measured recommendations applied (the section
+after the verify block — so the files carry the recommended state, and
+the ladders keep the alternatives). 18 samples, 6–24 s each, mono, no master; the
 refrain probes carry a 0.25 reverb so the voice is judged as it will
 sit. Seed 1991, `--bpm` to move the grid, `--only` for a subset. All
 probe checks pass.
@@ -168,22 +169,22 @@ probe checks pass.
 |---|---|
 | `01` | **the slam** — the same kick under snare weights 0.90 / 1.15 / 1.40. Which makes the pair one blow? (printed: the blow is 200 ms, no tail) |
 | `02a` | **the engine as the blueprint states it** — one cell, gated 8ths, eight bars, flat (no accents, no cycle). The drone the v3 verdict warned about |
-| `02b` | **the same eight bars as a phrase** — 4 cells, 12 colour notes, the filter cycle, the accents. The A/B against 02a is the whole argument |
+| `02b` | **the same eight bars as a phrase with the no_access v3 knobs** — 4 cells, 12 colour notes, accent floor 0.78, cycle 2400 / 1700 / 2900 / 2000 Hz. The middle of the ladder |
 | `02c` | **the chorus roots**, 12 bars — the bass following A2 F2 E2 A2 *down* (sub squares 55 / 43.7 / 41.2 Hz), then *pedalling* on A2 under the same chords, then following *up* A2 F3 E3 A2 (subs 55 / 87 / 82 Hz) |
-| `02d` | **the phrase turned up** — accent floor 0.6 (02b: 0.78) and a wider filter cycle 2800 / 1300 / 3400 / 1700 Hz |
+| `02d` | **the phrase turned up — now the default in every other probe**: accent floor 0.6 and the wider cycle 2800 / 1300 / 3400 / 1700 Hz |
 | `03a` | **the verse guitar as events** — two bursts per eight bars (bars 3 and 7), the bark's old slot; gain 0.75 |
 | `03b` | the same guitar **as a carpet**, every bar — the A/B that proves why it is two |
 | `03c` | the **sparse** DAF cell on the guitar instead of the dense one |
 | `03d` | **the guitar's level** — the same 4-bar verse three times, the burst on bar 3 at 0.45 / 0.75 / 1.10 |
-| `04a` | **THE QUOTE** — Reliquary's hook verbatim on `dark_lead` over Am F Em Am, chest 1.0, choir hit on the downbeat |
+| `04a` | **THE QUOTE** — Reliquary's hook verbatim on `dark_lead` over Am F Em Am with the bass pedalling A2 (sub 0.6, the boom and the pump under it), chest 0.8 (chorus 1), the choir hit at 0.35 s |
 | `04b` | the same, chest 1.3 (the final chorus's voice) |
-| `04c` | the refrain alone, wet — the voice judged on its own |
-| `05a` | **the bookend as Part 1 leaves it** — 808 + the down-arp, ending open on Em |
+| `04c` | the refrain alone, wet, chest 0.8 — the voice judged on its own |
+| `05a` | **the bookend as Part 1 leaves it** — 808 (Reliquary's decay 0.2, the kick tuned to A1 = 55 Hz) + the down-arp, the bed's sub at 0.3, ending open on Em |
 | `05b` | the same cell **resolved to A**, 8ths, cutoff down: the outro reading |
-| `06a` | **the beat, dry 1993** — no pump, no boom |
-| `06b` | **the beat with the deviation** — the sub-boom under every kick, the pump halved to 0.30 (mean 0.94, floor 0.70) |
-| `07` | **the pre-chorus lift** — the bass to half-time under a held choir hit, the tag answering, then two bars of the chorus actually landing (engine, stabs, hit, the refrain's first bars) |
-| `08` | **the chorus hit** — choir against orchestral, same chord, same bar |
+| `06a` | **the beat, dry 1993** — the pedal with the sub square at 0.85, no pump, no boom |
+| `06b` | **the beat with the deviation** — the pedal with the sub square down to 0.6, the boom's sine carrying 55 Hz under every kick, the pump halved to 0.30 (mean 0.94, floor 0.70) |
+| `07` | **the pre-chorus lift** — the bass to half-time under a held choir hit, the tag answering, **the hole** (beat 4 of the last pre bar: no drum, no bass — 17.5 dB down), then two bars of the chorus landing (engine on the pedal + boom, stabs, hit, the refrain's first bars) |
+| `08` | **the chorus hit** — choir at 0.35 s against orchestral at 0.25 s (each as it would ship), same chord, same bar |
 
 Listen in ladders: `02a` → `02b` → `02d`, `03a`/`03b`/`03c` and the
 three levels inside `03d`, `05a`/`05b`, `06a`/`06b`, the three weights
@@ -349,14 +350,37 @@ Scripts: the probe's own prints, plus `metrics.py` / `solo.py` /
   lowered (or the 808 kick's `decay` shorter) so the intro's sub-60
   share prints ≤ 0.6; the verify block should check it.
 
+### Applied to the probe script (same day) — what changed on the way
+
+All of the above is now the probe script's default state and every
+file was re-rendered (nothing had been listened to). Three things
+moved while applying:
+
+- **The intro sub check was wrong-headed.** With the bed's sub at 0.3
+  the intro still measured 0.67: the 808 kick alone is 0.8 sub-60 by
+  nature (a 48 Hz sine), the bed sits 20 dB under it. So: the kick
+  takes Reliquary's own `decay=0.2` (1.05 s sounding instead of 2.3)
+  and is **tuned to A1 = 55 Hz** (the default 48 Hz sits a
+  quarter-tone under G — the earlier chroma read G / F♯ for a reason);
+  the probe checks the kick's length, and the track's verify will
+  compare the intro's 30–70 Hz *level* to the chorus's, not a share.
+- **The hole takes the bass out too.** Drums only measured 4.9 dB
+  down (the half-time quarter on beat 4 filled it); with the bass's
+  last-bar cell `x...x...x.......` it is 17.5 dB down and the bed, pad
+  and the tag's last note carry it.
+- **02b keeps the v3 knobs explicitly** so the engine ladder stays
+  flat → v3 → bold while bold is the default everywhere else.
+
 ### Plan changes these imply
 
 `bass_spec`: chorus root A2 always (the ledger check becomes "bass root
 == A2 in every chorus bar; the pad follows the loop"), `sub` 0.6 in
 the choruses, the bold accent/cycle knobs; `REFRAINS` chest (0.8,
 0.8, 1.0, 1.0, 1.3, 1.3); `GAIN["guitar"]` 0.75; a `HOLE` constant
-(bars 31.75–32, 71.75–72, 95.75–96, drums only); the choir hit's
-`dur`; an intro sub check. Everything else stands.
+(bars 31.75–32, 71.75–72, 95.75–96: drums *and* bass out, the bass's
+last pre bar on the hole cell); the choir hit's `dur` 0.35; the 808
+kick `decay=0.2, f0=55.0` in the bookends; an intro level check (30–70
+Hz within 1 dB of chorus 1). Everything else stands.
 
 ## Next
 

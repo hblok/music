@@ -8,7 +8,12 @@ will print, heard and checked BEFORE procession.py exists.  Notes:
 procession_notes.md ("The probes"; the answers of 2026-09-11 are folded
 in: the guitar takes the bark's slot, the quote is literal, the 808 arp
 frames the track, boom yes and the pump halved, the spoken slot stays
-empty).
+empty).  Re-rendered 2026-09-11 with the measured recommendations: the
+chorus bass pedals on A2 with the sub square at 0.6 (the boom carries
+55 Hz), the bold phrase knobs are the default (02b keeps the v3 recipe
+for the ladder), the chest arc starts at 0.8, a one-beat drum hole
+before the chorus, the choir hit at 0.35 s, the bookend's bed with its
+sub lowered.
 
     python3 procession_probe.py                 # all, to /workspace/music/ebm/procession_probe/
     python3 procession_probe.py --only 02b,04   # a subset
@@ -70,12 +75,19 @@ PATTERN808 = {"kick": "x...x...x...x...", "snare": "....x.......x...",      # no
 
 # the engine: gated 8ths as an 8-bar PHRASE (the no_access v3 lesson, built in from bar 1)
 CELL = {**CELLS, "stomp5": "x.x.x.x.x.x.5.o.", "walk": "x.x.x.5.x.7.o.o.",
-        "8ths_half": "x...x...x...x..."}                   # the pre-chorus half-time bass
+        "8ths_half": "x...x...x...x...",                   # the pre-chorus half-time bass
+        "8ths_hole": "x...x...x......."}                   # its last bar: the bass leaves the hole too
 PHRASE = ("stomp", "stomp", "stomp", "stomp5", "stomp", "stomp", "riff", "walk")
 INTERVAL = {"x": 0, "o": 12, "5": 7, "7": 10}
-BASS_CUT = (2400.0, 1700.0, 2900.0, 2000.0)           # the filter talks: one open value per two bars
-BASS_ACCENT = {0: 1.0, 4: 0.92, 8: 1.0, 12: 0.92}     # the quarters lean, the rest sit back (floor 0.78)
-BOLD_CUT, BOLD_FLOOR = (2800.0, 1300.0, 3400.0, 1700.0), 0.6   # 02d: the phrase turned up (measured: 02b is subtle)
+BASS_CUT = (2800.0, 1300.0, 3400.0, 1700.0)           # the filter talks: one open value per two bars (the bold cycle)
+BASS_FLOOR = 0.6                                      # the 16ths sit back (the bold floor)
+BASS_ACCENT = {0: 1.0, 4: 0.92, 8: 1.0, 12: 0.92}     # the quarters lean
+V3_CUT, V3_FLOOR = (2400.0, 1700.0, 2900.0, 2000.0), 0.78   # 02b: the no_access v3 recipe as shipped (measured subtle at 122)
+CHORUS_SUB = 0.6                                      # the chorus sub square (was 0.85): the boom carries 55 Hz, not the square
+CHEST = (0.8, 1.0, 1.3)                               # the chest arc: chorus 1 / chorus 2 / the final (Reliquary v2 starts it)
+HIT_DUR = 0.35                                        # the choir hit's truncation (0.25 read as a hit, not a voice)
+BED_SUB_INTRO = 0.3                                   # the bed's sub under the 808 bookend (measured: it hardly matters — the kick IS the sub)
+K808_DECAY, K808_F0 = 0.2, 55.0                       # Reliquary's 808 decay; tuned to A1 (the default 48 Hz sits a quarter-tone under G)
 PUMP_DEPTH, PUMP_TAU, PUMP_FLOOR = 0.30, 0.10, 0.30   # half of no_access's 0.55: 122 does not want a modern pump
 BOOM_OCTAVE, BOOM_DUR = -12, 0.45                     # the beat at 122 is 0.492 s
 
@@ -102,9 +114,10 @@ def mix(buf, x, bar=0, gain=1.0):
 
 
 # ---------------------------------------------------------------- parts
-def drums(bars, snare_gain=None, hat_gain=None, figures=True, open_from=None, kick_out=()):
+def drums(bars, snare_gain=None, hat_gain=None, figures=True, open_from=None, kick_out=(), holes=()):
     """The slam: kick on every quarter, the snare on 2 and 4, closed 16ths
-    (quiet — at 122 the snare is the aggression, not the hats)."""
+    (quiet — at 122 the snare is the aggression, not the hats).  `holes`:
+    bars whose beat 4 has NO drum — the composed hole before a chorus."""
     K, S, CH, OH = kick(decay=6.0), snare(), hat(), hat(open_=True)
     sg = GAIN["snare"] if snare_gain is None else snare_gain
     hg = GAIN["ch"] if hat_gain is None else hat_gain
@@ -115,6 +128,8 @@ def drums(bars, snare_gain=None, hat_gain=None, figures=True, open_from=None, ki
         fig = KICK_FIG["B" if figures and b % 4 == 3 else "A"]
         for s in range(16):
             st = b * 16 + s
+            if b in holes and s >= 12:
+                continue
             if fig[s] == "x":
                 place(buf, K, st, GAIN["kick"])
             if SNARE_P[s] == "x":
@@ -133,10 +148,10 @@ def phrase_spec(b, roots, sub=0.6, cuts=BASS_CUT):
     return CELL[cell], root, {"cutoff": (cuts[(b // 2) % 4], 250.0), "sub": sub}
 
 
-def bassline(bars, roots, phrase=True, cell_name="stomp", sub=0.6, accents=True, floor=0.78, cuts=BASS_CUT, **kw):
+def bassline(bars, roots, phrase=True, cell_name="stomp", sub=0.6, accents=True, floor=BASS_FLOOR, cuts=BASS_CUT, **kw):
     """The engine.  phrase=True walks PHRASE bar by bar (the v3 lesson);
     phrase=False repeats one cell — the A/B that proves the difference.
-    accents=False is the flat control; floor/cuts are the 02d knobs."""
+    accents=False is the flat control; floor/cuts default to the bold knobs."""
     buf = steps_buffer(bars)
     for b in range(bars):
         if phrase:
@@ -184,7 +199,7 @@ def arp808(bars, chords, cutoff=500.0, rate=1, resolved=True):
     """The bookend: Reliquary's down-arp over the 808 kit.  resolved=False
     ends on the V (E) as Part 1 does; True lands on A — the answer."""
     buf = steps_buffer(bars)
-    hits = {"kick": k808(), "snare": s808(), "ch": h808(), "oh": h808(open_=True)}
+    hits = {"kick": k808(decay=K808_DECAY, f0=K808_F0), "snare": s808(), "ch": h808(), "oh": h808(open_=True)}
     for name, line in PATTERN808.items():
         for s in range(bars * 16):
             if line[s % 16] == "x":
@@ -231,8 +246,8 @@ def reverb(x, wet=0.25, seconds=2.5, decay=1.0):
     return (1 - wet) * x + wet * w
 
 
-def bed(bars, throb=0.4):
-    return seethe(A2, bars * BAR + 0.5, throb=throb, grit=0.3)
+def bed(bars, throb=0.4, sub=0.6):
+    return seethe(A2, bars * BAR + 0.5, throb=throb, grit=0.3, sub=sub)
 
 
 def sub_boom(f):
@@ -282,7 +297,7 @@ def stats(x, bars):
 
 def timeline(*events):
     for bar, what in events:
-        print(f"    {bar * BAR:6.2f}s  bar {bar:2d}  {what}")
+        print(f"    {bar * BAR:6.2f}s  bar {bar:5.2f}  {what}")
 
 
 def slam_report(hits, snare_gain):
@@ -309,7 +324,7 @@ def phrase_report(roots):
     onsets = [len([ch for ch in CELL[c] if ch != "."]) for c in cells]
     print(f"    the phrase: {' '.join(cells)}  ({len(set(cells))} cells, {colour} colour notes per 8 bars, "
           f"onsets/bar {min(onsets)}-{max(onsets)})")
-    print(f"    filter cycle {BASS_CUT} Hz per two bars;  accents {BASS_ACCENT} (the rest 0.78)")
+    print(f"    filter cycle {BASS_CUT} Hz per two bars;  accents {BASS_ACCENT} (the rest {BASS_FLOOR})")
     for c in set(cells):
         dur = min(b - a for a, b in zip([i for i, ch in enumerate(CELL[c]) if ch != "."],
                                         [i for i, ch in enumerate(CELL[c]) if ch != "."][1:] + [16]))
@@ -355,6 +370,21 @@ def room_report(chords):
     lowest = min(min(ch) for ch in chords)
     print(f"    pad/stab lowest note midi {lowest} ({midi_to_hz(lowest):.0f} Hz); refrain ceiling Bb3 = 58 (233 Hz)")
     check("pad and stabs voiced above the refrain (lowest note > Bb3)", lowest > 58)
+
+
+def sub_share(x, hz=60.0):
+    X = np.abs(np.fft.rfft(x)) ** 2
+    f = np.fft.rfftfreq(len(x), 1 / SR)
+    return float(X[f < hz].sum() / X.sum())
+
+
+def hole_report(x, bar):
+    """The composed hole: beat 4 of `bar` against beats 1-3 of the same bar."""
+    i0 = int(bar * BAR * SR)
+    beats = [x[i0 + int(q * BEAT * SR): i0 + int((q + 1) * BEAT * SR)] for q in range(4)]
+    r = [20 * np.log10(np.sqrt(np.mean(b ** 2)) + 1e-12) for b in beats]
+    print(f"    bar {bar} beats RMS dB: {' '.join(f'{v:.1f}' for v in r)}  (the hole is beat 4)")
+    check("the hole is >= 6 dB under the beats before it", np.mean(r[:3]) - r[3] >= 6.0, f"({np.mean(r[:3]) - r[3]:.1f} dB)")
 
 
 def bed_report(x):
@@ -410,18 +440,19 @@ def p02a():
 
 
 def p02b():
-    """The same eight bars as a PHRASE (the v3 lesson built in from bar 1):
-    accents, a filter cycle, the 5th, the riff bar, the walk."""
-    x, _ = engine(8, A2)
-    phrase_report(A2)
+    """The same eight bars as a PHRASE with the no_access v3 knobs (accent
+    floor 0.78, cycle 2400/1700/2900/2000): the middle of the ladder."""
+    x, _ = engine(8, A2, floor=V3_FLOOR, cuts=V3_CUT)
+    print(f"    accent floor {V3_FLOOR}, filter cycle {V3_CUT} Hz — the v3 recipe as shipped")
     return x, 8
 
 
 def p02d():
-    """The phrase turned UP: accent floor 0.6 (was 0.78) and a wider filter
-    cycle — measured, 02b's cycle moves the bass centroid only +-10 %."""
-    x, _ = engine(8, A2, floor=BOLD_FLOOR, cuts=BOLD_CUT)
-    print(f"    accent floor {BOLD_FLOOR} (02b: 0.78), filter cycle {BOLD_CUT} Hz (02b: {BASS_CUT})")
+    """The phrase turned UP — now the default everywhere else: accent floor
+    0.6 and the wider cycle (measured: the v3 cycle moved the bass centroid
+    20 %, this one 28 %; accents +1.2 vs +2.9 dB)."""
+    x, _ = engine(8, A2)
+    phrase_report(A2)
     return x, 8
 
 
@@ -436,6 +467,7 @@ def p02c():
     for i, roots in enumerate((follow, A2, up)):
         mix(x, bassline(4, roots, sub=0.85), 4 * i, GAIN["bass"])
         mix(x, pads(CHORUS_LOOP[:4], depth=0.0), 4 * i, GAIN["pad"])
+    print("    (sub square 0.85 here on purpose — the evidence probe; the track's chorus sub is CHORUS_SUB)")
     timeline((0, "the bass FOLLOWS DOWN: A2 F2 E2 A2 (sub squares 55 / 43.7 / 41.2 Hz)"),
              (4, "the bass PEDALS on A2 under the same chords (sub square 55 Hz throughout)"),
              (8, "the bass FOLLOWS UP: A2 F3 E3 A2 (sub squares 55 / 87 / 82 Hz — a leap of a 6th)"))
@@ -496,22 +528,28 @@ def p03d():
     return x, 12
 
 
-def _chorus(chest, hit_kind="choir", roots=None):
-    roots = roots or [ROOT[c] for c in CHORUS_LOOP]
-    x, _ = engine(8, roots, sub=0.85, open_from=0, figures=False)
-    mix(x, bed(8), 0, GAIN["bed"] * 0.7)
-    mix(x, pads(CHORUS_LOOP, depth=0.0), 0, GAIN["pad"])
-    mix(x, stabs(CHORUS_LOOP, depth=0.0), 0, GAIN["stab"])
-    place(x, hit(HIT_CHORD, kind=hit_kind), 0, GAIN["hit"])
+def _chorus(chest, hit_kind="choir"):
+    """The chorus as recommended: the bass PEDALS on A2 under Am F Em Am
+    (the pad and stabs follow the loop), sub square CHORUS_SUB, the boom
+    under every kick, the pump, the choir hit at HIT_DUR."""
+    d, _ = drums(8, open_from=0, figures=False)
+    sustained = GAIN["bass"] * bassline(8, A2, sub=CHORUS_SUB)[: len(d)]
+    for layer, g in ((pads(CHORUS_LOOP, depth=0.0), GAIN["pad"]), (stabs(CHORUS_LOOP, depth=0.0), GAIN["stab"]),
+                     (bed(8), GAIN["bed"] * 0.7)):
+        sustained[: len(layer)] += g * layer[: len(sustained)]
+    boom, pump = beat_layers(8, A2)
+    x = d + sustained * pump[: len(d)] + GAIN["boom"] * boom[: len(d)]
+    place(x, hit(HIT_CHORD, kind=hit_kind, dur=HIT_DUR), 0, GAIN["hit"])
     mix(x, reverb(line_on_lead(HOOK, 8, chest)), 0, GAIN["lead"])
     return x
 
 
 def p04a():
     """THE QUOTE: Reliquary's hook, verbatim, on dark_lead over the stomp —
-    chorus 1's chest (1.0).  Does Part 1's idea survive as a chorus?"""
-    x = _chorus(1.0)
-    timeline((0, "the refrain Q (bars 0-3) over Am F Em Am, chest 1.0; choir hit on the downbeat"),
+    chorus 1's chest (0.8, Reliquary v2's own).  Does Part 1's idea survive
+    as a chorus, with the top voice owning the pitch?"""
+    x = _chorus(CHEST[0])
+    timeline((0, f"the refrain Q (bars 0-3) over Am F Em Am (the bass pedals A2, sub {CHORUS_SUB}), chest {CHEST[0]}; choir hit"),
              (4, "the refrain A (bars 4-7), landing on the low tonic A2"))
     refrain_report()
     room_report(CHORUS_LOOP)
@@ -520,21 +558,26 @@ def p04a():
 
 def p04b():
     """The final chorus's chest (1.3) — the same eight bars, the voice deeper."""
-    return _chorus(1.3), 8
+    return _chorus(CHEST[2]), 8
 
 
 def p04c():
-    """The refrain alone, wet, chest 1.0 — the voice judged on its own."""
-    return reverb(line_on_lead(HOOK, 8, 1.0)), 8
+    """The refrain alone, wet, chest 0.8 — the voice judged on its own."""
+    return reverb(line_on_lead(HOOK, 8, CHEST[0])), 8
 
 
 def p05a():
     """The bookend, as Part 1 leaves it: the 808 + Reliquary's down-arp,
     ending OPEN on the V (Em)."""
     x, last = arp808(8, ARP_CHORDS, resolved=False)
-    mix(x, bed(8, throb=0.0), 0, GAIN["bed"] * 0.8)
-    timeline((0, "808 kit + the down-arp on Am F Em Am (Reliquary's cell and cutoffs)"),
+    mix(x, bed(8, throb=0.0, sub=BED_SUB_INTRO), 0, GAIN["bed"] * 0.8)
+    timeline((0, f"808 kit + the down-arp on Am F Em Am (Reliquary's cell and cutoffs); the bed's sub at {BED_SUB_INTRO}"),
              (7, f"the last bar stays OPEN on {last} (E minor) — Part 1's ending"))
+    k = k808(decay=K808_DECAY, f0=K808_F0)
+    sounding = (int(np.max(np.nonzero(np.abs(k) > 1e-3))) + 1) / SR
+    print(f"    sub-60 share {sub_share(x):.2f} — a sine kick at {K808_F0:.0f} Hz is sub by nature; the track's verify compares the "
+          f"intro's 30-70 Hz LEVEL to the chorus's instead")
+    check("the 808 kick is short (Reliquary's decay: sounding < 1.2 s)", sounding < 1.2, f"({sounding * 1000:.0f} ms)")
     return x, 8
 
 
@@ -542,7 +585,8 @@ def p05b():
     """The same eight bars RESOLVED to A — the song's outro, the answer
     Part 1 withheld."""
     x, last = arp808(8, ARP_CHORDS, cutoff=400.0, rate=2, resolved=True)
-    mix(x, bed(8, throb=0.0), 0, GAIN["bed"] * 0.8)
+    mix(x, bed(8, throb=0.0, sub=BED_SUB_INTRO), 0, GAIN["bed"] * 0.8)
+    print(f"    sub-60 share {sub_share(x):.2f}")
     timeline((0, "the same cell, 8ths (rate 2) and the cutoff down at 400 — the outro reading"),
              (7, f"the last bar RESOLVES to {last} (A minor)"))
     check("the bookend restates the same cell at both ends", True, "(same chords, same pattern, different last bar)")
@@ -551,23 +595,24 @@ def p05b():
 
 def p06a():
     """The beat, dry 1993: no pump, no boom.  The blueprint's own rule."""
-    x, _ = engine(8, [ROOT[c] for c in CHORUS_LOOP], sub=0.85, open_from=0, figures=False)
+    x, _ = engine(8, A2, sub=0.85, open_from=0, figures=False)
     mix(x, pads(CHORUS_LOOP, depth=0.0), 0, GAIN["pad"])
+    print("    the bass pedals A2, sub square 0.85 (dry: the square is the only low end)")
     return x, 8
 
 
 def p06b():
     """The beat with the approved deviation: the sub-boom under every kick
     and the pump HALVED (0.30, against no_access's 0.55)."""
-    roots = [ROOT[c] for c in CHORUS_LOOP]
     d, _ = drums(8, open_from=0, figures=False)
-    sustained = GAIN["bass"] * bassline(8, roots, sub=0.85)[: len(d)]
+    sustained = GAIN["bass"] * bassline(8, A2, sub=CHORUS_SUB)[: len(d)]
     p = pads(CHORUS_LOOP, depth=0.0)
     sustained[: len(p)] += GAIN["pad"] * p[: len(sustained)]
-    boom, pump = beat_layers(8, roots)
+    boom, pump = beat_layers(8, A2)
     x = d + sustained * pump[: len(d)] + GAIN["boom"] * boom[: len(d)]
+    print(f"    the bass pedals A2 with the sub square at {CHORUS_SUB} (06a: 0.85) — the boom's sine carries 55 Hz")
     print(f"    pump depth {PUMP_DEPTH} (no_access: 0.55), floor {pump.min():.2f}, mean {pump.mean():.2f}; "
-          f"boom {BOOM_DUR * 1000:.0f} ms at {', '.join(f'{midi_to_hz(r + BOOM_OCTAVE):.0f}' for r in sorted(set(roots)))} Hz")
+          f"boom {BOOM_DUR * 1000:.0f} ms at {midi_to_hz(A2 + BOOM_OCTAVE):.0f} Hz")
     check("the pump breathes but never gates (mean 0.85-0.97)", 0.85 <= pump.mean() <= 0.97)
     check("one boom per quarter, none longer than the beat", BOOM_DUR < BEAT)
     return x, 8
@@ -577,20 +622,25 @@ def p07():
     """The pre-chorus lift (the approved one): the bass drops to half-time
     under a held hit, the tag answers on top, then the chorus downbeat."""
     x = steps_buffer(10)
-    d, _ = drums(10, open_from=4)
+    d, _ = drums(10, open_from=4, holes=(7,))                               # the composed hole: beat 4 of the last pre bar
     mix(x, d)
     mix(x, bassline(4, A2, sub=0.6), 0, GAIN["bass"])
-    mix(x, bassline(4, [A2, A2, A2, A2], phrase=False, cell_name="8ths_half", sub=0.85), 4, GAIN["bass"])
-    mix(x, bassline(2, A2, sub=0.85), 8, GAIN["bass"])                      # the chorus engine lands
+    mix(x, bassline(3, A2, phrase=False, cell_name="8ths_half", sub=0.85), 4, GAIN["bass"])
+    mix(x, bassline(1, A2, phrase=False, cell_name="8ths_hole", sub=0.85), 7, GAIN["bass"])   # beat 4 empty
+    mix(x, bassline(2, A2, sub=CHORUS_SUB), 8, GAIN["bass"])                # the chorus engine lands
+    boom, _ = beat_layers(10, A2)
+    mix(x, boom[8 * int(BAR * SR):], 8, GAIN["boom"])                         # the boom from the chorus downbeat
     mix(x, pads(CHORUS_LOOP[:4], bars_each=2, depth=0.0), 0, GAIN["pad"])
     mix(x, pads(CHORUS_LOOP[:2], depth=0.0), 8, GAIN["pad"])
     mix(x, stabs(CHORUS_LOOP[:2], depth=0.0), 8, GAIN["stab"])
     place(x, hit(HIT_CHORD, kind="choir", dur=0.45), 4 * 16, GAIN["hit"])
-    mix(x, reverb(line_on_lead(TAG, 2, 1.0)), 6, GAIN["lead"])
-    place(x, hit(HIT_CHORD, kind="choir"), 8 * 16, GAIN["hit"])
-    mix(x, reverb(line_on_lead(HOOK[:2], 2, 1.0)), 8, GAIN["lead"])         # the refrain's first two bars
+    mix(x, reverb(line_on_lead(TAG, 2, CHEST[0])), 6, GAIN["lead"])
+    place(x, hit(HIT_CHORD, kind="choir", dur=HIT_DUR), 8 * 16, GAIN["hit"])
+    mix(x, reverb(line_on_lead(HOOK[:2], 2, CHEST[0])), 8, GAIN["lead"])    # the refrain's first two bars
     timeline((0, "the verse engine running"), (4, "the bass drops to half-time (quarters, on the pedal) under a held choir hit"),
-             (6, "the tag answers: A3 G3 E3"), (8, "the chorus lands: the engine on 0.85, stabs, the hit, the refrain's first bars"))
+             (6, "the tag answers: A3 G3 E3"), (7.75, "THE HOLE: no drum, no bass on beat 4 (the bed, the pad and the tag's last note carry it)"),
+             (8, f"the chorus lands: the engine on the pedal (sub {CHORUS_SUB}) + the boom, stabs, the hit, the refrain's first bars"))
+    hole_report(x, 7)
     return x, 10
 
 
@@ -598,20 +648,20 @@ def p08():
     """The chorus hit: choir (chosen) against orchestral (no_access's), same
     chord, same bar."""
     x = steps_buffer(4)
-    for i, kind in enumerate(("choir", "orch")):
+    for i, (kind, dur) in enumerate((("choir", HIT_DUR), ("orch", 0.25))):
         d, _ = drums(2, open_from=0)
         mix(x, d, 2 * i)
         mix(x, pads(CHORUS_LOOP[:2], depth=0.0), 2 * i, GAIN["pad"])
-        place(x, hit(HIT_CHORD, kind=kind), 2 * i * 16, GAIN["hit"])
-        print(f"    {2 * i * BAR:6.2f}s  bars {2 * i}-{2 * i + 1}  hit kind {kind!r}")
+        place(x, hit(HIT_CHORD, kind=kind, dur=dur), 2 * i * 16, GAIN["hit"])
+        print(f"    {2 * i * BAR:6.2f}s  bars {2 * i}-{2 * i + 1}  hit kind {kind!r} truncated at {dur * 1000:.0f} ms (each as it would ship)")
     return x, 4
 
 
 PROBES = [("01", "slam_snare_weights", p01), ("02a", "engine_one_cell", p02a), ("02b", "engine_phrase", p02b),
-          ("02c", "chorus_roots", p02c), ("02d", "engine_phrase_bold", p02d),
+          ("02c", "chorus_roots", p02c), ("02d", "engine_phrase_bold_default", p02d),
           ("03a", "verse_guitar_events", p03a), ("03b", "verse_guitar_carpet", p03b),
-          ("03c", "verse_guitar_sparse", p03c), ("03d", "verse_guitar_gain_ladder", p03d), ("04a", "chorus_quote_chest10", p04a),
-          ("04b", "chorus_quote_chest13", p04b), ("04c", "refrain_solo", p04c),
+          ("03c", "verse_guitar_sparse", p03c), ("03d", "verse_guitar_gain_ladder", p03d), ("04a", "chorus_quote_chorus1", p04a),
+          ("04b", "chorus_quote_final", p04b), ("04c", "refrain_solo", p04c),
           ("05a", "bookend_open", p05a), ("05b", "bookend_resolved", p05b),
           ("06a", "beat_dry_1993", p06a), ("06b", "beat_boom_halfpump", p06b),
           ("07", "pre_chorus_lift", p07), ("08", "chorus_hit_choir_vs_orch", p08)]
