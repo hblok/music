@@ -97,6 +97,15 @@ should carry the same three pieces — copy them, don't reinvent.
   probes: `no_access_probe.py` → `/workspace/music/ebm/no_access_probe/`.
   Listen verdict pending.
 
+- **procession** (working title) — **planned, in review**:
+  `procession_notes.md` is the design doc for the third track, the
+  *Ashes to Ashes '93* **slam** archetype (122 BPM, A minor, seed 1991,
+  ~3:56). It is the song `reliquary` bookends, so its refrain is
+  Reliquary's hook returned on `dark_lead`, and the track opens and
+  closes on Part 1's arp cell (the second time resolved to A). No
+  script until the open questions are answered and the probes are
+  heard.
+
 ## The Frankfurt-trance trap (load-bearing — read before writing a melody)
 
 Every synth-pop trance track in `../trance` and every Juno preset in
