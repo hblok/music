@@ -286,12 +286,16 @@ Seeds, thematically: **1999**, **8** (cat. mind 008), **50**.
 | pads, stabs, organ | `juno` | the Virus stands in: the same saw/pulse + SVF engine with `depth=0.0` (no Juno chorus) and a brighter cutoff. Declare the substitution rather than writing `virus.py` |
 | refrain carrier | `dark_lead` | Harris is a baritone; the existing range already fits. For the *Saviour* shape, a warmer, more sustained variant — a knob, not a module |
 | bed | `seethe` | as is |
-| **ROM strings** | — | **new** (`rom_strings`): 4 detuned saws, 0.3 s attack, no sample-loop flutter (`ungeschrieben`'s flutter is owned), a brighter bow layer on top. Already specced in `EBM_1990s.md` §12 |
-| **ROM choir** | — | **new** (`rom_choir`): static, chordal, wordless, formant pair, octave-doubled, **no drift and no breath** (`adrift`'s breath choir is owned). The *Legion* chant |
+| **the ROM orchestra** | `rom.py` | **written 2026-09-11**, one module with two entry points: `strings` (5 detuned saws per note, 0.3 s attack, a bright bow layer, no sample-loop flutter — `ungeschrieben`'s flutter is owned) and `choir` (the same stack through three formants, static and chordal, octave-doubled, **no drift and no breath** — `adrift`'s breath choir is owned). The detune phases are fixed, so the patch is stiff by construction. `juno.pad_loop` takes either voice unchanged |
 | master | big-room chain | 1999 is pre-loudness-war: lighter duck (≤ 0.35), pads only, never the refrain carrier |
 
-**Two new modules, both already on the books.** Everything else is a
-knob. That is the cheapest new dialect this directory can open.
+**One new module, written; everything else is a knob.** The blueprint
+first called for two, but `strings` and `choir` share one detuned-stack
+core, which is how `eps_hit` already handles its two kinds. No separate
+warm-lead voice either: the ascent's refrain carrier is `strings` on a
+single note until a probe says otherwise. `demo_rom.py` is the test of
+the whole premise. That makes this the cheapest new dialect this
+directory can open.
 
 **Track archetypes, best first:**
 

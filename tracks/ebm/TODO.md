@@ -2,7 +2,7 @@
 
 Everything started and not finished, newest first within each block.
 Written 2026-09-11. The directory's actual bottleneck is at the top:
-**five things are rendered and unheard, and most of the rest is blocked
+**six things are rendered and unheard, and everything else is blocked
 behind them.** Nothing here is a bug; it is all work-in-progress with a
 verdict missing.
 
@@ -19,6 +19,7 @@ the A/B and stem workflow, `CLAUDE.md` the directory rules.
 | **Reliquary v3.3** | `/workspace/music/reliquary_v3.3.wav` | The chest was raised twice after "too thin". `dark_lead.py` still says the v3.3 verdict is pending, and that voice is now the refrain carrier for three planned tracks, so this verdict is worth more than one track. An A/B of the two lead takes is already rendered next to it |
 | **Procession probes** | `/workspace/music/ebm/procession_probe/` | 18 samples rendered 2026-09-11, never heard. The ladders to listen in: `02a → 02b → 02d` (the drone argument), the three levels inside `03d`, `05a/05b`, `06a/06b`, the three weights inside `01`, the three root choices inside `02c` |
 | **The ROM orchestra** | `/workspace/music/ebm/instruments/rom.wav` | New today. Nine isolated settings then two four-chord loops. The questions: does the 5-voice detune read as a section or as a wobble, and is the choir's `o` vowel the monkish one |
+| **Litany probes** | `/workspace/music/ebm/litany_probe/` | 13 samples rendered 2026-09-11, all checks passing. The ladders: `01a → 01b → 01c` (the drone argument, and whether "root only" is worth keeping at all), the three levels inside `02`, `03`, `05` and `08`, the three roots inside `04`, the three kick readings inside `09` |
 | **The 1999 dialect** | `/workspace/music/ebm/instruments/demo_rom.wav` | New today. Eight bars: the kit with its dirt off, the Pro One bass reading, then the registral lift. **This one decides whether the whole 1999 premise holds** — that the era move is one knob plus one voice |
 
 Older instrument demos also still unheard: `demo_colour`, `demo_arp808`,
@@ -33,9 +34,10 @@ as awaiting a listen.
 - **`procession.py`** — the slam track. The notes are complete, the
   questions are answered, the probes are rendered. Only the ear is
   missing. This is the closest thing to shippable in the directory.
-- **`litany_probe.py`** then **`litany.py`** — the hammer. Notes are
-  written; the ten questions in `litany_notes.md` are unanswered, so
-  the probe script cannot be written yet.
+- **`litany.py`** — the hammer. The notes and the probe script are both
+  written and the probes are rendered, so this one is now in the same
+  position as `procession`: waiting only on the ear. The ten questions
+  can be answered from the probes rather than on paper.
 - **`watchfire_probe.py`** then **`watchfire.py`** — the ascent, the
   first 1999-dialect track. `watchfire_notes.md` is written and its
   eight questions are unanswered, so the probe script cannot start.

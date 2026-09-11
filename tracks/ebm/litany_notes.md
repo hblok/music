@@ -272,8 +272,55 @@ truncation, master guardrails) plus, specific to this track:
     day. If the probes land before this one is written, its defaults
     inherit from them.
 
+## Probe amendments (2026-09-11, written and rendered, before any listening)
+
+`litany_probe.py` is written and its 13 files are rendered to
+`/workspace/music/ebm/litany_probe/`; all probe checks pass. The
+recommendations above are the probe's DEFAULT state and every ladder
+keeps its alternative, so answering the ten questions later costs one
+re-render. Three things changed on the way, and the plan changes with
+them:
+
+1. **The engine cell is `hammer` (`x.x.x.x.x.x.x.x.`), not
+   `CELLS["stomp"]`.** Stomp puts an octave on the "and" of 4, which is
+   a pitch event — and this track's entire claim is that the pitch never
+   moves. The verify block's pedal check now reads exactly: bars 0–6 of
+   every phrase contain interval 0 and nothing else, with bar 7's walk
+   as the only pitch event in a verse.
+2. **Q7's answer is conditional: when the kick takes the 8ths, the hats
+   give them up.** The first rendering failed the space check — kick 8 +
+   slam 2 + hats 8 + bass 8 is 26 onsets against this track's ceiling of
+   24. Probe 09 now renders three readings (quarters with hats at 22,
+   8ths with hats at 26 and over, 8ths without hats at 18). The fix is
+   musically the obvious one and it is now the recommendation.
+3. **The anti-drone check was measuring the wrong thing.** The filter,
+   gate and accent cycle turns every *two* bars by design, so a
+   per-bar "nothing repeats" assertion was always going to fail. It now
+   checks that no state holds longer than 2 bars and that at least 4
+   distinct states appear across the 8.
+
+**Measured, supporting Q2** (probe 02, the sub at F♯2 whose square lands
+at 46.2 Hz):
+
+| sub | sub-60 share | against the guardrail band 0.60–0.70 |
+|---|---|---|
+| 0.85 | 0.71 | just over |
+| **0.60** | **0.65** | **inside — the recommendation holds** |
+| 0.40 | 0.60 | at the floor |
+
+The low root is affordable after all: at `sub` 0.6 the track sits mid-band
+without the kick having to compensate. The ear still decides whether
+46 Hz has body or just weight.
+
+**The space, measured** (probe 03 and 06): a verse bar runs 14 onsets
+with no hats and 22 with 8ths, against `procession`'s 30. The 16th
+carpet reaches 30 and is rendered as the rejected reading, so the A/B
+is real rather than assumed.
+
 ## Next
 
-1. Answer the questions above.
-2. Write `litany_probe.py`, render, inspect, listen.
+1. **Listen to the probes** — the ladders are `01a → 01b → 01c`, the
+   three levels inside `02`, `03`, `05` and `08`, the three roots inside
+   `04`, and the three kick readings inside `09`.
+2. Answer the ten questions above, now that the alternatives are audible.
 3. Only then `litany.py`.
