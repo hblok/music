@@ -129,6 +129,17 @@ should carry the same three pieces — copy them, don't reinvent.
   and the phrase moves through the filter, the gate and the accent**.
   Questions unanswered; no probe script yet.
 
+- **watchfire** (working title) — **planned, in review**: the first
+  **1999-dialect** track, `watchfire_notes.md` — the *Saviour* **ascent**
+  archetype (126 BPM, B minor, 136 bars ≈ 4:19, seed 1999). The one
+  *Empires* track whose emotional centre is carried without a voice, so
+  the refrain is the `rom.strings` section rather than `dark_lead`, and
+  there is no vocal slot. Its load-bearing decision: **the ascent is not
+  an intro, it is the refrain arriving in pieces**, so the melody is
+  assembled from bar 1 with the groove entering underneath. No arp and
+  no ♭VII — the two things that turn this dialect into trance. Blocked
+  on the `rom.wav` / `demo_rom.wav` verdicts.
+
 ## The Frankfurt-trance trap (load-bearing — read before writing a melody)
 
 Every synth-pop trance track in `../trance` and every Juno preset in

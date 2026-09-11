@@ -36,11 +36,12 @@ as awaiting a listen.
 - **`litany_probe.py`** then **`litany.py`** — the hammer. Notes are
   written; the ten questions in `litany_notes.md` are unanswered, so
   the probe script cannot be written yet.
-- **A 1999 track notes doc** — the blueprint exists
-  (`../../inspiration/VNV_Empires.md`) and so does the orchestra, but no
-  track has been proposed. The archetype ranking in its §6 puts *the
-  ascent* first, after *Saviour*, because its emotional centre is
-  instrumental and so is this repo.
+- **`watchfire_probe.py`** then **`watchfire.py`** — the ascent, the
+  first 1999-dialect track. `watchfire_notes.md` is written and its
+  eight questions are unanswered, so the probe script cannot start.
+  Doubly blocked: everything in it is downstream of the `rom.wav` and
+  `demo_rom.wav` verdicts, since a bad verdict there takes the whole
+  dialect with it.
 - **A No Access v4, or none** — depends entirely on the v3 verdict.
 
 ---
