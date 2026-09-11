@@ -231,8 +231,10 @@ truncation, master guardrails) plus, specific to this track:
 
 ## Open questions for review
 
-1. **Title and seed.** *Litany* (the form names the mechanism);
-   alternatives *Vigil*, *Toll*, *Threnody*, *Mortal Coil*. Seeds so
+1. **Title and seed.** *Litany* (the form names the mechanism) —
+   **but it collides**: `../dune/generate_litany_against_fear.py`
+   already exists, so one of the alternatives probably has to win:
+   *Vigil*, *Toll*, *Threnody*, *Mortal Coil*. Seeds so
    far: 1993 (reliquary), 18 (no_access), 1991 (procession).
    Recommended seed **2018** — the year Morten Lund remastered the
    record from the original tapes, i.e. the year it was finally heard

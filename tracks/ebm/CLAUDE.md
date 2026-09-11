@@ -43,6 +43,14 @@ array, peak 1.0, at 44100 Hz — the same thing `make_kick()` returned in
 `commit()`/mix/master, exactly like every other generate_*.py. The
 library never touches stereo, reverb or the master chain.
 
+## What is unfinished
+
+`TODO.md` is the ledger: every started-and-unfinished thing in this
+directory, what blocks what, and the open questions still on paper.
+The directory's bottleneck is usually the same one — renders and probes
+waiting on a listen, with the next step blocked behind them — so read it
+before starting anything new here.
+
 ## Listening: A/B and stems
 
 **Read `LISTENING.md`** before iterating on a voice or a mix balance.
