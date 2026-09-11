@@ -45,6 +45,16 @@ as awaiting a listen.
   downstream of items 4 and 5. A bad verdict there rebuilds the probe
   script rather than retuning it.
 - **A No Access v4, or none** — depends entirely on the v3 verdict.
+- **A check that cannot fail is worse than no check.** Two audits this
+  session found six such checks. Three asserted a literal `True` while
+  their names claimed to verify gate duty, the bookend match and an
+  editorial fact. One read chord inversions as roots. One was weaker
+  than its name. One was flaky, passing in a full run and failing alone,
+  because these scripts share one seeded RNG and every noise-dependent
+  measurement therefore depends on how many probes ran before it. **That
+  last one is unfixed**: a subset render is not bit-identical to the
+  same probe inside a full render. It does not affect the checks any
+  more, but it does mean `--only` output is not the shipped file.
 - **Carried into all three track scripts:** a chord's root must come
   from a declared root map, never from the lowest note of its voicing.
   The watchfire probe's anti-♭VII check read inversions as F♯ G F♯ G

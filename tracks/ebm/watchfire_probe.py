@@ -88,7 +88,9 @@ LIFT = 12                                           # the registral lift: a whol
 SUB_VERSE, SUB_CHORUS = 0.5, 0.7
 
 GAIN = {"kick": 1.0, "snare": 0.9, "hat": 0.22, "oh": 0.26, "bass": 0.75, "bed": 0.4,
-        "pad": 0.45, "chant": 0.42, "hit": 0.55, "lead": 0.9, "arp": 0.35}
+        "pad": 0.45, "chant": 0.78, "hit": 0.55, "lead": 0.9, "arp": 0.35}
+# chant was 0.42 and measured 14.5 dB under the bed it sits in — buried, and it is
+# supposed to be the counter-layer that justifies leaving the arp out (probe 05)
 
 
 def mix(buf, x, bar=0, gain=1.0):
@@ -405,8 +407,20 @@ def p05():
     mix(x, a, 8, GAIN["arp"])
     for i, what in enumerate(("the chant (recommended)", "nothing", "a 16th updown arp (the rejected reading)")):
         print(f"    bars {4 * i}-{4 * i + 3}: {what}")
-    check("the arp reading is rendered as the alternative, not the plan", True,
-          "(no arp layer exists in watchfire_notes.md's kit table)")
+    # measure each counter-layer's own contribution, not the mix's centroid: the
+    # chant is dark and low, so it barely moves a centroid even when clearly present
+    rms = lambda y: float(np.sqrt(np.mean(y ** 2)))
+    seg = [x[int(4 * i * BAR * SR): int(4 * (i + 1) * BAR * SR)] for i in range(3)]
+    ch_layer = GAIN["chant"] * orchestra(LOOP, fn=choir)
+    for i, what in enumerate(("chant", "bare", "arp")):
+        print(f"      {what}: centroid {centroid(seg[i]):.0f} Hz, RMS {20 * np.log10(rms(seg[i])):.1f} dBFS")
+    print(f"      the chant layer alone: {20 * np.log10(rms(ch_layer)):.1f} dBFS, "
+          f"{20 * np.log10(rms(ch_layer) / rms(seg[1])):+.1f} dB against the bare reading")
+    check("the chant is present, not buried (within 12 dB of the bed it sits in)",
+          rms(ch_layer) > rms(seg[1]) / 4.0, f"({20 * np.log10(rms(ch_layer) / rms(seg[1])):+.1f} dB)")
+    check("the arp reading is spectrally distinct from the bare one",
+          centroid(seg[2]) - centroid(seg[1]) > 300,
+          f"({centroid(seg[2]) - centroid(seg[1]):+.0f} Hz)")
     return x, 12
 
 

@@ -228,7 +228,10 @@ def phrase_report():
     print(f"    cutoff {CUTS} Hz;  gate {GATES};  accent floor {FLOORS}; quarters lean {ACCENT}")
     check("the pitch never moves in bars 0-6 (root only)", pitches == {0},
           f"(intervals present: {sorted(pitches)})")
-    check("bar 7 is the only pitch event (the walk)", set(CELL["walk"]) - {".", "x"} != set())
+    check("bar 7 is the ONLY pitch event: bars 0-6 are all the hammer cell",
+          set(PHRASE[:7]) == {"hammer"} and PHRASE[7] == "walk")
+    check("and the walk really does leave the root", set(CELL["walk"]) - {".", "x"} != set(),
+          f"(intervals {sorted({INTERVAL[c] for c in CELL['walk'] if c != '.'})})")
     runs, run = [], 1
     for a, b in zip(states, states[1:]):
         run = run + 1 if a == b else (runs.append(run) or 1)

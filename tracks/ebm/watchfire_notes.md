@@ -278,6 +278,13 @@ script rather than retuning it. Four things to record:
    rests on it being audible. This probe, with `demo_rom.wav`, is the
    one that can invalidate the plan.
 
+**The chant was buried, and the chant is load-bearing.** A check-audit
+the same day found it sitting **14.5 dB** under the mix it plays in, at
+gain 0.42. That layer is the entire justification for leaving the arp
+out — it is supposed to *be* the counter-melody — so at that level probe
+05 could not have answered its own question. Raised to 0.78, which puts
+it 9.2 dB down, and re-rendered. The ear still sets the final balance.
+
 **One weak spot in the rising-roots reading** (probe 03): G2's sub
 square lands at 49 Hz, under the directory's measured-good 55 Hz
 centre. B2, D3 and E3 are all comfortable at 61.7, 73.4 and 82.4 Hz, so

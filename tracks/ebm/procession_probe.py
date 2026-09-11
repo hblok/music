@@ -81,6 +81,7 @@ PHRASE = ("stomp", "stomp", "stomp", "stomp5", "stomp", "stomp", "riff", "walk")
 INTERVAL = {"x": 0, "o": 12, "5": 7, "7": 10}
 BASS_CUT = (2800.0, 1300.0, 3400.0, 1700.0)           # the filter talks: one open value per two bars (the bold cycle)
 BASS_FLOOR = 0.6                                      # the 16ths sit back (the bold floor)
+GATE_FRAC = 0.5                                       # the gap IS the groove (blueprint: <= 0.5 in 1993)
 BASS_ACCENT = {0: 1.0, 4: 0.92, 8: 1.0, 12: 0.92}     # the quarters lean
 V3_CUT, V3_FLOOR = (2400.0, 1700.0, 2900.0, 2000.0), 0.78   # 02b: the no_access v3 recipe as shipped (measured subtle at 122)
 CHORUS_SUB = 0.6                                      # the chorus sub square (was 0.85): the boom carries 55 Hz, not the square
@@ -165,7 +166,7 @@ def bassline(bars, roots, phrase=True, cell_name="stomp", sub=0.6, accents=True,
         for j, s in enumerate(onsets):
             gap = (onsets[j + 1] if j + 1 < len(onsets) else onsets[0] + 16) - s
             g = (BASS_ACCENT.get(s, floor) if cell[s] == "x" else 1.0) if accents else 1.0
-            place(buf, note(root + INTERVAL[cell[s]], dur=gap * STEP * 0.5, **note_kw), b * 16 + s, g)
+            place(buf, note(root + INTERVAL[cell[s]], dur=gap * STEP * GATE_FRAC, **note_kw), b * 16 + s, g)
     return buf
 
 
@@ -195,6 +196,17 @@ def stabs(chords, steps=OPEN_STEPS, **kw):
     return buf
 
 
+EM_OPEN = (52, 55, 59)
+
+
+def arp_sequence(bars, chords, resolved=True):
+    """The chord the arp plays in each bar — the bookend claim lives here,
+    so it is computed once and can be compared between the two readings."""
+    seq = [chords[b % len(chords)] for b in range(bars)]
+    seq[-1] = chords[0] if resolved else EM_OPEN
+    return seq
+
+
 def arp808(bars, chords, cutoff=500.0, rate=1, resolved=True):
     """The bookend: Reliquary's down-arp over the 808 kit.  resolved=False
     ends on the V (E) as Part 1 does; True lands on A — the answer."""
@@ -205,13 +217,11 @@ def arp808(bars, chords, cutoff=500.0, rate=1, resolved=True):
             if line[s % 16] == "x":
                 g = (1.0 if name == "kick" else 0.8 if name == "snare" else 0.35)
                 place(buf, hits[name], s, GAIN["808"] * g * (1.0 if s % 4 == 0 else 0.8))
-    for b in range(bars):
-        ch = chords[b % len(chords)]
-        if b == bars - 1:
-            ch = chords[0] if resolved else (52, 55, 59)          # Am, or the open Em
+    seq = arp_sequence(bars, chords, resolved)
+    for b, ch in enumerate(seq):
         x = arp(ch, bars=1, pattern="down", octaves=1, rate=rate, cutoff=cutoff)
         mix(buf, x[: int(BAR * SR) + int(0.3 * SR)], b, GAIN["arp"])
-    return buf, (chords[0] if resolved else (52, 55, 59))
+    return buf, seq[-1]
 
 
 def parse(lines):
@@ -328,7 +338,9 @@ def phrase_report(roots):
     for c in set(cells):
         dur = min(b - a for a, b in zip([i for i, ch in enumerate(CELL[c]) if ch != "."],
                                         [i for i, ch in enumerate(CELL[c]) if ch != "."][1:] + [16]))
-        check(f"cell {c}: gate duty 0.5, shortest note {dur * STEP * 0.5 * 1000:.0f} ms", True)
+        shortest = dur * STEP * GATE_FRAC
+        check(f"cell {c}: gate duty {GATE_FRAC} <= 0.5 (the 1993 figure), shortest note {shortest * 1000:.0f} ms",
+              GATE_FRAC <= 0.5 and shortest >= 0.040, f"(gate {GATE_FRAC}, {shortest * 1000:.0f} ms)")
         check(f"cell {c} starts on the root (the chorus ledger)", CELL[c][0] == "x")
     check("the engine is a phrase, not one cell (>= 3 cells)", len(set(cells)) >= 3)
     for r in (roots if isinstance(roots, (list, tuple)) else [roots]):
@@ -589,7 +601,11 @@ def p05b():
     print(f"    sub-60 share {sub_share(x):.2f}")
     timeline((0, "the same cell, 8ths (rate 2) and the cutoff down at 400 — the outro reading"),
              (7, f"the last bar RESOLVES to {last} (A minor)"))
-    check("the bookend restates the same cell at both ends", True, "(same chords, same pattern, different last bar)")
+    opened, closed = arp_sequence(8, ARP_CHORDS, resolved=False), arp_sequence(8, ARP_CHORDS, resolved=True)
+    print(f"    bars 0-6 open:   {[c[0] for c in opened[:-1]]}")
+    print(f"    bars 0-6 closed: {[c[0] for c in closed[:-1]]};  last bar {opened[-1][0]} -> {closed[-1][0]}")
+    check("the bookend restates the same cell at both ends", opened[:-1] == closed[:-1])
+    check("and differs only in the last bar", opened[-1] != closed[-1] and closed[-1] == ARP_CHORDS[0])
     return x, 8
 
 
