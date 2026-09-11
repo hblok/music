@@ -219,35 +219,43 @@ is built on these answers.
    Reliquary's frame, English, one word). Alternatives: *Vigil*,
    *Anvil*, *Threshold*, *The Nail*, *Ashes*.
    **Answer: Procession.**
+   
 2. **The slam's weight.** Recommended: the snare *louder* than
    no_access's 0.9 and the hats quieter, so 122 hits harder than 140.
    **Answer: yes** — probe `01` renders 0.90 / 1.15 / 1.40; 1.15 is the
    provisional default in the probe's gain table, the ear settles it.
+   
 3. **The verse device** (the bark's slot). Recommended (a) **the
    guitar** — `riff.py`'s palm-muted chug as a texture stab, the
    library's one unused instrument and its declared one-track
    exception.
    **Answer: yes, the guitar.** As events, not a carpet: two bursts per
    eight bars (`03a`), with `03b` kept as the negative control.
+   
 4. **The refrain quote: literal or developed?** Recommended literal in
    choruses 1 and 2, developed in the final.
-   **Answer: yes** — literal, chest 1.0 → 1.15 → 1.3, the octave double
-   and the extended last phrase only on the final pass.
+   Answer: The refrain solo is reall cool (4c - love it!)
+   
 5. **The bookend inside the track.** Recommended: open on the arp cell
    over the 808 (8 bars), close with it resolved to A.
-   **Answer: yes** (`05a` / `05b`).
+   Answer:  05a - open!
+   
 6. **The spoken slot.** Recommended: leave it empty.
    **Answer: yes, empty** — no probe, no `VOICE_GAIN`, no TTS in this
    track.
+   
 7. **The beat.** Recommended: the boom yes, the pump **halved** (0.30).
-   **Answer: yes** (`06b` against the dry `06a`).
+   **Answer: 06b
+   
 8. **The pre-chorus lift.** Recommended: the bass drops to half-time
    under a held hit, the tag answers on top — no snare roll (that is
    no_access's device and the wrong archetype here).
    **Answer: yes** (`07`).
+   
 9. **The chorus hit**: recommended **choir** — the liturgical frame,
    and it separates this track from no_access's orchestral hit.
    **Answer: yes, choir** (`08` keeps the A/B).
+   
 10. **Length.** Recommended 120 bars (3:56).
     **Answer: yes, 120 bars.**
 
@@ -386,3 +394,6 @@ Hz within 1 dB of chorus 1). Everything else stands.
 
 Listen — the ladders in the probe table — and write the verdicts under
 "Probe measurements" as answers. Then `procession.py`, not before.
+
+See questions answer above.
+Also note, the 04c_refrain_solo reads very well

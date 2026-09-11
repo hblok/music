@@ -533,3 +533,5 @@ in the choruses (v2: 0.71–0.73 — the boldness held).
 
 **Listen verdict v3: pending.** Slices: `--solo bass --slice 16 32`
 (the verse phrase + the VI–VII answer), `--slice -2 8` (the way in).
+
+v3 works quite well. It's not a full-on banger, but a good track on the album.

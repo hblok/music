@@ -222,28 +222,43 @@ this track's own claims:
 1. **Title and seed.** *Watchfire*; alternatives *Ascendant*,
    *Vanguard*, *Zenith*. Seed **1999**; the blueprint also offers 8
    (catalogue mind 008) and 50.
+   Answer: geradeaus
+
 2. **126, or faster.** Recommended 126, for the separation argued
    above. The risk is that "relentless momentum" needs more than this,
    in which case 131 is the next step that still misses every taken
    tempo.
+   Answer: 126
+
 3. **The peak at A4.** Recommended: keep it, with the octave doubling
    doing the work. Probe 01a/01b/01c is exactly this argument, and if
    the doubled version still reads as trance the line drops a third.
+   Answer: yes
+
 4. **Leaving the arp out entirely.** Recommended yes — it is the
    genre's signature and also its trap, and the chant covers the
    counter-melody job. Probe 05 is the check.
+   Answer: no arp
+
 5. **The chorus bass rising through the loop**, with G2's sub square at
    49 Hz. Recommended yes; the fallback is pedalling on B under the
    moving chords, as `procession` does.
+   Answer: yes
+
 6. **The trough at 16 bars.** Recommended yes at this length, because
    it keeps a pulse. If it reads as two songs, it goes to 8.
+   answer: yes
+
 7. **How warm is too warm.** The relative major III is the warmth here.
    The standing goa verdict is that major reads as country; the
    defence is that III inside a minor loop is diatonic and the track
    never cadences on it. Probe 01a decides.
+   Answer: 01a is the best from 01 - again, similar to u96
+
 8. **Whether `rom.strings` wants a `lead` sibling** after all — a
    single warm sustained voice rather than the section on one note. The
    module deliberately does not have one yet. Probe 01a answers it.
+   Answers: No, I think we're good
 
 ## Probe amendments (2026-09-11, written and rendered, before any listening)
 
@@ -295,9 +310,13 @@ is rendered beside it.
 
 1. **Listen to `rom.wav` and `demo_rom.wav` first.** Everything here is
    downstream of those two verdicts, probe 06 most of all.
+   
 2. Then the probe ladders: `01a → 01b → 01c` (the anti-trap argument),
    `02` (the ascent as an opening), `03`, `04`, `05` (the chant against
    the arp), `06` (the era), `07`, `08`, `09`.
+
+   02 is great - the ascent! (Now, we might have left the dark goth with this. But we've entered early 90s techno. U96 - Das boot!)
+
 3. Answer the eight questions above, now that the alternatives are
    audible.
 4. Only then `watchfire.py`.

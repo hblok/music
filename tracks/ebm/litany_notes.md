@@ -234,43 +234,58 @@ truncation, master guardrails) plus, specific to this track:
 1. **Title and seed.** *Litany* (the form names the mechanism) —
    **but it collides**: `../dune/generate_litany_against_fear.py`
    already exists, so one of the alternatives probably has to win:
-   *Vigil*, *Toll*, *Threnody*, *Mortal Coil*. Seeds so
-   far: 1993 (reliquary), 18 (no_access), 1991 (procession).
-   Recommended seed **2018** — the year Morten Lund remastered the
-   record from the original tapes, i.e. the year it was finally heard
-   properly. Alternative: 1992 (the Apoptygma Sound Lab recordings).
+   *Vigil*, *Toll*, *Threnody*, *Mortal Coil*.
+   Answer: Tile: Ruin
+
 2. **The sub at F♯2 (46.3 Hz).** Recommended: `sub` 0.6 in verses and
    0.85 in choruses, with the kick carrying the weight the sub gives
    up — but probe 02 decides, and a bad answer means the key moves to
    G♯ minor rather than the register moving up.
+   Answer: yes
+
 3. **Hats.** Recommended: 8ths only, and none at all for the first 8
    bars of verse 1. A 16th carpet at 109 fills exactly the space the
    archetype is made of.
+   Answer: yes
+
 4. **Verse 2 at 8 bars** instead of 16. Recommended yes — the
    anti-drag measure, and the asymmetry is audible as intent.
+   Answer :yes
+
 5. **The snare's size.** Recommended: plate cut 220 ms, longer than
    `procession`'s 140 — the hammer is the one dialect where the blow
    is allowed a tail. This is a declared stretch of the truncation
    rule; argue it or keep 140.
+   Answer: yes
+
 6. **The toll device.** Recommended: **no new instrument** — the
    chopped choir hit at a long `dur` under a lone kick is the toll. If
    probe 08 says it reads as a stab and not a bell, the fallback is a
    detuned `eps_kick` at 55 Hz doubling it, still no new module.
+   Answer: No - the toll was not great.
+
 7. **The kick to 8ths in the final chorus.** Recommended yes, final
    only — at this tempo it is the one energy move available that adds
    no density.
+   Answer: unsure
+
 8. **The spoken slot.** Recommended **no**. `no_access` has it, the
    break here is better served by the organ stating the petition
    alone, and this is the track where silence between blows is the
    material.
+   Answer: no
+
 9. **The ending.** Recommended: hard stop on the downbeat of bar 104
    plus a 4-bar decay tail. `no_access` faded and `procession` fades;
    the hammer should stop.
+   Answer: hard stop.
+
 10. **Anything that should be borrowed from `procession`'s probe
     verdicts** once those are heard — in particular the accent floor
     and the filter-cycle widths, which were re-tuned there the same
     day. If the probes land before this one is written, its defaults
     inherit from them.
+    Answer: no
 
 ## Probe amendments (2026-09-11, written and rendered, before any listening)
 
@@ -322,5 +337,9 @@ is real rather than assumed.
 1. **Listen to the probes** — the ladders are `01a → 01b → 01c`, the
    three levels inside `02`, `03`, `05` and `08`, the three roots inside
    `04`, and the three kick readings inside `09`.
+
+   drone-as-phrase is good, phrase with moving pitch is als good.
+
 2. Answer the ten questions above, now that the alternatives are audible.
 3. Only then `litany.py`.
+

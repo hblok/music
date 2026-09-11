@@ -253,3 +253,6 @@ tag | A3 - G3 - E3 - - - | - - - - - - . . |
 thin. The octave-below layer is fuller (cutoff 700, sub-octave 0.5, Q
 1.0) and much louder (0.8 in hook 1, 1.0 in hook 2 and the tag), the
 lead layer weight 0.34 → 0.38. Nothing else changed.
+
+Listen:
+v3 is an excellent opening. Nothing to change here for now
