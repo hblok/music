@@ -202,10 +202,14 @@ check, master guardrails) plus, specific to this track:
    Reliquary's frame, English, one word). Alternatives: *Vigil*,
    *Anvil*, *Threshold*, *The Nail*, *Ashes* (the source's own, maybe
    too on the nose).
+   Answer: "Anvil" is better
+
 2. **The slam's weight.** The blueprint says kick and snare hit "like
    one instrument" — probe 1 sets the snare weight. Recommended: the
    snare *louder* than no_access's 0.9 and the hats quieter, so 122
    hits harder than 140 did.
+   Answer: Ok, but be careful with the snare hit. It can easily become to over-powering and steal the whole sound.
+
 3. **The verse device** (the bark's slot, now empty). Candidates:
    (a) **the guitar** — `riff.py`'s palm-muted chug as a texture stab,
    the library's one unused instrument and its declared one-track
@@ -215,26 +219,45 @@ check, master guardrails) plus, specific to this track:
    (c) a low `dark_lead` mutter on the pedal.
    Recommended: (a) — it is the one colour this directory has never
    used, and it is exactly what a 1993 slam had.
+
+   Answer: Yes, let's try guitar riff.
+
+
 4. **The refrain quote: literal or developed?** Recommended literal in
    choruses 1 and 2, developed in the final (the last phrase extended,
    the octave double) — a quote that never changes is a rerun.
+   Answer: sounds good
+
 5. **The bookend inside the track.** Recommended: open the song with
    the arp cell over the 808 (8 bars) and close with it resolved to A.
    Or keep the 808 out entirely and let the song start on the engine?
+   Answer: An opening is always good. Then 808.
+
+
 6. **The spoken slot.** Leave it empty (recommended: the guitar and the
    engine carry the verses, and the last track spent its slot well), or
    one short machine phrase in the break? If yes, name the phrase.
+   Answer: Nothing spoken on this one.
+
 7. **The beat.** no_access v2/v3 deviated from the 1993 "no pump, no
    sub-boom" and you liked it. Recommended here: **the boom yes, the
    pump halved** (0.30) — at 122 a deep pump is audibly modern, while
    the boom is what made the bass land. Or dry 1993, or the full v3
    treatment?
+   Answer: Yes boom and half pump.
+
 8. **The pre-chorus lift.** A snare roll is the no_access device and
    may read as the wrong archetype at this tempo. Recommended: the bass
    drops to half-time under a held hit, the tag answers on top.
+   Answers: Yes, drop bass.
+
 9. **The chorus hit**: orchestral stack or choir? Recommended choir —
    the liturgical frame, and it separates this track from no_access's
    orchestral hit.
+   Answers: Interesting. Let's try the choir.
+
 10. **Length.** 120 bars (3:56) recommended. 136 bars (4:27) buys a
     third verse or a longer break; the slam archetype argues against
     it.
+    Answers: I would lean towards longer. However, like we've discussed many times. Duration is never a limit nor target. If we need it to be longer, it can be.
+    
