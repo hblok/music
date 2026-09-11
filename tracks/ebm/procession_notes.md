@@ -111,12 +111,25 @@ loop bar by bar.
 | 72–88 | CHORUS 2 | the refrain ×2, chest 1.15 |
 | 88–96 | BREAK (8) | drums out, the 808 keeps the pulse, organ/pad, the spoken slot if it exists |
 | 96–112 | FINAL | the refrain ×2, chest 1.3, + the octave double |
-| 112–120 | OUTRO | the arp cell returns and **resolves to A** — the answer Part 1 withheld; fade |
+| 112–120 | OUTRO | the arp cell returns and **stays open on Em**, as Part 1 leaves it (Q5, `05a`); the outro's own darker reading (8ths, cutoff down) but the last bar unresolved; fade |
 
 The bookend is inside one track (the blueprint's device compressed):
-the opening 8 bars and the closing 8 are the same idea, and the second
-one resolves. The eventual *Reliquary (Part 2)* then restates it at
-album scale.
+the opening 8 bars and the closing 8 are the same idea. **Neither
+resolves** (Q5, answered 2026-09-11: "05a means keep it open, no
+resolution at the end").
+
+That is a deliberate deferral, not a missing ending. Reliquary is Part 1
+and ends open on the V; this track restates the cell and also leaves it
+open; so **the resolution now belongs to the eventual *Reliquary (Part
+2)***, at album scale, which is where the device came from. Two tracks
+asking and the third answering is the record's own shape.
+
+The consequence for the return, per `VNV_Empires.md` §4's rule that a
+return must add a mechanism rather than subtract one: since the outro no
+longer resolves, its addition has to be the *reading* — the cell on 8ths
+with the cutoff down, heard after the loudest section instead of before
+the first verse. If that does not feel like enough of an arrival, the
+fix is in the rendering, not in resolving the chord.
 
 ## The engine (the bass)
 
@@ -180,7 +193,7 @@ probe checks pass.
 | `04b` | the same, chest 1.3 (the final chorus's voice) |
 | `04c` | the refrain alone, wet, chest 0.8 — the voice judged on its own |
 | `05a` | **the bookend as Part 1 leaves it** — 808 (Reliquary's decay 0.2, the kick tuned to A1 = 55 Hz) + the down-arp, the bed's sub at 0.3, ending open on Em |
-| `05b` | the same cell **resolved to A**, 8ths, cutoff down: the outro reading |
+| `05b` | the same cell **resolved to A**, 8ths, cutoff down — **the rejected reading** (Q5: the outro keeps 05b's 8ths and cutoff but does not resolve) |
 | `06a` | **the beat, dry 1993** — the pedal with the sub square at 0.85, no pump, no boom |
 | `06b` | **the beat with the deviation** — the pedal with the sub square down to 0.6, the boom's sine carrying 55 Hz under every kick, the pump halved to 0.30 (mean 0.94, floor 0.70) |
 | `07` | **the pre-chorus lift** — the bass to half-time under a held choir hit, the tag answering, **the hole** (beat 4 of the last pre bar: no drum, no bass — 17.5 dB down), then two bars of the chorus landing (engine on the pedal + boom, stabs, hit, the refrain's first bars) |
@@ -199,7 +212,9 @@ check, master guardrails) plus, specific to this track:
 - **the quote check**: the refrain's note list is byte-identical to
   `reliquary_v2.py`'s `HOOK` (the bookend's whole point);
 - **the bookend match**: the outro's arp note list restates the intro's,
-  and its last chord is A where the intro's is E;
+  **including the last chord** — both end on E minor, and the check
+  asserts no A-minor resolution anywhere in either bookend (Q5). The
+  outro differs from the intro only in its rate and cutoff;
 - **the phrase check** (from v3): ≥ 4 distinct bass cells over the
   verses and choruses, the pedal moves, accents printed;
 - **bass gate duty ≤ 0.5** (stricter than futurepop — this bass stomps);
@@ -239,6 +254,10 @@ is built on these answers.
 5. **The bookend inside the track.** Recommended: open on the arp cell
    over the 808 (8 bars), close with it resolved to A.
    Answer:  05a - open!
+   **Clarified 2026-09-11:** 05a means *keep it open, no resolution at
+   the end* — so both bookends end on Em and the resolution is deferred
+   to a future *Reliquary (Part 2)*. The structure table, the bookend
+   paragraph and the verify check are updated to match.
    
 6. **The spoken slot.** Recommended: leave it empty.
    **Answer: yes, empty** — no probe, no `VOICE_GAIN`, no TTS in this
