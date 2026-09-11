@@ -478,4 +478,58 @@ the beat block (pump floor / ducked beats / mean in chorus 1 between
 no boom after the drums stop); the slot block prints the source of
 each phrase. -13.0 LUFS integrated (v1: −13.2).
 
-**Listen verdict: pending.**
+**Listen verdict v2:**
+
+v2 is pretty good.
+
+However, the bass line becomes very monotome after a while. Although there is variation to it, which is nice, it really drags. Of course, making it bolder and louder also made it more prominent. So, what can we do to bring in more interest there.
+
+Secondly, smaller detail: It would be good with a very short intro, a couple of bars, at the very beginning. The whole thing starts abruptly.
+
+## v3 amendment (2026-09-11) — `no_access_v3.py` → `no_access_v3.wav`
+
+**The v2 verdict** (above): "pretty good", but the bass line "becomes
+very monotone after a while ... it really drags" (and louder made it
+more prominent), and "it would be good with a very short intro, a
+couple of bars — the whole thing starts abruptly". Same seed, bars,
+form, refrain, harmony, keypad, beat, voice, organ.
+
+1. **The engine is a phrase, not one cell.** v2 played `gallop` on the
+   same root for almost every engine bar; v3 plays an **8-bar phrase**,
+   aligned to the chorus loop (`PHRASE`, `b % 8`): three bars of
+   `gallop`, then `lift` (`x.xxx.xxo.xxo.xx` — octaves on beats 3 and
+   4), two more `gallop`, then `seven` (`x.xxx.xx7.xx5.xx` — the flat 7
+   then the fifth) and `walk` (`x.xxx.xx5.xx7.oo` — 5 → ♭7 → the octave
+   pair climbing into the next phrase). Every variant still starts on
+   the root, so the chorus root ledger check is untouched; bars 55 / 95
+   / 143 keep the old `answer` turnaround. 112 non-root onsets over the
+   engine where v2 had a handful.
+2. **The filter talks.** `BASS_CUT = (2400, 1700, 2900, 2000)` Hz, one
+   open value per two bars — the envelope's floor and everything else
+   unchanged. Not an arc over the piece (the 303 lesson), a per-phrase
+   wiggle.
+3. **Accents.** `BASS_ACCENT` = 1.0 on 1 and 3, 0.92 on 2 and 4, **0.78
+   on every other 16th**, and a colour note (octave / fifth / ♭7)
+   always leans. v2 placed every bass note at the same level, which is
+   most of why the gallop read as a drone.
+4. **The verse pedal answers.** `VERSE_ROOTS` = six bars of C♯3 then
+   **A2 and B2** (VI – VII pushing back to i) — the verses were a
+   16-bar C♯ pedal in v2. The boom follows the root automatically now
+   (built from the roots the kick table actually uses: 52 / 55 / 62 /
+   69 Hz).
+5. **The way in.** `INTRO_BARS = 2` and `bar_t(b) = (b + INTRO_BARS) *
+   BAR` — every table keeps its bar numbers, the whole score just sits
+   two bars in. Those two bars: the seethe bed swelling from silence (a
+   raised cosine), one low organ i at cutoff 500 (the same chord the
+   outro fades on — a bookend) and one slow noise swell 150 → 2500 Hz.
+   The gallop then *enters* at bar 0 instead of starting.
+
+Verify: two new checks in the BASS CELLS block (≥ 4 cells over the
+verses and choruses; the verse pedal moves), the seam scan starts at
+bar 0 (the swell before it is by design, and printed), the event map
+opens on the way in. All 42 checks pass. −13.0 LUFS integrated (v2:
+−13.0), true peak 0.92, final-chorus crest 3.89, sub-80 share 0.69–0.71
+in the choruses (v2: 0.71–0.73 — the boldness held).
+
+**Listen verdict v3: pending.** Slices: `--solo bass --slice 16 32`
+(the verse phrase + the VI–VII answer), `--slice -2 8` (the way in).

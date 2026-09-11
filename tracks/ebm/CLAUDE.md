@@ -74,9 +74,9 @@ should carry the same three pieces — copy them, don't reinvent.
   Notes: `reliquary_notes.md` §"v2 amendment" / "v3". Iterating in
   place via `LISTENING.md`'s flags — bump `NAME`, never overwrite a
   kept render.
-- **no_access** (working title *Clearance*) — `no_access_v2.py` →
-  `no_access_v2.wav` (current; `no_access.py` → `no_access.wav` is v1,
-  kept for its verdict): the jackhammer archetype
+- **no_access** (working title *Clearance*) — `no_access_v3.py` →
+  `no_access_v3.wav` (current: the bass phrase + the two-bar way in;
+  `no_access_v2.py` and `no_access.py` are kept for their verdicts): the jackhammer archetype
   (*Backdraft*): 140 BPM, C♯ minor, gallop bass, 160 bars = 4:34, seed
   18, hook target 8. The refrain declaimed on `dark_lead` (G♯2–A3, chest
   1.0 → 1.3); a second SH-101 "tick" counter-sequence as the verse voice
@@ -93,7 +93,7 @@ should carry the same three pieces — copy them, don't reinvent.
   not a carpet); the silver_wire pump + sub-boom for "an actual beat"
   (a declared deviation from 1993); the slot filled by a cached edge-tts
   phrase through the robot chain; organ under the pre-choruses and the
-  fade. Notes: `no_access_notes.md` (plan + amendments + v1 + v2 notes);
+  fade. Notes: `no_access_notes.md` (plan + amendments + v1/v2/v3 verdicts);
   probes: `no_access_probe.py` → `/workspace/music/ebm/no_access_probe/`.
   Listen verdict pending.
 
