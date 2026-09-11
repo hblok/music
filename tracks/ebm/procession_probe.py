@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Procession — the probes (the slam, tracks/ebm's third track).
 
-Short samples at 122 BPM of the slam, the engine, the verse guitar, the
+Short samples (18) at 122 BPM of the slam, the engine, the verse guitar, the
 refrain quote, the bookend, the beat, the pre-chorus lift and the
 chorus hit — each printed with the inspection the track's verify block
 will print, heard and checked BEFORE procession.py exists.  Notes:
@@ -74,7 +74,8 @@ CELL = {**CELLS, "stomp5": "x.x.x.x.x.x.5.o.", "walk": "x.x.x.5.x.7.o.o.",
 PHRASE = ("stomp", "stomp", "stomp", "stomp5", "stomp", "stomp", "riff", "walk")
 INTERVAL = {"x": 0, "o": 12, "5": 7, "7": 10}
 BASS_CUT = (2400.0, 1700.0, 2900.0, 2000.0)           # the filter talks: one open value per two bars
-BASS_ACCENT = {0: 1.0, 4: 0.92, 8: 1.0, 12: 0.92}     # the quarters lean, the rest sit back
+BASS_ACCENT = {0: 1.0, 4: 0.92, 8: 1.0, 12: 0.92}     # the quarters lean, the rest sit back (floor 0.78)
+BOLD_CUT, BOLD_FLOOR = (2800.0, 1300.0, 3400.0, 1700.0), 0.6   # 02d: the phrase turned up (measured: 02b is subtle)
 PUMP_DEPTH, PUMP_TAU, PUMP_FLOOR = 0.30, 0.10, 0.30   # half of no_access's 0.55: 122 does not want a modern pump
 BOOM_OCTAVE, BOOM_DUR = -12, 0.45                     # the beat at 122 is 0.492 s
 
@@ -89,7 +90,7 @@ HOOK = ["A3 - A3 A3 Bb3 - A3 -", "G3 - - - . A3 G3 F3", "E3 - F3 E3 D3 - E3 -", 
 TAG = ["A3 - G3 - E3 - - -", "- - - - - - . ."]
 
 GAIN = {"kick": 1.0, "snare": 1.15, "ch": 0.20, "oh": 0.26, "bass": 0.75, "bed": 0.45, "pad": 0.22,
-        "stab": 0.2, "dark_stab": 0.22, "guitar": 0.35, "hit": 0.7, "lead": 0.85, "boom": 0.45,
+        "stab": 0.2, "dark_stab": 0.22, "guitar": 0.75, "hit": 0.7, "lead": 0.85, "boom": 0.45,
         "arp": 0.35, "808": 0.8}
 
 
@@ -125,20 +126,21 @@ def drums(bars, snare_gain=None, hat_gain=None, figures=True, open_from=None, ki
     return buf, {"kick": K, "snare": S, "ch": CH, "oh": OH}
 
 
-def phrase_spec(b, roots, sub=0.6):
+def phrase_spec(b, roots, sub=0.6, cuts=BASS_CUT):
     """-> (cell, root, note kwargs) for bar b of the engine phrase."""
     cell = PHRASE[b % 8]
     root = roots[b % len(roots)] if isinstance(roots, (list, tuple)) else roots
-    return CELL[cell], root, {"cutoff": (BASS_CUT[(b // 2) % 4], 250.0), "sub": sub}
+    return CELL[cell], root, {"cutoff": (cuts[(b // 2) % 4], 250.0), "sub": sub}
 
 
-def bassline(bars, roots, phrase=True, cell_name="stomp", sub=0.6, accents=True, **kw):
+def bassline(bars, roots, phrase=True, cell_name="stomp", sub=0.6, accents=True, floor=0.78, cuts=BASS_CUT, **kw):
     """The engine.  phrase=True walks PHRASE bar by bar (the v3 lesson);
-    phrase=False repeats one cell — the A/B that proves the difference."""
+    phrase=False repeats one cell — the A/B that proves the difference.
+    accents=False is the flat control; floor/cuts are the 02d knobs."""
     buf = steps_buffer(bars)
     for b in range(bars):
         if phrase:
-            cell, root, note_kw = phrase_spec(b, roots, sub)
+            cell, root, note_kw = phrase_spec(b, roots, sub, cuts)
         else:
             cell = CELL[cell_name]
             root = roots[b % len(roots)] if isinstance(roots, (list, tuple)) else roots
@@ -147,7 +149,7 @@ def bassline(bars, roots, phrase=True, cell_name="stomp", sub=0.6, accents=True,
         onsets = [i for i, ch in enumerate(cell) if ch != "."]
         for j, s in enumerate(onsets):
             gap = (onsets[j + 1] if j + 1 < len(onsets) else onsets[0] + 16) - s
-            g = (BASS_ACCENT.get(s, 0.78) if cell[s] == "x" else 1.0) if accents else 1.0
+            g = (BASS_ACCENT.get(s, floor) if cell[s] == "x" else 1.0) if accents else 1.0
             place(buf, note(root + INTERVAL[cell[s]], dur=gap * STEP * 0.5, **note_kw), b * 16 + s, g)
     return buf
 
@@ -380,9 +382,9 @@ def guitar_report(cell, bars, bars_playing, carpet=False):
 
 # ---------------------------------------------------------------- probes
 def engine(bars, roots, phrase=True, cell_name="stomp", sub=0.6, snare_gain=None, hat_gain=None,
-           open_from=None, figures=True):
+           open_from=None, figures=True, **bass_kw):
     d, hits = drums(bars, snare_gain=snare_gain, hat_gain=hat_gain, open_from=open_from, figures=figures)
-    b = bassline(bars, roots, phrase=phrase, cell_name=cell_name, sub=sub)
+    b = bassline(bars, roots, phrase=phrase, cell_name=cell_name, sub=sub, **bass_kw)
     return d + GAIN["bass"] * b[: len(d)], hits
 
 
@@ -402,8 +404,8 @@ def p01():
 def p02a():
     """The engine as the blueprint states it: ONE cell, gated 8ths on the
     pedal, eight bars.  This is the drone the v3 verdict warned about."""
-    x, _ = engine(8, A2, phrase=False)
-    print(f"    one cell x 8 bars: {CELLS['stomp']}")
+    x, _ = engine(8, A2, phrase=False, accents=False)
+    print(f"    one cell x 8 bars: {CELLS['stomp']}  — flat: no accents, no filter cycle, no colour notes")
     return x, 8
 
 
@@ -415,22 +417,30 @@ def p02b():
     return x, 8
 
 
+def p02d():
+    """The phrase turned UP: accent floor 0.6 (was 0.78) and a wider filter
+    cycle — measured, 02b's cycle moves the bass centroid only +-10 %."""
+    x, _ = engine(8, A2, floor=BOLD_FLOOR, cuts=BOLD_CUT)
+    print(f"    accent floor {BOLD_FLOOR} (02b: 0.78), filter cycle {BOLD_CUT} Hz (02b: {BASS_CUT})")
+    return x, 8
+
+
 def p02c():
     """The chorus roots: does the SH-101 hold under F and E?  Bars 0-3 the
     bass follows Am F Em Am down (F2 sub 43.7 Hz, E2 sub 41.2 Hz);
     bars 4-7 it stays on the A pedal under the same chords."""
-    x = steps_buffer(8)
-    follow = [A2, F2, E2, A2]
-    d, _ = drums(8, open_from=0)
+    x = steps_buffer(12)
+    follow, up = [A2, F2, E2, A2], [A2, 53, 52, A2]
+    d, _ = drums(12, open_from=0)
     mix(x, d)
-    mix(x, bassline(4, follow, sub=0.85), 0, GAIN["bass"])
-    mix(x, bassline(4, A2, sub=0.85), 4, GAIN["bass"])
-    mix(x, pads(CHORUS_LOOP[:4], depth=0.0), 0, GAIN["pad"])
-    mix(x, pads(CHORUS_LOOP[:4], depth=0.0), 4, GAIN["pad"])
-    timeline((0, "the bass FOLLOWS: A2 F2 E2 A2 (sub squares 55 / 43.7 / 41.2 Hz)"),
-             (4, "the bass PEDALS on A2 under the same chords (sub square 55 Hz throughout)"))
+    for i, roots in enumerate((follow, A2, up)):
+        mix(x, bassline(4, roots, sub=0.85), 4 * i, GAIN["bass"])
+        mix(x, pads(CHORUS_LOOP[:4], depth=0.0), 4 * i, GAIN["pad"])
+    timeline((0, "the bass FOLLOWS DOWN: A2 F2 E2 A2 (sub squares 55 / 43.7 / 41.2 Hz)"),
+             (4, "the bass PEDALS on A2 under the same chords (sub square 55 Hz throughout)"),
+             (8, "the bass FOLLOWS UP: A2 F3 E3 A2 (sub squares 55 / 87 / 82 Hz — a leap of a 6th)"))
     phrase_report(follow)
-    return x, 8
+    return x, 12
 
 
 def p03a():
@@ -468,6 +478,22 @@ def p03c():
     mix(x, guitar(8, cell=VERSE_RIFF_SPARSE), 0, GAIN["guitar"])
     guitar_report(VERSE_RIFF_SPARSE, 8, RIFF_BARS)
     return x, 8
+
+
+def p03d():
+    """The guitar's level: the same 4-bar verse three times, the burst on
+    bar 3 at 0.45 / 0.75 / 1.10 (measured: 0.35 sat 10 dB under the engine
+    in its own band — buried)."""
+    x = steps_buffer(12)
+    the_bed = bed(12)
+    for i, g in enumerate((0.45, 0.75, 1.10)):
+        e, _ = engine(4, A2)
+        mix(x, e, 4 * i)
+        mix(x, pads([CLUSTER] * 2, bars_each=2, cutoff=600.0, depth=0.0), 4 * i, GAIN["pad"])
+        mix(x, guitar(4, bars_playing=(3,)), 4 * i, g)
+        print(f"    {4 * i * BAR:6.2f}s  bars {4 * i}-{4 * i + 3}  guitar gain {g:.2f} (the burst on bar {4 * i + 3})")
+    mix(x, the_bed, 0, GAIN["bed"])
+    return x, 12
 
 
 def _chorus(chest, hit_kind="choir", roots=None):
@@ -550,18 +576,22 @@ def p06b():
 def p07():
     """The pre-chorus lift (the approved one): the bass drops to half-time
     under a held hit, the tag answers on top, then the chorus downbeat."""
-    x = steps_buffer(9)
-    d, _ = drums(8, open_from=4)
+    x = steps_buffer(10)
+    d, _ = drums(10, open_from=4)
     mix(x, d)
     mix(x, bassline(4, A2, sub=0.6), 0, GAIN["bass"])
-    mix(x, bassline(4, [A2, A2, F2, E2], phrase=False, cell_name="8ths_half", sub=0.85), 4, GAIN["bass"])
+    mix(x, bassline(4, [A2, A2, A2, A2], phrase=False, cell_name="8ths_half", sub=0.85), 4, GAIN["bass"])
+    mix(x, bassline(2, A2, sub=0.85), 8, GAIN["bass"])                      # the chorus engine lands
     mix(x, pads(CHORUS_LOOP[:4], bars_each=2, depth=0.0), 0, GAIN["pad"])
+    mix(x, pads(CHORUS_LOOP[:2], depth=0.0), 8, GAIN["pad"])
+    mix(x, stabs(CHORUS_LOOP[:2], depth=0.0), 8, GAIN["stab"])
     place(x, hit(HIT_CHORD, kind="choir", dur=0.45), 4 * 16, GAIN["hit"])
     mix(x, reverb(line_on_lead(TAG, 2, 1.0)), 6, GAIN["lead"])
     place(x, hit(HIT_CHORD, kind="choir"), 8 * 16, GAIN["hit"])
-    timeline((0, "the verse engine running"), (4, "the bass drops to half-time (quarters) under a held choir hit"),
-             (6, "the tag answers: A3 G3 E3"), (8, "the chorus downbeat"))
-    return x, 9
+    mix(x, reverb(line_on_lead(HOOK[:2], 2, 1.0)), 8, GAIN["lead"])         # the refrain's first two bars
+    timeline((0, "the verse engine running"), (4, "the bass drops to half-time (quarters, on the pedal) under a held choir hit"),
+             (6, "the tag answers: A3 G3 E3"), (8, "the chorus lands: the engine on 0.85, stabs, the hit, the refrain's first bars"))
+    return x, 10
 
 
 def p08():
@@ -578,8 +608,9 @@ def p08():
 
 
 PROBES = [("01", "slam_snare_weights", p01), ("02a", "engine_one_cell", p02a), ("02b", "engine_phrase", p02b),
-          ("02c", "chorus_roots", p02c), ("03a", "verse_guitar_events", p03a), ("03b", "verse_guitar_carpet", p03b),
-          ("03c", "verse_guitar_sparse", p03c), ("04a", "chorus_quote_chest10", p04a),
+          ("02c", "chorus_roots", p02c), ("02d", "engine_phrase_bold", p02d),
+          ("03a", "verse_guitar_events", p03a), ("03b", "verse_guitar_carpet", p03b),
+          ("03c", "verse_guitar_sparse", p03c), ("03d", "verse_guitar_gain_ladder", p03d), ("04a", "chorus_quote_chest10", p04a),
           ("04b", "chorus_quote_chest13", p04b), ("04c", "refrain_solo", p04c),
           ("05a", "bookend_open", p05a), ("05b", "bookend_resolved", p05b),
           ("06a", "beat_dry_1993", p06a), ("06b", "beat_boom_halfpump", p06b),
