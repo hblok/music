@@ -350,6 +350,42 @@ with no hats and 22 with 8ths, against `procession`'s 30. The 16th
 carpet reaches 30 and is rendered as the rejected reading, so the A/B
 is real rather than assumed.
 
+## Built (2026-09-12) — `ruin.py` → `/workspace/music/ruin.wav`
+
+104 bars + a 4-bar decay, 3:58, all checks pass. Every answered
+question is followed as given. **Four things were chosen without an
+answer**, each a single constant at the top of the script so changing
+one is a grep and a re-render:
+
+| constant | chosen | why, and the fallback |
+|---|---|---|
+| `OPENING` | `"blow"` | the naked blow is the only candidate that belongs to this archetype alone, and the only opening in the directory that is a bare drum. `"way_in"` and `"none"` are wired |
+| the verse pedal | both readings, as development | you liked `01b` and `01c` equally, so verse 1 refuses to move at all and verse 2 gives in once, answering A2–B2 in its last two bars. The refusal is the idea; giving in is the development |
+| `CHORUS_ROOTS` | `"up"` | `"down"` puts D2 and C♯2 sub squares at 37 and 35 Hz, far under the measured-good 55. `"pedal"` is `procession`'s answer and would waste the one harmonic event this track has |
+| `KICK_8THS` | `True` | Q7 was "unsure"; the probe found it fits only if the hats give up their eighths, so they do. Set `False` to drop it |
+
+Two flaws the verify block caught, both in the arc:
+
+1. **The pre-choruses were louder than the choruses they lead into**
+   (0.211 against 0.196) with a 0.76 sub-60 share, outside the master
+   guardrail band. The half-time bass was running at the chorus sub of
+   0.85, so the *build* was heavier than the *arrival*. A pre builds by
+   removing rhythm, not by adding weight: `SUB_PRE` is now 0.45.
+2. **`VERIFY.md`'s standard check 2 was missing.** "Chorus > its
+   pre-chorus — the drop actually lands" is in the standard set and this
+   script did not have it, which is precisely why flaw 1 could pass.
+   Added, along with a sub-60 guardrail check.
+
+Arc now: verse 1 0.155 → pre 1 0.184 → chorus 1 0.196 → final 0.214,
+**+2.0 dB verse to chorus**, −8.2 dB into the break. Twelve petitions,
+busiest bar 22 onsets against the ceiling of 24, the slam truncated at
+its declared 220 ms.
+
+One consequence of `CHORUS_ROOTS = "up"` worth hearing for: the
+choruses carry *less* low end than the verses (sub-60 0.46 against
+0.58), because the roots climb to D3 and C♯3. That is the price of
+letting the pitch move at all.
+
 ## Next
 
 1. **Listen to the probes** — the ladders are `01a → 01b → 01c`, the
