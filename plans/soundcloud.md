@@ -92,4 +92,6 @@ if __name__ == "__main__":
 
 ## 5. Strategic Optimization Checklist
 *   **Ditch the AI Tags:** Avoid tagging your work as "AI Music" on public feeds. The tag is oversaturated with low-effort text-to-audio content. 
-*   **Target Niche Genres:** Classify your tracks under **IDM (Intelligent Dance Music)**, **Experimental**, **Glitch**, or **Ambient
+*   **Target Niche Genres:** Classify your tracks under **IDM (Intelligent Dance Music)**, **Experimental**, **Glitch**, or **Ambient**. 
+*   **Show Your Work:** Turn your track description into a technical documentation block. Listeners on SoundCloud love interacting with technical, code-driven content.
+
