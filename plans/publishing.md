@@ -39,8 +39,7 @@ industrial), Werkdiscs, The Werks, art|werk, Werk II (Leipzig venue).
 Carry these into any future naming — they killed real candidates:
 
 - **Never 14, 18, 28, 88, 1488.** Far-right numeric codes, read as such on
-  sight in the EBM/industrial scene. `WERK 88` would look great and be
-  unusable.
+  sight in the EBM/industrial scene. E.g. `WERK 88` is unusable.
 - **No Ø, umlauts, or digit-as-letter** (`Ødemark`, `0werk`, `000werk`) —
   glyphs that look cool and then can't be pronounced, typed or searched.
 - **No "seed", no "dead"/"death"** in any name.
@@ -72,8 +71,9 @@ Named after the track. Deliberately keeps the **German spelling** — the
 German reads as part of the WERK 16 identity. Names the paradox the whole
 project runs on: emotional music with no hands on it.
 
-Fourteen tracks is an album and a half — **cut to 9–10**. tech_noir as the
-cold open.
+~~Fourteen tracks is an album and a half — cut to 9–10.~~ Superseded: the
+actual current-version catalogue is 12 tracks / 67:28 once Unsung (dead
+end) and Hammerwerk (abandoned) drop out — see the running order below.
 
 ### 3. `tracks/dune/` → **SANDWERK** — last
 
@@ -81,13 +81,9 @@ Sand + works: the desert without one word of Frank Herbert's, and it ties
 to the artist name. (It was a candidate artist name; unclaimed as of the
 search.)
 
-**⚠️ Do not publish this as a Dune record.** "Kwisatz Haderach",
-"Muad'Dib", "Sihaya", "Shai-Hulud", "Arrakeen" are invented proper nouns
-from an actively-licensed franchise, and a monetised release is a
-different risk than a game soundtrack sitting in a repo. Retitle the
-tracks that name characters or places. The ones already in plain English —
-*Night Pursuit*, *The Sleeper Awakens*, *Water of Life*, *Stillsuit*,
-*Base Under Attack* — are fine as-is.
+Track titles include some of Frank Herbert's invented terms (Kwisatz
+Haderach, Muad'Dib, Sihaya, Shai-Hulud, Arrakeen) — low risk; titles
+aren't copyrightable.
 
 19 tracks is a double album. **Split it**: the desert ambient loops as one
 release, the psy-trance side (water_of_life, sleeper_awakens,
@@ -101,17 +97,79 @@ the_maker_comes, jihad, fall_of_arrakeen) as another.
       check that came back inconclusive.
 - [ ] Register `werk16.com` / `.net` if wanted, and claim
       `soundcloud.com/werk16`.
-- [ ] **Find out whether auto-upload tooling to SoundCloud actually
-      exists and works in 2026.** Specifically: is there a maintained
-      Python client, or is it raw HTTP against the API? What does the
-      upload endpoint want, and does it take FLAC directly?
-      `soundcloud.md` §3 already flags two blockers to confirm first —
-      **client credentials require an active Artist/Next Pro account**,
-      and **numeric track IDs are deprecated in favour of URNs**
-      (`urn:soundcloud:tracks:xxxx`). Neither has been verified against
-      the live API; both were written from genre/platform knowledge, not
-      from a successful call. Worth a spike before paying for Next Pro.
+- [x] **Checked (2026-09-14): no viable Python auto-upload path exists
+      right now.** SoundCloud closed public API registration years ago —
+      new client IDs are granted case-by-case via a manual review form
+      (weeks, often denied), not tied to buying Artist/Next Pro. That's a
+      harder blocker than `soundcloud.md` §3 implied.
+      - `soundcloud-python` (official, `pip install soundcloud`) can
+        upload but needs that closed grant, and **SoundCloud's own repo
+        says it's unmaintained** — they've told the community to fork it.
+      - `soundcloud.py`/`soundcloud-v2`, `soundcloudpy`, `soundcloud-lib`
+        — all actively maintained, all **read/download-only**, wrong job.
+      - `soundcloud-mcp` claims OAuth2.1+PKCE upload of MP3/WAV/FLAC —
+        unverified; almost certainly hits the same closed client-ID gate
+        underneath, an MCP wrapper can't route around that.
+      - **Decision needed:** either submit SoundCloud's developer-access
+        form now (review takes weeks, so start early if this path is
+        wanted) and accept manual upload until/unless it's approved, or
+        skip automation and just upload through the web UI /
+        Next Pro's own distribution to Spotify/Apple.
 - [ ] `soundcloud.md` **ends mid-sentence** at §5 ("...**Ambient") — its
       strategy checklist was never finished.
-- [ ] Track-by-track running orders for all three records — not started.
-- [ ] The Dune retitles — not started.
+- [x] Maschinenherz running order — done, see below.
+- [x] Sandwerk running order — done, see below.
+- [ ] Reliquary running order — holding; still refining and possibly
+      adding more tracks first.
+
+---
+
+## MASCHINENHERZ — running order (decided 2026-09-15)
+
+12 tracks, 67:28 total. Sequencing follows the composer's own cross-track
+references in the `*_notes.md` docs (the machine-voice arc, the "run lane",
+and explicit dark/bright-twin pairings) rather than an arbitrary order.
+
+| # | Track | Time | Key/BPM | Why here |
+|---|---|---|---|---|
+| 1 | Tech Noir | 3:20 | D minor | Cold open; seeds the `love_phrase` voice Maschinenherz ports |
+| 2 | Maschinenherz | 7:26 | E minor / 145 | Title track — machine-voice arc station 1 |
+| 3 | Silver Wire | 5:38 | A minor / 142 | Arc station 2 — the machine sings solo |
+| 4 | Morgenland | 6:14 | C Phrygian/Hijaz / 142 | Arc station 3 — sings an old song, modal turn east |
+| 5 | Flightpath | 4:43 | C minor / 138 | Closes the "run lane" (silver_wire ran, morgenland sang, flightpath flies) |
+| 6 | Eisgang | 4:55 | F minor / 138 | Side-B pivot, hardest track |
+| 7 | Ungeschrieben | 5:48 | F minor / 130 | Same key as Eisgang — held tonic across the cut |
+| 8 | Nachtkind | 5:38 | G minor / 139 | Deepens the dark, one step up from F minor |
+| 9 | Penumbra | 6:06 | C minor / 140 | The trough — notes call it Farlight's dark twin |
+| 10 | Lost | 5:32 | Bm/G/D/A / 130 | Climbs back out toward hope |
+| 11 | Farlight | 6:07 | E minor / 136 | Answers Penumbra (delayed Q/A); echoes track 2's E minor |
+| 12 | Adrift | 6:00 | C♯ minor / 137 | Farlight's bell, floating not struck — dissolve close |
+
+Excluded: **Unsung** (documented dead end, `unsung.py`'s own notes say the
+sung voice reads "strange"), **Hammerwerk** (abandoned, no script written).
+
+If a tighter single-LP cut is wanted later, drop **Penumbra** and
+**Ungeschrieben** first — each is the darker sibling of a stronger track
+already on the list (Farlight, Eisgang) so cutting them loses least.
+
+---
+
+## SANDWERK — running order (decided 2026-09-15)
+
+12 tracks, 74:58 total — the **story arc** only. `tracks/dune/` also has
+five seamless game-state loops (arrakis_winds_v3, spice_must_flow,
+stillsuit, sandstorm_coriolis, base_under_attack) plus the pre-Dune test
+piece ambient_track; these underlie gameplay with no build and no ending
+and are excluded from the listening release, same as Unsung/Hammerwerk
+were excluded from Maschinenherz. Full table + reasoning:
+`tracks/dune/sandwerk_running_order.md`. Playback script:
+`tracks/dune/play_sandwerk.sh`.
+
+1. Night Pursuit — 2. The Maker Comes — 3. Kanly — 4. Water of Life —
+5. The Sleeper Awakens — 6. Fall of Arrakeen — 7. The Navigator —
+8. Jihad — 9. Kwisatz Haderach — 10. Gurney's Song —
+11. Litany Against Fear — 12. Sihaya.
+
+Track titles include some of Frank Herbert's invented terms (Kwisatz
+Haderach, Sihaya, Kanly, Arrakeen, Sardaukar) — low risk; titles aren't
+copyrightable.
