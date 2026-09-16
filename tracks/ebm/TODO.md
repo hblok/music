@@ -32,7 +32,7 @@ the A/B and stem workflow, `CLAUDE.md` the directory rules.
 
 | track | state | what is left |
 |---|---|---|
-| **Ruin** (the hammer, 109, F♯ minor) | **BUILT 2026-09-12**, heard 2026-09-16: flat. `ruin_probe.py` now renders **11/11a/b/c** (three new hooks vs the control, solo), **12a/b/c** (in the chorus) and **13** (the seam kit in context) → `/workspace/music/ebm/ruin_probe/` | **the active track.** Listen, answer questions 11–14 in `ruin_notes.md` (+ the three still open from the build: opening, pedal, kick 8ths), then `ruin.py` gets its revision |
+| **Ruin** (the hammer, 109, F♯ minor) | **BUILT 2026-09-12**, heard 2026-09-16: flat. Round one answered: **the litany hook (11b)**, the seam kit, varied statements, the riff verse. Round two rendered: **10a/b/c** (the opening, split), **14a/b/c** (three ways to vary statement 2), **15a/b** (verse 2 hammer vs riff) → `/workspace/music/ebm/ruin_probe/` | **the active track.** Answer questions 15–17 in `ruin_notes.md`, then `ruin_v2.py` |
 | **Procession** (the slam, 122, A minor) | 10 answers + probe verdicts in; snare weight unpicked | **parked** until Ruin is through. Notes in §2b |
 | **Watchfire** (the ascent, 126, B minor) | **BUILT 2026-09-11**, heard 2026-09-16: flat | **parked** until Ruin is through. Notes in §2b |
 

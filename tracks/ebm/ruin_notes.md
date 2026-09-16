@@ -491,3 +491,51 @@ whether the verse pedal moves (01b/01c), `KICK_8THS` (09). Those wait
 for the same listen.
 
 Answer: The opening - let's split the probes for that, because it not clear which is which.
+
+### Round two (2026-09-16, the answers to 11–14 in): probes 10a/b/c, 14a/b/c, 15a/b
+
+Answers: **B, the litany** ("clearly the most fitting"); the seam kit,
+yes; the second statement varied, yes; the riff cell for verse 2, yes —
+both of those said "probe it", so this round renders them, and the
+opening is re-rendered as three files because the combined probe 10
+made it unclear which was which. `ruin.py` is still untouched;
+`ruin_v2.py` is written after questions 15–17.
+
+| probe | what |
+|---|---|
+| `10a` / `10b` / `10c` | the opening, one candidate per file: the naked blow / the way in / no opening. Same renderings as before, split |
+| `14a` **the litany form** | a whole 16-bar chorus: statement 1 = P1 + the response; statement 2 = a **second petition** (opens on the ♭2 G3, leans on it again in bar 3) + the **same response**. A litany's petitions change and its response is the constant — over the track: P1 A, P2 A, P1 A, P2 A, P3 A … |
+| `14b` **the organ answers** | statement 2 = the litany unchanged, but the low organ answers from below (E2 D2 C♯2, then A1 G♯1 F♯1) while the voice holds each phrase-end tone — call and response made literal, a second voice in the gap |
+| `14c` **the double early** | statement 2 = the litany + its octave-up dark_lead double at 0.35 (the built track's final-only device brought forward) — the voice thickens, the notes do not change |
+| `15a` / `15b` | verse 2 (six bars on the pedal, then A2 and B2) on the **hammer** as built, then on the **riff** cell `x..x..x...x.5...`: five onsets a bar against eight (18 per bar against 22), beat 2 left to the slam alone, the 5th landing with the slam on 4. Both keep the pitch-stays-put claim |
+
+P2 passes every refrain check with the response (density 0.20, held
+0.54, down-steps 0.64, three ♭2 onsets).
+
+### Questions 15–17
+
+15. **The opening** (`10a` / `10b` / `10c`). Recommended **10a, the
+    naked blow** — the only opening in the directory that is a bare
+    drum, and the archetype's own gesture. `10b` is No Access's device
+    reused; `10c` risks "starts abruptly".
+    Answer: b
+
+16. **How the second statement varies** (`14a` / `14b` / `14c`, or a
+    combination — a and b stack; c stacks with either). Recommended
+    **14a**, the litany form, because it is what the word means and it
+    gives the track a *third* petition for the final; **14b on top of
+    it** if the organ answer reads as a voice and not as clutter.
+    Answer: c_varied_double
+
+17. **Verse 2's engine** (`15a` hammer / `15b` riff). Recommended
+    **15b** — the verse's one identity move, more space not less, and
+    the syncopation this directory otherwise lacks. If it reads as a
+    different song, verse 2 stays on the hammer and the riff is dropped.
+    Answer: a - hammer
+
+Then `ruin_v2.py`: the litany as the refrain (P1/P2 per Q16), the seam
+kit at every verse→chorus and into the final, the opening per Q15,
+verse 2 per Q17. Still standing from the build unless you say
+otherwise: verse 1 refuses to move and verse 2 gives in (01b + 01c as
+development), `CHORUS_ROOTS = "up"`, `KICK_8THS = True` with the hats
+out, the hard stop.

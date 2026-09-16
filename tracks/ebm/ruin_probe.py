@@ -24,7 +24,10 @@ NEW hook candidates against it (solo, then in the chorus), and probe 13
 renders the seam devices (`instruments/devices.py`: the kick figure, the
 snare run, the roll + riser, the hit + downsweep) in this track's
 context, which the built track has none of.  Questions 11-14 in
-ruin_notes.md.
+ruin_notes.md.  Round two (same day, the answers in): probe 10 split into
+10a/b/c (it was not clear which was which), 14a/b/c = three ways to vary
+the litany's second statement, 15a/b = verse 2 on the hammer vs the
+riff cell.  Questions 15-17.
 
     python3 ruin_probe.py                   # all, to /workspace/music/ebm/ruin_probe/
     python3 ruin_probe.py --only 01a,01b    # a subset
@@ -94,6 +97,14 @@ HOOK_C = ["F#3 F#3 - - E3 E3 - -", "D3 D3 - - C#3 - - -", "F#3 F#3 - - G3 G3 F#3
           "E3 E3 - - D3 D3 - -", "C#3 C#3 - - B2 - - -", "D3 D3 - - G3 - C#3 A2", "F#2 - - - - - . ."]
 # C, THE HAMMER: the voice strikes in pairs like the drum — short-short-long, silence between
 CANDIDATES = {"a": ("offbeat", HOOK_A), "b": ("litany", HOOK_B), "c": ("hammer", HOOK_C)}
+# ANSWERED 2026-09-16: B, the litany — "clearly the most fitting".  Round two (probes 14/15):
+PETITION_B, RESPONSE_B = HOOK_B[:4], HOOK_B[4:]
+PETITION_B2 = ["G3 - - - F#3 - E3 D3", "C#3 - - - D3 - C#3 D3", "E3 - - - G3 - F#3 E3", "C#3 - - - - - . ."]
+HOOK_B2 = PETITION_B2 + RESPONSE_B
+# the litany FORM: the petitions change, the response is the constant.  P2 opens ON the
+# flat 2 (more insistent) and leans on it again in bar 3; the response is B's, unchanged.
+ORGAN_ANSWER = [". . . . . . . ."] * 3 + [". . . . E3 - D3 C#3"] + [". . . . . . . ."] * 3 + [". . . . A2 - G#2 F#2"]
+# the organ answers from below (an octave down) while the voice holds each phrase-end tone
 
 # the engine: the pitch NEVER moves; the phrase is in the filter, the gate and the accent
 CELL = {**CELLS, "hammer": "x.x.x.x.x.x.x.x.", "walk": "x.x.x.5.x.7.o.o.",
@@ -191,9 +202,10 @@ def parse(lines):
     return [tuple(e) for e in out]
 
 
-def line_on(lines, bars, chest=1.0, fn=None):
+def line_on(lines, bars, chest=1.0, fn=None, transpose=0):
     buf = steps_buffer(bars, tail=1.5)
     for start, midi, ln in parse(lines):
+        midi += transpose
         x = fn(midi, ln * BEAT / 2 * 0.95) if fn else dark_lead(midi, ln * BEAT / 2 * 0.95, chest)
         _common.add_at(buf, x, start * BEAT / 2)
     return buf
@@ -305,9 +317,10 @@ def space_report(kick_cell, hat_steps, cell="hammer", rejected=False):
     marks a reading the probe renders on purpose as the alternative — for
     those the check is that it really does break the ceiling, otherwise
     the A/B is not an A/B (the procession guitar-carpet pattern)."""
-    onsets = kick_cell.count("x") + SNARE_P.count("x") + len(hat_steps) + CELL[cell].count("x")
+    bass_on = sum(1 for ch in CELL[cell] if ch != ".")
+    onsets = kick_cell.count("x") + SNARE_P.count("x") + len(hat_steps) + bass_on
     print(f"    onsets per bar: kick {kick_cell.count('x')} + slam {SNARE_P.count('x')} + "
-          f"hats {len(hat_steps)} + bass {CELL[cell].count('x')} = {onsets} (ceiling {SPACE_CEILING})")
+          f"hats {len(hat_steps)} + bass {bass_on} = {onsets} (ceiling {SPACE_CEILING})")
     if rejected:
         check("the rejected reading really is over the ceiling (the A/B is real)", onsets > SPACE_CEILING,
               f"({onsets} > {SPACE_CEILING})")
@@ -520,30 +533,23 @@ def p09():
     return x, 6
 
 
-def p10():
-    """THE OPENING, take two.  The toll was rejected ("not great",
-    2026-09-11) and it was the whole of bars 0-8, so this is three
-    candidates with nothing decided between them — try something, adjust
-    later.  Each is 8 bars and each ends the same way, with the engine
-    running, so only the way IN differs.
+def _opening_level(x):
+    lvl = 20 * np.log10(np.sqrt(np.mean(x[: int(2 * BAR * SR)] ** 2)) + 1e-12)
+    print(f"    first two bars {lvl:.1f} dBFS (blow -10.4 / way in -24.1 / none -5.7 when rendered together);"
+          f" the organ quotes the petition from bar 6; no eps_hit")
 
-    a) THE NAKED BLOW: the hammer announces itself.  Kick and slam
-       together on beats 1 and 3, nothing else, 1.1 s of silence between
-       blows at this tempo.  The bed creeps in at bar 2, the pedal at 4.
-       No other track in the directory opens on a bare drum.
-    b) THE WAY IN: no_access v3's device, which the ear has already
-       passed ("works quite well").  The bed swells from silence, one low
-       organ chord, one slow noise swell; the kick lands at bar 4.
-    c) NO OPENING: the engine simply starts, full hammer at bar 0.  The
-       "skip long intros" rule taken to its limit — and the reading that
-       risks repeating the "starts abruptly" verdict."""
-    x = steps_buffer(24)
-    blow_steps = (0, 8)
 
-    # (a) the naked blow
+def p10a():
+    """THE OPENING (a) THE NAKED BLOW: the hammer announces itself.  Kick
+    and slam together on beats 1 and 3, nothing else, 1.1 s of silence
+    between blows at this tempo.  The bed creeps in at bar 2, the pedal
+    at 4.  No other track in the directory opens on a bare drum.
+    (Probe 10 rendered a/b/c in one file, 2026-09-11; split 2026-09-16
+    because it was not clear which was which.)"""
+    x = steps_buffer(8)
     K, S = kick(decay=5.0), snare(plate_decay=3.0, cut=PLATE_CUT)
     for b in range(2):
-        for st in blow_steps:
+        for st in (0, 8):
             place(x, K, b * 16 + st, GAIN["kick"])
             place(x, S, b * 16 + st, GAIN["snare"])
     ramp = bed(6)
@@ -554,32 +560,41 @@ def p10():
     d, _ = drums(4)
     mix(x, d, 4)
     mix(x, line_on(PETITION[:2], 4, fn=organ), 6, GAIN["organ"])
+    timeline((0, "kick + slam on 1 and 3, nothing else"), (2, "the bed creeps in"), (4, "the pedal, the kit"),
+             (6, "the organ quote"))
+    _opening_level(x)
+    return x, 8
 
-    # (b) the way in
+
+def p10b():
+    """THE OPENING (b) THE WAY IN: no_access v3's device, which the ear
+    has already passed.  The bed swells from silence, one low organ
+    chord, one slow noise swell; the kick lands at bar 4."""
+    x = steps_buffer(8)
     swell = bed(8)
     n = int(2 * BAR * SR)
     swell[:n] *= 0.5 - 0.5 * np.cos(np.pi * np.arange(n) / n)
-    mix(x, swell, 8, GAIN["bed"])
-    mix(x, organ(ORGAN_LOW, 3 * BAR, depth=0.0), 8, GAIN["organ"] * 0.8)
-    mix(x, noise_sweep(3 * BAR, f0=150.0, f1=2500.0, res=2.0), 8, 0.12)
+    mix(x, swell, 0, GAIN["bed"])
+    mix(x, organ(ORGAN_LOW, 3 * BAR, depth=0.0), 0, GAIN["organ"] * 0.8)
+    mix(x, noise_sweep(3 * BAR, f0=150.0, f1=2500.0, res=2.0), 0, 0.12)
     d, _ = drums(4)
-    mix(x, d, 12)
-    mix(x, bassline(4, FS2), 12, GAIN["bass"])
-    mix(x, line_on(PETITION[:2], 4, fn=organ), 14, GAIN["organ"])
+    mix(x, d, 4)
+    mix(x, bassline(4, FS2), 4, GAIN["bass"])
+    mix(x, line_on(PETITION[:2], 4, fn=organ), 6, GAIN["organ"])
+    timeline((0, "the bed swells from silence; a low organ i; the noise sweep"), (4, "the kick lands; the pedal"),
+             (6, "the organ quote"))
+    _opening_level(x)
+    return x, 8
 
-    # (c) no opening
-    seg, _ = verse(8, hat_steps=HAT_8)
-    mix(x, seg, 16)
 
-    for i, what in enumerate(("a) the naked blow", "b) the way in (no_access v3's device)", "c) no opening at all")):
-        print(f"    bars {8 * i}-{8 * i + 7}: {what}")
-    lvl = [20 * np.log10(np.sqrt(np.mean(x[int((8 * i) * BAR * SR): int((8 * i + 2) * BAR * SR)] ** 2)) + 1e-12)
-           for i in range(3)]
-    print(f"    first two bars, RMS dBFS: {[round(v, 1) for v in lvl]}  (the way in should be the quietest)")
-    check("the three openings are genuinely different in level", max(lvl) - min(lvl) > 6.0,
-          f"({max(lvl) - min(lvl):.1f} dB spread)")
-    print("    no eps_hit in any reading: the toll is out of all three")
-    return x, 24
+def p10c():
+    """THE OPENING (c) NO OPENING: the engine simply starts, full hammer
+    at bar 0 — the "skip long intros" rule at its limit, and the reading
+    that risks repeating the "starts abruptly" verdict."""
+    x, _ = verse(8, hat_steps=HAT_8)
+    timeline((0, "the full engine from the first beat"))
+    _opening_level(x)
+    return x, 8
 
 
 def _hook_solo(lines, label):
@@ -591,19 +606,97 @@ def _hook_solo(lines, label):
     return reverb(line_on(lines, 8, CHEST[0])), 8
 
 
-def _hook_chorus(lines, label):
-    """The same eight bars in chorus 1's context: the engine on the pedal,
-    the pad loop, the bed, the choir hit on each phrase — 07b at chest 1.0."""
-    x = steps_buffer(8)
-    d, _ = drums(8, hat_steps=HAT_8)
+def _chorus_bed(bars):
+    """Chorus 1's context without the voice: the engine on the pedal, the
+    pad loop, the bed, the choir hit on each 8-bar statement."""
+    x = steps_buffer(bars)
+    d, _ = drums(bars, hat_steps=HAT_8)
     mix(x, d)
-    mix(x, bassline(8, FS2, phrase=False, sub=SUB_CHORUS), 0, GAIN["bass"])
-    mix(x, pads(LOOP * 2, depth=0.0), 0, GAIN["pad"])
-    mix(x, bed(8), 0, GAIN["bed"])
-    for b in (0, 4):
+    mix(x, bassline(bars, FS2, phrase=False, sub=SUB_CHORUS), 0, GAIN["bass"])
+    mix(x, pads(LOOP * (bars // 4), depth=0.0), 0, GAIN["pad"])
+    mix(x, bed(bars), 0, GAIN["bed"])
+    for b in range(0, bars, 8):
         place(x, hit(HIT_CHORD, kind="choir", dur=0.35), b * 16, GAIN["hit"])
+    return x
+
+
+def _hook_chorus(lines, label):
+    """The same eight bars in chorus 1's context — 07b at chest 1.0."""
+    x = _chorus_bed(8)
     mix(x, reverb(line_on(lines, 8, CHEST[0])), 0, GAIN["lead"])
     refrain_report(lines, label)
+    return x, 8
+
+
+def _varied(second, events):
+    """A whole 16-bar chorus: statement 1 is the litany as chosen, statement
+    2 (bars 8-15) is `second`'s reading of it.  Q13: 'yes, varied' — three
+    ways to vary, heard in context."""
+    x = _chorus_bed(16)
+    mix(x, reverb(line_on(HOOK_B, 8, CHEST[0])), 0, GAIN["lead"])
+    second(x)
+    timeline((0, "statement 1: the litany (P1 + the response), chest 1.0"), *events)
+    return x, 16
+
+
+def p14a():
+    """VARIED (a) THE LITANY FORM: the petitions change, the response is
+    the constant — which is what a litany IS.  Statement 2 = a second
+    petition (opens ON the flat 2, leans on it again in bar 3) + the same
+    response.  Over a track: P1 A, P2 A, P1 A, P2 A, P3 A ..."""
+    def second(x):
+        mix(x, reverb(line_on(HOOK_B2, 8, CHEST[0])), 8, GAIN["lead"])
+        refrain_report(HOOK_B2, "P2 + the response")
+    return _varied(second, [(8, "statement 2: PETITION 2 (G3 F#3 E3 D3 | ... | E3 G3 F#3 E3) + the SAME response")])
+
+
+def p14b():
+    """VARIED (b) THE ORGAN ANSWERS: statement 2 is the litany unchanged,
+    but while the voice holds each phrase-end tone (C#3 in bar 4, F#2 in
+    bar 8) the low organ answers from below with the falling tail figure
+    — a second voice in the gap, the call-and-response made literal."""
+    def second(x):
+        mix(x, reverb(line_on(HOOK_B, 8, CHEST[0])), 8, GAIN["lead"])
+        mix(x, line_on(ORGAN_ANSWER, 8, fn=lambda m, d: organ(m - 12, d, depth=0.0)), 8, GAIN["organ"] * 1.3)
+    return _varied(second, [(8, "statement 2: the litany again"), (11.5, "the organ answers under the held C#3 (E2 D2 C#2)"),
+                            (15.5, "and under the held F#2 (A1 G#1 F#1)")])
+
+
+def p14c():
+    """VARIED (c) THE DOUBLE EARLY: statement 2 is the litany with the
+    octave-up dark_lead double (the built track's final-only fusion
+    device) already on it — the voice thickens, the notes do not change."""
+    def second(x):
+        mix(x, reverb(line_on(HOOK_B, 8, CHEST[0])), 8, GAIN["lead"])
+        mix(x, reverb(line_on(HOOK_B, 8, CHEST[0], transpose=12)), 8, GAIN["lead"] * 0.35)
+    return _varied(second, [(8, "statement 2: the litany + its octave double at 0.35")])
+
+
+def p15a():
+    """VERSE 2 as built: the hammer phrase on the pedal for six bars, the
+    pedal giving in to A2 then B2 in the last two (the built track's verse
+    2), 8th hats, the pad on the pedal's chord.  The A of 15."""
+    x, _ = verse(8, roots=[FS2] * 6 + [45, 47], hat_steps=HAT_8, pad_chords=[FSM_HI] * 8)
+    space_report(KICK_Q, HAT_8)
+    timeline((0, "the hammer phrase, pitch fixed"), (6, "the pedal gives in: A2, then B2"))
+    return x, 8
+
+
+def p15b():
+    """VERSE 2 on the RIFF cell (Q14): `x..x..x...x.5...` — the DAF /
+    Nitzer syncopation, the one cell no track here uses.  Root and 5th
+    only, so the archetype's 'pitch stays put' claim still holds; five
+    onsets a bar against the hammer's eight, beat 2 left to the slam
+    alone, the one colour note (the 5th) landing WITH the slam on beat 4.
+    Same roots, hats, pad as 15a."""
+    x, _ = verse(8, roots=[FS2] * 6 + [45, 47], hat_steps=HAT_8, pad_chords=[FSM_HI] * 8,
+                 phrase=False, cell_name="riff")
+    space_report(KICK_Q, HAT_8, cell="riff")
+    onsets = [i for i, ch in enumerate(CELL["riff"]) if ch != "."]
+    print(f"    riff onsets on 16ths {onsets}: beats {[s / 4 + 1 for s in onsets]}; the 5th with the slam on 4")
+    check("the riff leaves beat 2 to the slam", 4 not in onsets)
+    check("its only pitch move is the 5th (root otherwise)", set(CELL["riff"]) - {".", "x"} == {"5"})
+    timeline((0, "the riff cell on the pedal (the filter cycle still turns)"), (6, "A2, then B2"))
     return x, 8
 
 
@@ -701,11 +794,13 @@ PROBES = [("01a", "drone_flat_cell", p01a), ("01b", "drone_as_phrase", p01b),
           ("05", "hammer_snare", p05), ("06", "the_space", p06),
           ("07a", "petition", p07a), ("07b", "petition_and_response", p07b),
           ("08", "the_toll", p08), ("09", "final_kick_to_8ths", p09),
-          ("10", "the_opening_take_two", p10),
+          ("10a", "opening_naked_blow", p10a), ("10b", "opening_way_in", p10b), ("10c", "opening_none", p10c),
           ("11", "hook_control_solo", p11), ("11a", "hook_offbeat_solo", p11a),
           ("11b", "hook_litany_solo", p11b), ("11c", "hook_hammer_solo", p11c),
           ("12a", "hook_offbeat_chorus", p12a), ("12b", "hook_litany_chorus", p12b),
-          ("12c", "hook_hammer_chorus", p12c), ("13", "the_seams", p13)]
+          ("12c", "hook_hammer_chorus", p12c), ("13", "the_seams", p13),
+          ("14a", "varied_litany_form", p14a), ("14b", "varied_organ_answers", p14b),
+          ("14c", "varied_double_early", p14c), ("15a", "verse2_hammer", p15a), ("15b", "verse2_riff", p15b)]
 
 if __name__ == "__main__":
     only = {x.strip() for x in ARGS.only.split(",") if x.strip()}
