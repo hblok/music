@@ -32,7 +32,7 @@ the A/B and stem workflow, `CLAUDE.md` the directory rules.
 
 | track | state | what is left |
 |---|---|---|
-| **Ruin** (the hammer, 109, F♯ minor) | **BUILT 2026-09-12**, heard 2026-09-16: flat. Round one answered: **the litany hook (11b)**, the seam kit, varied statements, the riff verse. Round two rendered: **10a/b/c** (the opening, split), **14a/b/c** (three ways to vary statement 2), **15a/b** (verse 2 hammer vs riff) → `/workspace/music/ebm/ruin_probe/` | **the active track.** Answer questions 15–17 in `ruin_notes.md`, then `ruin_v2.py` |
+| **Ruin** (the hammer, 109, F♯ minor) | **v2 BUILT 2026-09-16** — `ruin_v2.py` → `/workspace/music/ruin_v2.wav`, all 17 questions answered and followed (the litany hook, the seam kit, the way in, the double on statement 2, verse 2 on the hammer), all checks pass. v1 kept for the A/B | **a listen.** Verdict decides whether Ruin is done and the next track (Watchfire or Procession, §2b) starts |
 | **Procession** (the slam, 122, A minor) | 10 answers + probe verdicts in; snare weight unpicked | **parked** until Ruin is through. Notes in §2b |
 | **Watchfire** (the ascent, 126, B minor) | **BUILT 2026-09-11**, heard 2026-09-16: flat | **parked** until Ruin is through. Notes in §2b |
 
@@ -82,25 +82,11 @@ instead of retrofitted):
 
 ## 3. The five decisions
 
-1. **Ruin's opening: pick one of three.** The toll was rejected and no
-   replacement idea was to hand, so probe `10` renders three candidates
-   instead of guessing: **(a) the naked blow**, kick and slam together
-   with 1.1 s of silence between them, which no other track here does;
-   **(b) the way in**, no_access v3's swell-organ-sweep device, already
-   passed by ear on that track; **(c) no opening at all**, the engine
-   starting cold. Measured at -10.4, -24.1 and -5.7 dBFS across their
-   first two bars, so they are three different proposals rather than
-   three mixes of one. No longer a blocker — a listen.
-2. **Ruin: does the pitch move or not?** Both `01b` (the phrase, pitch
-   fixed) and `01c` (the phrase with a walking pedal) were called good.
-   That makes the track's stated load-bearing decision — the pitch never
-   moves, the filter does the phrasing — optional rather than necessary.
-   Worth choosing deliberately, because the archetype's whole claim
-   rests on it.
-3. **Ruin: the kick to 8ths in the final chorus** is *"unsure"*. The
-   probe found it only fits if the hats give up their eighths, which
-   drops the bar from 26 onsets to 18. Recommend taking it with hats
-   out; it is the one energy move available at 109 that adds no density.
+1. ~~Ruin's opening~~ — **answered 2026-09-16: the way in (10b).**
+2. ~~Ruin: does the pitch move~~ — stands as built (verse 1 refuses,
+   verse 2 gives in once); not re-asked, v2 keeps it.
+3. ~~Ruin: the kick to 8ths~~ — stands as built (`KICK_8THS = True`,
+   hats out); not re-asked, v2 keeps it.
 4. **Procession: the snare weight.** Probe `01` renders 0.90 / 1.15 /
    1.40 and 1.15 is the provisional default. Pick one or keep 1.15.
 5. **Two seeds were never stated.** Ruin's answer replaced the seed

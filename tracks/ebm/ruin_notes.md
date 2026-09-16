@@ -539,3 +539,37 @@ verse 2 per Q17. Still standing from the build unless you say
 otherwise: verse 1 refuses to move and verse 2 gives in (01b + 01c as
 development), `CHORUS_ROOTS = "up"`, `KICK_8THS = True` with the hats
 out, the hard stop.
+
+## Built v2 (2026-09-16) — `ruin_v2.py` → `/workspace/music/ruin_v2.wav`
+
+Answers to 15–17: **10b the way in; 14c the double early; 15a the
+hammer for verse 2.** With 11–14 (the litany; the seam kit; varied;
+riff-probed-and-declined), v2 is exactly:
+
+- **the litany** as the refrain — 13 petition statements, chest 1.0 /
+  1.15 / 1.3 as before; the verify block now checks bars 1–3 and 5–7
+  open on a held tone and that bar 1's rhythm is not Reliquary's
+  (`[0, 4, 6, 7]` against `[0, 2, 3, 4, 6]`)
+- **the seam kit** — figure B on 14 bars (4n+1 of the verses and
+  choruses), the run on 18 bars (4n+3, the hats yield beat 4), the
+  two-bar roll + riser into 32 / 64 / 88, the holes at 31.75 / 63.75
+  measured 10.2 / 7.6 dB deep, one true silent beat at 87.75 (−240
+  dBFS, bed included), a downsweep on every chorus entry. The roll bars
+  are the declared exception to the space ceiling; every other bar
+  measures ≤ 24 (busiest 24)
+- **the double on statement 2** of each chorus and on both statements
+  of the final, at 0.35
+- **the way in** — the bed swells over two bars under the low organ i
+  and the noise sweep; the kick at bar 4; the organ quote at 6. The bed
+  cursor check starts after the swell
+- verse 2 on the hammer, giving in A2–B2 in its last two bars, as v1
+- the break now has the organ actually under the petition (v1 said so
+  and did not do it)
+
+Arc: verse 1 0.153 → pre 1 0.182 → chorus 1 0.197 → final 0.210;
+**+2.2 dB verse to chorus, +0.7 dB pre to chorus** (the roll makes the
+pre heavier; it still lands), −7.8 dB into the break. All checks pass.
+
+Kept for the verdict: `ruin.wav` (v1) is untouched, so the A/B is the
+two full renders, or slices of both — `--slice 24 48` is pre 1 + chorus
+1, where every change but the way in is audible at once.

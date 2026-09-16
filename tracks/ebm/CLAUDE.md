@@ -128,13 +128,15 @@ should carry the same three pieces — copy them, don't reinvent.
   decision: the archetype wants a bass that never leaves the root and
   the v3 verdict says a repeated cell drones, so **the pitch stays put
   and the phrase moves through the filter, the gate and the accent**.
-  **Built 2026-09-12 (`ruin.py` → `ruin.wav`), heard 2026-09-16: "flat,
-  boring, similar"** — its hook turned out to be Reliquary's transposed
-  and it has none of No Access's seam devices. **The active track:**
-  `ruin_probe.py` 11–13 render three new hooks and the seam kit
-  (`instruments/devices.py`); questions 11–14 in `ruin_notes.md`.
-  Watchfire and Procession are parked until it is through — **one song
-  at a time** (`TODO.md` §2b holds their notes).
+  **v1 (`ruin.py` → `ruin.wav`, 2026-09-12) was heard 2026-09-16:
+  "flat, boring, similar"** — its hook turned out to be Reliquary's
+  transposed and it had none of No Access's seam devices. **v2
+  (`ruin_v2.py` → `ruin_v2.wav`, same day, questions 11–17 answered):**
+  the litany hook, the seam kit from `instruments/devices.py`, the way
+  in, the octave double on every second statement. Listen verdict
+  pending; v1 kept for the A/B. Watchfire and Procession are parked
+  until it is through — **one song at a time** (`TODO.md` §2b holds
+  their notes).
 
 - **watchfire** (working title) — **planned, in review**: the first
   **1999-dialect** track, `watchfire_notes.md` — the *Saviour* **ascent**
