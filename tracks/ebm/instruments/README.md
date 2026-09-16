@@ -78,6 +78,7 @@ user has listened to — new demos get new names).
 | `machine.py` | `machine`, `retrigger` | the vocal-slot TREATMENT (takes any mono array — a spoken take, or a bark): intercom band, crude dirt (hold 3, 8 bits), ring mod, drive; the sequencer retrigger stutter | `band`, `hold/bits`, `ring_hz`, `drive`; `retrigger(x, step_s, n, head)` |
 | `rom.py` | `strings`, `choir`, `voice` | the 1999 ROM orchestra (VNV's four sample modules): a detuned unison saw stack, slow attack, static filter — bowed, or sung through formants. Stiff by construction (fixed detune phases), no flutter, no drift, no chorus. `hold=1` by default | `voices`/`detune` (the stack), `attack`, `cutoff`, `octave`, `bow`, `vowel`/`q` (choir), `hold`/`lowpass` (era) |
 | `riff.py` | `chug`, `riff` | the one guitar: Karplus-Strong power chord, double-tracked, palm-mute or open, tanh amp, cab, body thump. A texture, one track only (declared) | `drive`, `mute`, `body`, `cab`, cell with x/b/3/5/o |
+| `devices.py` | `FIGURES`, `RUN`, `run`, `roll`, `riser`, `downsweep`, `silent_beat`, `delay`, `pingpong`, `DOTTED_8TH` | the ARRANGEMENT events no_access v3 proved and the 2026-09-16 batch lacked: kick figures A/B/C, the snare run on the last beat, the 2-bar roll (8ths → 16ths → 32nds), the riser under it and the downsweep after the hit, the composed silent beat, the dotted-8th delay (mono or ping-pong). Take a rendered hit; return one event on the grid. **The two delays return WET taps at the input's scale — `pingpong` a (L, R) pair** — the one contract exception, so the track adds them at its own gain | `run(hit, n, gain)`, `roll(hit, gain=(a, b, c))`, `riser(bars)`, `silent_beat(n, t0, t1)`, `delay(x, time_s, feedback, taps, damp)` |
 
 `_common.py` — SR, BPM/STEP/BAR, `midi_to_hz`, `norm`, `dirt`, `gate`,
 `bp_noise`/`hp_noise`, `steps_buffer`, `place`/`add_at`, `seed`,
@@ -110,6 +111,9 @@ A/B and stem workflow for the track scripts: `../LISTENING.md`.
 
 ## Verdicts so far (2026-09-05)
 
+- **The devices (2026-09-16):** every one of them shipped and was passed
+  by ear inside `no_access_v3` ("works quite well"); `devices.py` only
+  moves them into the library.  The delays are new and unheard.
 - SH-101 bass: keeper.  Juno: keeper, "great potential".  demo_groove:
   keeper.  **Bark: rejected on no_access (2026-09-06)** — "like somebody
   saying Aaa, or a burp; doesn't fit anywhere in our EBM set"; kept in the

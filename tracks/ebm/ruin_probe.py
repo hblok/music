@@ -17,6 +17,15 @@ One refinement on the notes: the engine cell is `hammer`
 "and" of 4, which would be a pitch event, and this archetype's whole
 claim is that the pitch never moves.  The notes are amended to match.
 
+2026-09-16, after the built track's verdict ("flat, boring, similar"):
+the HOOK below turned out to be Reliquary's hook transposed to F# — the
+same rhythm and contour bar for bar — so probes 11 and 12 render three
+NEW hook candidates against it (solo, then in the chorus), and probe 13
+renders the seam devices (`instruments/devices.py`: the kick figure, the
+snare run, the roll + riser, the hit + downsweep) in this track's
+context, which the built track has none of.  Questions 11-14 in
+ruin_notes.md.
+
     python3 ruin_probe.py                   # all, to /workspace/music/ebm/ruin_probe/
     python3 ruin_probe.py --only 01a,01b    # a subset
     python3 ruin_probe.py --bpm 100         # another tempo (files suffixed _100)
@@ -47,6 +56,7 @@ _common.set_tempo(ARGS.bpm)                     # BEFORE the instrument imports 
 _common.seed(2018)                              # the year the record was remastered from the tapes
 from _common import BAR, BEAT, SR, STEP, midi_to_hz, norm, place, steps_buffer, write_wav  # noqa: E402
 from dark_lead import dark_lead                                           # noqa: E402
+from devices import FIGURES, downsweep, riser, roll, run                  # noqa: E402
 from eps_hit import hit                                                   # noqa: E402
 from eps_kick import kick                                                 # noqa: E402
 from eps_snare import snare                                               # noqa: E402
@@ -57,7 +67,7 @@ from sh101_bass import CELLS, note                                        # noqa
 
 # ------------------------------------------------------------- the material
 FS2, D2, CS2, D3, CS3 = 42, 38, 37, 50, 49          # the roots: F#2 is home
-NOTE = {"F#2": 42, "A2": 45, "C#3": 49, "D3": 50, "E3": 52, "F#3": 54, "G3": 55}
+NOTE = {"F#2": 42, "G#2": 44, "A2": 45, "B2": 47, "C#3": 49, "D3": 50, "E3": 52, "F#3": 54, "G3": 55}
 
 # the pads sit ABOVE the refrain's G3 ceiling (the no_access probe-07 lesson)
 FSM_HI, D_HI, CSM_HI = (57, 61, 66), (57, 62, 66), (56, 61, 64)
@@ -70,6 +80,20 @@ ORGAN_LOW = (42, 49, 54)
 HOOK = ["F#3 - F#3 F#3 G3 - F#3 -", "E3 - - - . F#3 E3 C#3", "D3 - C#3 D3 E3 - D3 -", "C#3 - - - - - . .",
         "F#3 - F#3 F#3 G3 - F#3 -", "E3 - - - . D3 C#3 D3", "E3 - D3 C#3 A2 - - -", "F#2 - - - - - . ."]
 PETITION = HOOK[:4]
+# HOOK is Reliquary's hook transposed (found 2026-09-16): "A3 - A3 A3 Bb3 - A3 -" became
+# "F#3 - F#3 F#3 G3 - F#3 -", bar for bar.  It stays as the CONTROL for probes 11/12.
+# Three candidates, each a different rhythmic grammar, all inside the refrain checks:
+HOOK_A = [". A2 - - B2 - C#3 -", ". D3 - - . C#3 D3 -", ". F#3 G3 - F#3 E3 D3 C#3", "C#3 - - - - - . .",
+          ". A2 - - B2 - C#3 -", ". D3 - - . C#3 B2 -", ". D3 G3 - C#3 B2 A2 G#2", "F#2 - - - - - . ."]
+# A, THE OFF-BEAT: the voice never lands on the kick until each phrase end; the petition
+# CLIMBS from A2 to the flat 2 (the one contour Reliquary never has), the response falls
+HOOK_B = ["F#3 - - - E3 - D3 C#3", "C#3 - - - D3 - C#3 D3", "F#3 - - - G3 - F#3 E3", "C#3 - - - - - . .",
+          "E3 - - - D3 - C#3 B2", "C#3 - - - D3 - C#3 B2", "D3 - - - G3 - C#3 A2", "F#2 - - - - - . ."]
+# B, THE LITANY: one tone held across two beats then a falling tail, every bar — recitation
+HOOK_C = ["F#3 F#3 - - E3 E3 - -", "D3 D3 - - C#3 - - -", "F#3 F#3 - - G3 G3 F#3 -", "C#3 - - - - - . .",
+          "E3 E3 - - D3 D3 - -", "C#3 C#3 - - B2 - - -", "D3 D3 - - G3 - C#3 A2", "F#2 - - - - - . ."]
+# C, THE HAMMER: the voice strikes in pairs like the drum — short-short-long, silence between
+CANDIDATES = {"a": ("offbeat", HOOK_A), "b": ("litany", HOOK_B), "c": ("hammer", HOOK_C)}
 
 # the engine: the pitch NEVER moves; the phrase is in the filter, the gate and the accent
 CELL = {**CELLS, "hammer": "x.x.x.x.x.x.x.x.", "walk": "x.x.x.5.x.7.o.o.",
@@ -243,7 +267,8 @@ def phrase_report():
     check("the phrase moves 3 parameters, not 1", len({*CUTS}) >= 3 and len({*GATES}) >= 3 and len({*FLOORS}) >= 3)
 
 
-def refrain_report(lines=HOOK, label="the Q/A pair"):
+def refrain_report(lines=HOOK, label="the Q/A pair", qa=None):
+    qa = len(lines) == 8 if qa is None else qa          # a full Q/A pair gets the phrase-end checks
     ev = parse(lines)
     slots = len(lines) * 16
     onsets = len(ev)
@@ -267,7 +292,7 @@ def refrain_report(lines=HOOK, label="the Q/A pair"):
     check("register F#2..G3", min(midis) >= 42 and max(midis) <= 55)
     check("descending contour: down-steps >= 0.5", downs >= 0.5)
     check("no soaring leap: max upward <= 5 st", max(steps) <= 5)
-    if lines is HOOK:
+    if qa:
         q_end = [e for e in ev if e[0] < 32][-1]
         check("the petition hangs on the 5th (C#), the response lands on the tonic (F#)",
               q_end[1] % 12 == 1 and ev[-1][1] % 12 == 6)
@@ -557,13 +582,130 @@ def p10():
     return x, 24
 
 
+def _hook_solo(lines, label):
+    """The 04c format procession's verdict loved: the refrain alone, wet,
+    chest 1.0 — the melody judged as a melody."""
+    refrain_report(lines, label)
+    print(f"    {'  |  '.join(lines[:4])}")
+    print(f"    {'  |  '.join(lines[4:])}")
+    return reverb(line_on(lines, 8, CHEST[0])), 8
+
+
+def _hook_chorus(lines, label):
+    """The same eight bars in chorus 1's context: the engine on the pedal,
+    the pad loop, the bed, the choir hit on each phrase — 07b at chest 1.0."""
+    x = steps_buffer(8)
+    d, _ = drums(8, hat_steps=HAT_8)
+    mix(x, d)
+    mix(x, bassline(8, FS2, phrase=False, sub=SUB_CHORUS), 0, GAIN["bass"])
+    mix(x, pads(LOOP * 2, depth=0.0), 0, GAIN["pad"])
+    mix(x, bed(8), 0, GAIN["bed"])
+    for b in (0, 4):
+        place(x, hit(HIT_CHORD, kind="choir", dur=0.35), b * 16, GAIN["hit"])
+    mix(x, reverb(line_on(lines, 8, CHEST[0])), 0, GAIN["lead"])
+    refrain_report(lines, label)
+    return x, 8
+
+
+def p11():
+    """THE CONTROL: the built track's hook, solo and wet — which is
+    Reliquary's hook transposed.  11a/b/c are the candidates in the same
+    format; A/B any of them against this."""
+    return _hook_solo(HOOK, "the control (Reliquary transposed)")
+
+
+def p11a():
+    """Candidate A, THE OFF-BEAT: every note enters on the 'and', off the
+    kick, until the phrase-end tone lands on the beat.  The petition climbs
+    A2 -> B2 -> C#3 -> D3 -> the flat 2 (G3) before hanging on C#3; the
+    response climbs the same way and falls through to F#2.  The one
+    contour Reliquary never has (it starts at the top)."""
+    return _hook_solo(HOOK_A, "A: the off-beat")
+
+
+def p11b():
+    """Candidate B, THE LITANY: one tone held across beats 1-2, a falling
+    tail on beats 3-4, every bar — recitation.  The liturgical reading;
+    the fewest distinct gestures, the most vocal."""
+    return _hook_solo(HOOK_B, "B: the litany")
+
+
+def p11c():
+    """Candidate C, THE HAMMER: the voice strikes in pairs like the drum
+    (short-short-long), with silence between the pairs — the space claim
+    carried into the melody.  The most rhythmic reading."""
+    return _hook_solo(HOOK_C, "C: the hammer")
+
+
+def p12a():
+    """Candidate A in chorus 1's context."""
+    return _hook_chorus(HOOK_A, "A: the off-beat, in the chorus")
+
+
+def p12b():
+    """Candidate B in chorus 1's context."""
+    return _hook_chorus(HOOK_B, "B: the litany, in the chorus")
+
+
+def p12c():
+    """Candidate C in chorus 1's context."""
+    return _hook_chorus(HOOK_C, "C: the hammer, in the chorus")
+
+
+def p13():
+    """THE SEAMS: the device kit (instruments/devices.py) in this track's
+    context, which the built track has none of.  Eight bars: a verse of
+    four with kick FIGURE B on bar 1 and the snare RUN on the last beat
+    of bar 3 (the hats yield that beat), then the two-bar ROLL + RISER
+    with the bass to half-time, then the chorus landing: the choir HIT,
+    the DOWNSWEEP, the petition's first two bars.  The space ceiling is
+    printed for the two busy bars — a fill bar is allowed to touch it,
+    not to pass it."""
+    x = steps_buffer(8)
+    K, S, H = kick(decay=5.0), snare(plate_decay=3.0, cut=PLATE_CUT), hat()
+    for b in range(8):
+        fig = FIGURES["B"] if b == 1 else KICK_Q
+        rolling = b in (4, 5)
+        for s in range(16):
+            st = b * 16 + s
+            if fig[s] == "x":
+                place(x, K, st, GAIN["kick"])
+            if not rolling and SNARE_P[s] == "x":
+                place(x, S, st, GAIN["snare"])
+            if s in HAT_8 and not (b == 3 and s >= 12):
+                place(x, H, st, GAIN["hat"] * HAT_ACC[s % 4])
+    place(x, run(S), 3 * 16 + 12, GAIN["snare"])
+    place(x, roll(S), 4 * 16, GAIN["snare"])
+    mix(x, riser(2), 4, 0.10)
+    mix(x, bassline(4, FS2), 0, GAIN["bass"])
+    mix(x, bassline(2, FS2, phrase=False, cell_name="half", sub=SUB_VERSE), 4, GAIN["bass"])
+    mix(x, bassline(2, FS2, phrase=False, sub=SUB_CHORUS), 6, GAIN["bass"])
+    mix(x, pads(LOOP[:2], depth=0.0), 6, GAIN["pad"])
+    mix(x, bed(8), 0, GAIN["bed"])
+    place(x, hit(HIT_CHORD, kind="choir", dur=0.35), 6 * 16, GAIN["hit"])
+    mix(x, downsweep(1), 6, 0.08)
+    mix(x, reverb(line_on(PETITION[:2], 2, CHEST[0])), 6, GAIN["lead"])
+    timeline((0, "verse: the hammer engine, 8th hats"), (1, "kick FIGURE B: the 'and' of 4"),
+             (3.75, "the snare RUN on the last beat (hats yield it)"), (4, "the ROLL: 8ths, then 16ths -> 32nds; the riser; bass to half-time"),
+             (6, "the chorus lands: the hit, the downsweep, the petition"))
+    fig_b = FIGURES["B"].count("x") + SNARE_P.count("x") + len(HAT_8) + CELL["hammer"].count("x")
+    run_b = KICK_Q.count("x") + SNARE_P.count("x") + 4 + (len(HAT_8) - 2) + CELL["hammer"].count("x")
+    print(f"    onsets: the figure-B bar {fig_b}, the run bar {run_b} (ceiling {SPACE_CEILING})")
+    check("the fill bars touch the space ceiling but do not pass it", max(fig_b, run_b) <= SPACE_CEILING)
+    return x, 8
+
+
 PROBES = [("01a", "drone_flat_cell", p01a), ("01b", "drone_as_phrase", p01b),
           ("01c", "phrase_with_moving_pitch", p01c), ("02", "sub_at_fsharp", p02),
           ("03", "hats_none_8ths_16ths", p03), ("04", "chorus_roots", p04),
           ("05", "hammer_snare", p05), ("06", "the_space", p06),
           ("07a", "petition", p07a), ("07b", "petition_and_response", p07b),
           ("08", "the_toll", p08), ("09", "final_kick_to_8ths", p09),
-          ("10", "the_opening_take_two", p10)]
+          ("10", "the_opening_take_two", p10),
+          ("11", "hook_control_solo", p11), ("11a", "hook_offbeat_solo", p11a),
+          ("11b", "hook_litany_solo", p11b), ("11c", "hook_hammer_solo", p11c),
+          ("12a", "hook_offbeat_chorus", p12a), ("12b", "hook_litany_chorus", p12b),
+          ("12c", "hook_hammer_chorus", p12c), ("13", "the_seams", p13)]
 
 if __name__ == "__main__":
     only = {x.strip() for x in ARGS.only.split(",") if x.strip()}

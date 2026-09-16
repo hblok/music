@@ -267,6 +267,7 @@ truncation, master guardrails) plus, specific to this track:
    probe 08 says it reads as a stab and not a bell, the fallback is a
    detuned `eps_kick` at 55 Hz doubling it, still no new module.
    Answer: No - the toll was not great.
+   
    **Take two (2026-09-11): "no ideas right now — let's just try
    something and adjust later."** Probe `10` renders three candidate
    openings with nothing decided between them, each 8 bars ending with
@@ -397,3 +398,96 @@ letting the pitch move at all.
 2. Answer the ten questions above, now that the alternatives are audible.
 3. Only then `ruin.py`.
 
+
+## 2026-09-16 — the listen verdict, and the hook is not new
+
+**Verdict on `ruin.wav` (with Watchfire and the Procession probes, heard
+together): "not bad, but flat, boring, and similar."** Three things
+found on reading the three scripts against `no_access_v3.py`, the one
+track that "works quite well":
+
+1. **The hook is Reliquary's hook transposed to F♯.** Bar for bar:
+   `A3 - A3 A3 Bb3 - A3 -` became `F#3 - F#3 F#3 G3 - F#3 -`, the held
+   ♭7 + three-note tail in bar 2 likewise, the response likewise. The
+   "Declared up front" claim that the refrain is new material was wrong;
+   Procession quotes Reliquary on purpose, so two of the three new tracks
+   sing the same tune.
+
+2. **Every seam device that made No Access work was declared out of this
+   track.** Kick figures, snare runs, the roll + riser, the downsweep,
+   the silent beat — `EBM_1990s.md` §6/§9's kit. Ruin has one hole
+   before each chorus and a hit. The purity was the flatness.
+
+3. **Nothing varies inside a section.** Six statements of the hook are
+   identical (the chest knob aside); the per-bar filter cycle was
+   measured "subtle" on the procession probes. The state / vary / answer
+   rule was not applied.
+   
+
+What changed today, and nothing else (one song at a time): the seam
+devices moved into the library (`instruments/devices.py`, all of them
+already passed by ear inside No Access v3), and `ruin_probe.py` grew
+probes 11–13. `ruin.py` is untouched.
+
+### Three hook candidates (probes 11a/b/c solo, 12a/b/c in the chorus)
+
+All three pass every refrain check (density 0.20, held 0.54, register
+F♯2–G3, descending, no leap over a 5th, two ♭2 onsets, Q hangs on C♯,
+A lands on F♯). They differ in *grammar*, which is the thing the control
+shares with Reliquary:
+
+| | grammar | what it is |
+|---|---|---|
+| **control** (`11`) | hammered repeats on the beat, held ♭7 | Reliquary transposed — the built track |
+| **A, the off-beat** (`11a`) | every note enters on the "and", off the kick; the phrase-end tone alone lands on the beat | the petition CLIMBS A2 → B2 → C♯3 → D3 → G3 before hanging on C♯; the response climbs the same way and falls through to F♯2. The one contour Reliquary never has (it starts at the top) |
+| **B, the litany** (`11b`) | one tone held across beats 1–2, a falling tail on 3–4, every bar | recitation: the fewest gestures, the most vocal, the liturgical reading |
+| **C, the hammer** (`11c`) | pairs of repeated 8ths (short-short-long), silence between the pairs | the voice strikes like the drum; the space claim carried into the melody |
+
+`11` is the 04c format (solo, wet, chest 1.0 — the one the Procession
+verdict loved); `12` is the same eight bars in chorus 1's context. A/B
+any candidate against the control:
+`python3 ../../tools/ab.py 11_hook_control_solo.wav 11a_hook_offbeat_solo.wav --bpm 109 --bars 4`.
+
+### The seams (probe 13)
+
+Eight bars in this track's context: kick figure B on bar 1, the snare
+run on the last beat of bar 3 (the hats yield that beat), the two-bar
+roll + riser with the bass to half-time, then the chorus landing with
+the hit, the downsweep and the petition. Measured: the figure-B bar 23
+onsets, the run bar 24 — the fills touch the ceiling and do not pass
+it, so the space claim survives them.
+
+### Questions 11–14
+
+11. **The hook.** Control / A / B / C — from `11` first, then `12` for
+    the one(s) that survive. Recommended **A**: it is the only candidate
+    whose contour is not Reliquary's, and the off-beat entry is the one
+    syncopation in the whole directory. "None — keep the control and
+    find the identity elsewhere" is a valid answer.
+    Answer: B - litany - clearly the most fitting.
+
+12. **The seams.** Yes to the kit as probe 13 plays it (figure B every
+    4th bar, the run on bars 4n+3, roll + riser into each chorus, the
+    hit + downsweep on the chorus downbeat), or name the ones to drop.
+    Recommended: all of it; it is what No Access has and this does not.
+    Answer: Yes
+
+13. **Developing the hook.** The built track states it six times
+    unchanged. Next round, shall the second statement in each chorus be
+    a *varied* one (the response altered, or the organ answering the
+    petition in the gap, or the octave double entering early) — probed
+    on the winning candidate, not guessed? Yes/no; the how is the probe.
+    Answer: Yes, varied.
+
+14. **Verse 2's engine.** The `riff` cell (`x..x..x...x.5...`, the DAF
+    syncopation, unused by any track) instead of the hammer for verse
+    2's eight bars — the verse's one identity move, and the archetype's
+    "pitch stays put" claim holds (root and 5th only). Probe it next
+    round, after the hook is chosen? Yes/no.
+    Answer: Yes.
+
+Still open from the built track's docstring: `OPENING` (probe 10),
+whether the verse pedal moves (01b/01c), `KICK_8THS` (09). Those wait
+for the same listen.
+
+Answer: The opening - let's split the probes for that, because it not clear which is which.

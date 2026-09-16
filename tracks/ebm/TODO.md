@@ -1,9 +1,12 @@
 # TODO.md — tracks/ebm/
 
-Everything started and not finished. Rewritten 2026-09-11 after the
-`answers` commit: **the listening backlog is cleared and three track
-scripts are unblocked.** The bottleneck moved from ears to five small
-decisions, one of which is a real design hole.
+Everything started and not finished. Amended 2026-09-16 after the
+verdict on the 2026-09-11/12 batch — Ruin, Watchfire, the Procession
+probes, heard together: **"not bad, but flat, boring, and similar."**
+The diagnosis is in `ruin_notes.md` §2026-09-16 (the same drum / bass /
+bed skeleton in all three, Ruin's hook = Reliquary's transposed, none of
+No Access's seam devices anywhere). The rule from it: **one song at a
+time** — Ruin first; the others are parked with notes (§2b), not work.
 
 Conventions: `../VERIFY.md` is the form-check standard, `LISTENING.md`
 the A/B and stem workflow, `CLAUDE.md` the directory rules.
@@ -29,11 +32,53 @@ the A/B and stem workflow, `CLAUDE.md` the directory rules.
 
 | track | state | what is left |
 |---|---|---|
-| **Procession** (the slam, 122, A minor) | 10 answers + probe verdicts in. The refrain solo `04c` was *"really cool — love it!"*, the beat is `06b`, the bookend stays open | one knob: the slam's snare weight was never picked from 0.90 / 1.15 / 1.40 |
-| **Ruin** (the hammer, 109, F♯ minor; renamed from *Litany*) | **BUILT 2026-09-12** — `ruin.py` → `/workspace/music/ruin.wav`, 104 bars, 3:58, all checks pass | a listen. Four constants were chosen without an answer and are flagged in the script's docstring |
-| **Watchfire** (the ascent, 126, B minor) | **BUILT 2026-09-11** — `watchfire.py` → `/workspace/music/watchfire.wav`, 136 bars, 4:22, all checks pass | a listen. One genre remark to settle if you want to |
+| **Ruin** (the hammer, 109, F♯ minor) | **BUILT 2026-09-12**, heard 2026-09-16: flat. `ruin_probe.py` now renders **11/11a/b/c** (three new hooks vs the control, solo), **12a/b/c** (in the chorus) and **13** (the seam kit in context) → `/workspace/music/ebm/ruin_probe/` | **the active track.** Listen, answer questions 11–14 in `ruin_notes.md` (+ the three still open from the build: opening, pedal, kick 8ths), then `ruin.py` gets its revision |
+| **Procession** (the slam, 122, A minor) | 10 answers + probe verdicts in; snare weight unpicked | **parked** until Ruin is through. Notes in §2b |
+| **Watchfire** (the ascent, 126, B minor) | **BUILT 2026-09-11**, heard 2026-09-16: flat | **parked** until Ruin is through. Notes in §2b |
 
 ---
+
+## 2b. What we can do on the parked tracks (notes, not work)
+
+Written 2026-09-16 from the diagnosis; nothing here is built. The
+shared part is done already: `instruments/devices.py` holds the seam
+kit (kick figures A/B/C, the snare run, the roll, riser, downsweep, the
+silent beat, a dotted-8th delay mono or ping-pong). When a track's turn
+comes it starts from these, probe-first.
+
+**Both:** the seam kit at every verse→chorus and into the final (each
+track has one hole and a hit today); vary the hook statements
+(state / vary / answer — today every statement is identical); a
+different seethe bed per track (all three run the same throb / grit /
+rate); a bass cell nobody uses (`riff`, `offbeat`, `gallop` — every
+track here is stomp or hammer).
+
+**Watchfire** (the 1999 track, and the one denied the 1999 kit):
+- the dotted-8th ping-pong on the strings' refrain tails and the hit —
+  the VNV signature, and no track has a delay
+- roll + riser + crash into each chorus (era-correct, on the
+  blueprint's own list), the silent beat before the final
+- verse 2 actually denser than verse 1 (they are identical today:
+  stomp on the B pedal, orchestra 0.34)
+- the trough with a quarter-note feedback delay on the strings, so the
+  half-speed statement is a different *sound*, not just quieter
+- the chant moving against the refrain (contrary motion) instead of
+  static chords, if it is to be the counter-melody it was declared as
+- the remark to settle: *"early 90s techno — U96, Das Boot"*, said
+  twice. If that is a direction, it is a fourth blueprint.
+
+**Procession** (still probes; the script can be written *with* the kit
+instead of retrofitted):
+- figure B every 4th bar is already in the probes; add the run and the
+  roll into the choruses (the notes declined the roll as "no_access's
+  device" — that reasoning is what produced three tracks with nothing
+  in them; revisit)
+- the final's "development" made real: the `TAG` as a counter-line
+  under the quote, the stabs through the ping-pong, rather than a third
+  identical pass
+- the guitar bursts and the `stomp5`/`riff`/`walk` phrase are already
+  events — keep them; they are the most alive thing in the batch
+- the snare weight (0.90 / 1.15 / 1.40) is still unpicked
 
 ## 3. The five decisions
 
@@ -107,6 +152,9 @@ of the three tracks below has a vocal slot, so they stay parked.
   that survives a verdict moves into `instruments/` with its own
   audition. Nothing has been promoted since `dark_lead` on 2026-09-06,
   because nothing has had a verdict since.
+- **The delays in `devices.py` are unheard.** Everything else in that
+  module shipped inside No Access v3; `delay` / `pingpong` are new. Their
+  first use is a probe (Watchfire's, when its turn comes).
 
 ---
 
