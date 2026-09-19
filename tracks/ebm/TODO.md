@@ -32,7 +32,7 @@ the A/B and stem workflow, `CLAUDE.md` the directory rules.
 
 | track | state | what is left |
 |---|---|---|
-| **Ruin** (the hammer, 109, F♯ minor) | **v2 BUILT 2026-09-16** — `ruin_v2.py` → `/workspace/music/ruin_v2.wav`, all 17 questions answered and followed (the litany hook, the seam kit, the way in, the double on statement 2, verse 2 on the hammer), all checks pass. v1 kept for the A/B | **a listen.** Verdict decides whether Ruin is done and the next track (Watchfire or Procession, §2b) starts |
+| **Ruin** (the hammer, 109, F♯ minor) | **v3 BUILT 2026-09-18** — `ruin_v3.py` → `/workspace/music/ruin_v3.wav`. v2 was "not bad at all" but its bass read as "a 1980s commodore game"; v3 changes the bass ONLY (the dense reading + an octave-double layer, from the `sh101_bass_ruin.py` fork), all checks pass. v1 and v2 kept for the A/B | **a listen.** `BASS_READING` switches between the five probed readings in one word (probes 17a-e). Verdict decides whether Ruin is done and the next track (§2b) starts |
 | **Procession** (the slam, 122, A minor) | 10 answers + probe verdicts in; snare weight unpicked | **parked** until Ruin is through. Notes in §2b |
 | **Watchfire** (the ascent, 126, B minor) | **BUILT 2026-09-11**, heard 2026-09-16: flat | **parked** until Ruin is through. Notes in §2b |
 
@@ -127,9 +127,11 @@ of the three tracks below has a vocal slot, so they stay parked.
   it and no instrument passes `bits` through. Its own docstring calls it
   cosmetic, so it stays hidden until a listen disagrees, at which point
   it is a one-line passthrough per instrument.
-- **No detune knob on the bass.** The 1999 Pro One reading is the
-  existing note with lower resonance and the dirt off. If it reads thin
-  next to the real thing, that is when to add a second oscillator.
+- ~~**No detune knob on the bass.**~~ **Done 2026-09-18** — the trigger
+  fired ("the SH-101 bass is just too timid", ruin v2) and the second
+  oscillator exists as `detune` in `instruments/sh101_bass_ruin.py`, a
+  FORK so the tracks with verdicts keep their sound. Watchfire's 1999
+  Pro One reading can take the same knob when its turn comes.
 - **No warm-lead sibling in `rom.py` — now settled, not deferred.** The
   ascent's refrain carrier is `strings` on a single note, and question 8
   came back *"No, I think we're good"*. The module stays at two entry

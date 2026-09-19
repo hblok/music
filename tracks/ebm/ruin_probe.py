@@ -66,7 +66,7 @@ from eps_snare import snare                                               # noqa
 from hats import hat                                                      # noqa: E402
 from juno import noise_sweep, organ, pad                                  # noqa: E402
 from seethe import seethe                                                 # noqa: E402
-from sh101_bass import CELLS, note                                        # noqa: E402
+from sh101_bass_ruin import CELLS, note                                    # noqa: E402
 
 # ------------------------------------------------------------- the material
 FS2, D2, CS2, D3, CS3 = 42, 38, 37, 50, 49          # the roots: F#2 is home
@@ -160,17 +160,19 @@ def drums(bars, kick_cell=KICK_Q, snare_gain=None, hat_steps=(), plate_cut=PLATE
 
 
 def bassline(bars, roots, phrase=True, cell_name="hammer", sub=SUB_VERSE, accents=True,
-             cycle=True, gate=None, **kw):
+             cycle=True, gate=None, gate_mul=1.0, floor_hz=250.0, **kw):
     """The engine.  phrase=True walks PHRASE with the filter/gate/accent
     cycle (the counter-measure); phrase=False repeats one cell flat — the
-    A/B that is the whole argument of probe 01."""
+    A/B that is the whole argument of probe 01.  gate_mul scales the whole
+    gate cycle (probe 16's sustain rung) so the cycle still turns;
+    floor_hz is the filter envelope's floor."""
     buf = steps_buffer(bars)
     for b in range(bars):
         i = b % 8
         cell = CELL[PHRASE[i] if phrase else cell_name]
         root = roots[b % len(roots)] if isinstance(roots, (list, tuple)) else roots
-        cutoff = (CUTS[i] if cycle else 2200.0, 250.0)
-        g_frac = gate if gate is not None else (GATES[i] if cycle else 0.5)
+        cutoff = (CUTS[i] if cycle else 2200.0, floor_hz)
+        g_frac = gate if gate is not None else (GATES[i] if cycle else 0.5) * gate_mul
         floor = FLOORS[i] if accents else 1.0
         onsets = [j for j, ch in enumerate(cell) if ch != "."]
         for j, s in enumerate(onsets):
@@ -349,11 +351,12 @@ def sub_share(x, hz=60.0):
 
 # ---------------------------------------------------------------- probes
 def verse(bars, roots=FS2, hat_steps=(), phrase=True, sub=SUB_VERSE, accents=True, cycle=True,
-          kick_cell=KICK_Q, pad_chords=None, **kw):
+          kick_cell=KICK_Q, pad_chords=None, bass_gain=None, **kw):
     x = steps_buffer(bars)
     d, hits = drums(bars, kick_cell=kick_cell, hat_steps=hat_steps)
     mix(x, d)
-    mix(x, bassline(bars, roots, phrase=phrase, sub=sub, accents=accents, cycle=cycle, **kw), 0, GAIN["bass"])
+    mix(x, bassline(bars, roots, phrase=phrase, sub=sub, accents=accents, cycle=cycle, **kw), 0,
+        GAIN["bass"] if bass_gain is None else bass_gain)
     mix(x, bed(bars), 0, GAIN["bed"])
     if pad_chords:
         mix(x, pads(pad_chords, depth=0.0), 0, GAIN["pad"])
@@ -788,6 +791,219 @@ def p13():
     return x, 8
 
 
+# ------------------------------------------------- 16: the bass (v2's verdict)
+# "the SH-101 bass is just too timid — it reads like a 1980s commodore game, as
+# opposed to a heavy bold EBM goth track" (2026-09-18, on ruin_v2's bass stem).
+# A CUMULATIVE ladder: each rung adds one thing to the one before it, so the A/B
+# that matters is always rung N against rung N-1.  a is v2's bass exactly.
+BASS_V2 = {"sub": SUB_VERSE, "sub_wave": "square", "drive": 1.0, "hold": 2, "res": 2.5,
+           "floor_hz": 250.0, "gate_mul": 1.0, "env": 0.05}
+BASS_RUNGS = [
+    ("a", "as shipped (v2)", {}),
+    ("b", "+ the dirt OFF (hold 1)", {"hold": 1}),
+    ("c", "+ a SINE sub at 0.8 (was a 0.6 square)", {"sub": 0.8, "sub_wave": "sine"}),
+    ("d", "+ the UNISON stack (detune 18 cents)", {"detune": 18.0}),
+    ("e", "+ DRIVE 2.0 (the blueprint's old-school 1.6, past it)", {"drive": 2.0}),
+    ("f", "+ the filter FLOOR up 250 -> 500 Hz (grunt that does not decay away)", {"floor_hz": 500.0}),
+    ("g", "+ SUSTAIN: the whole gate cycle x1.4 (0.50 -> 0.70, 0.35 -> 0.49)", {"gate_mul": 1.4}),
+    ("h", "+ the filter ENVELOPE slower (env 0.05 -> 0.14): the pluck becomes a GROWL", {"env": 0.14}),
+    ("i", "+ the floor to 900 Hz and res down to 1.6: open body, less boing", {"floor_hz": 900.0, "res": 1.6}),
+]
+
+
+def _bass_kw(upto):
+    kw = dict(BASS_V2)
+    for tag, _, delta in BASS_RUNGS:
+        kw.update(delta)
+        if tag == upto:
+            break
+    return kw
+
+
+def _bass_report(x, label, kw):
+    """The numbers that separate thin from heavy at a fixed peak: crest (dense
+    or peaky), the sub shares (weight), the centroid (how much of it is fizz)."""
+    y = norm(x)
+    rms = float(np.sqrt(np.mean(y ** 2)))
+    X = np.abs(np.fft.rfft(y)) ** 2
+    f = np.fft.rfftfreq(len(y), 1 / SR)
+    centroid = float((f * X).sum() / X.sum())
+    print(f"    {label}")
+    print(f"    detune {kw.get('detune', 0.0):.0f}c  sub {kw['sub']:.2f} {kw['sub_wave']}  drive {kw['drive']:.1f}  "
+          f"hold {kw['hold']}  res {kw['res']:.1f}  floor {kw['floor_hz']:.0f} Hz  env {kw['env']:.2f}s  "
+          f"gate x{kw['gate_mul']:.1f}")
+    print(f"    BASS ALONE: crest {1 / rms:.2f} (lower = denser)  sub-60 {X[f < 60].sum() / X.sum():.2f}  "
+          f"sub-120 {X[f < 120].sum() / X.sum():.2f}  centroid {centroid:.0f} Hz")
+
+
+def _bass_rung(tag):
+    """Eight bars: four of the bass ALONE (the stem, which is what was judged),
+    then the same four in the verse.  One file per rung — probe 10's lesson."""
+    label = next(d for t, d, _ in BASS_RUNGS if t == tag)
+    kw = _bass_kw(tag)
+    x = steps_buffer(8)
+    solo = bassline(4, FS2, **kw)
+    mix(x, solo, 0, 1.0)
+    seg, _ = verse(4, hat_steps=HAT_8, **kw)
+    mix(x, seg, 4)
+    _bass_report(solo[: int(4 * BAR * SR)], label, kw)
+    timeline((0, "the bass stem alone"), (4, "the same four bars in the verse"))
+    return x, 8
+
+
+def p16a():
+    """THE CONTROL: ruin_v2's bass exactly — one saw, a 0.6 square sub, drive
+    1.0, the EPS decimation on, the filter floor at 250 Hz.  Every other rung
+    is this plus one change."""
+    return _bass_rung("a")
+
+
+def p16b():
+    """+ THE DIRT OFF.  _common.dirt's zero-order hold is decimation, and
+    decimation IS the 8-bit read — aliased, quantised sample playback is what
+    a C64 does.  The first suspect for "1980s commodore game"."""
+    return _bass_rung("b")
+
+
+def p16c():
+    """+ A SINE SUB.  The 101's own sub-octave is a square: buzzy, and its
+    peaks add coherently with the saw, so under this module's peak-1.0
+    contract raising `sub` made the note QUIETER, not heavier.  A sine sub
+    buys low end per unit of peak."""
+    return _bass_rung("c")
+
+
+def p16d():
+    """+ THE UNISON STACK.  Two more saws 18 cents either side — TODO.md's
+    deferred second oscillator, triggered by exactly this verdict.  Not a
+    real 101; a doubled 101 / Pro One thickness."""
+    return _bass_rung("d")
+
+
+def p16e():
+    """+ DRIVE 2.0.  EBM_1990s.md §9 gives the old-school bass tanh 1.6; this
+    goes past it, because the growl is the point.  The guardrails still hold:
+    the cutoff is always moving and there is a sub for body."""
+    return _bass_rung("e")
+
+
+def p16f():
+    """+ THE FILTER FLOOR UP.  At F#2 (92.5 Hz) a 250 Hz floor is 2.7x the
+    fundamental, so once the pluck has decayed the note is nearly a sine plus
+    a resonant bump — thin by construction.  500 Hz keeps some grunt."""
+    return _bass_rung("f")
+
+
+def p16g():
+    """+ SUSTAIN.  The gate cycle x1.4, so the notes connect.  This is the one
+    rung that trades against the track's own claim ("the gap IS the groove",
+    gate <= 0.5 in 1993) — 0.50 becomes 0.70, so it is a declared stretch, not
+    a free win.  Judge it against 16f, and against the space the track is
+    made of."""
+    return _bass_rung("g")
+
+
+def p16h():
+    """+ A SLOWER FILTER ENVELOPE.  The measurement that redirected this ladder:
+    rungs a-g all sat at a ~100-130 Hz spectral centroid, i.e. the note is
+    fundamental + sub and almost nothing else — a plain tone, which is what a
+    C64 plays.  At env 0.05 s the bright part of the note is over in 50 ms of a
+    138 ms step, so the growl is a click and the rest is the floor.  0.14 s
+    keeps the filter open across the whole note."""
+    return _bass_rung("h")
+
+
+def p16i():
+    """+ THE FLOOR AT 900 Hz, RES 1.6.  The other half of the same finding: a
+    250 Hz floor at F#2 (92.5 Hz) is under the 3rd harmonic, so the tail has no
+    harmonics at all to growl with, and res 2.5 turns what is left into a
+    resonant boing (the 8-bit "pwomp").  Opening the floor and dropping the Q
+    trades the boing for body.  NOTE: this is the rung that walks away from the
+    declared res-2.5 bite, so if it wins, that exception changes."""
+    return _bass_rung("i")
+
+
+# ---------------------------------------- 17: the bass, five distinct readings
+# Probe 16 was built on a theory — "the note has no midrange, add some" — and the
+# measurements killed it: the EPS dirt changes nothing at this register (16a vs 16b
+# measure identically), the filter floor changes nothing (800/1500/2500 Hz all the
+# same), a parallel distorted mid band only costs crest, and with sub=0.0 the
+# sub-120 share is STILL 0.87 — because at F#2 the fundamental (92.5 Hz) is itself
+# inside that band.  Spectral share does not predict "heavy and bold" here, so 17
+# stops arguing from numbers and renders five readings that differ audibly.
+# One more measured fact worth keeping: in a verse of ruin_v2 the bass stem runs
+# 6.9 dB LOUDER than the drums (-18.4 against -25.3 dBFS), so "timid" is not level.
+BASS_DENSE = {"sub": 0.8, "sub_wave": "sine", "drive": 2.0, "hold": 1, "detune": 18.0,
+              "res": 2.5, "floor_hz": 500.0, "env": 0.05, "gate_mul": 1.3}
+BASS_SQUARE = {"sub": 0.35, "sub_wave": "sine", "drive": 2.2, "hold": 1, "detune": 18.0,
+               "wave": "square", "res": 2.0, "floor_hz": 900.0, "env": 0.10, "gate_mul": 1.3}
+OCTAVE_GAIN, OCTAVE_CUT = 0.30, 1400.0
+
+
+def _bass_reading(label, kw, octave=0.0, wide=False, bars=8):
+    """Four bars of the stem alone, then the same four in the verse.  `octave`
+    adds a quieter copy of the line an octave up (the presence trick the lead
+    already uses; a track-level LAYER, not a note() knob).  `wide` pans that
+    copy against the root line — a declared deviation from the blueprint's
+    mono-centre bass, so it is the last reading, never the default."""
+    x = steps_buffer(bars)
+    solo = bassline(4, FS2, **kw)
+    mix(x, solo, 0, 1.0)
+    seg, _ = verse(4, hat_steps=HAT_8, **kw)
+    mix(x, seg, 4)
+    if octave:
+        oc = bassline(4, FS2 + 12, **{**kw, "floor_hz": OCTAVE_CUT})
+        mix(x, oc, 0, octave)
+        mix(x, oc, 4, octave * GAIN["bass"])
+    _bass_report(solo[: int(4 * BAR * SR)], label, kw)
+    if octave:
+        print(f"    + an octave-up copy at {octave:.2f} (floor {OCTAVE_CUT:.0f} Hz)"
+              f"{'; in the track it would be panned against the root line' if wide else ''}")
+    timeline((0, "the stem alone"), (4, "the same four bars in the verse"))
+    return x, bars
+
+
+def p17a():
+    """READING 1 — THE CONTROL: ruin_v2's bass, unchanged.  Everything below is
+    judged against this."""
+    return _bass_reading("1. as shipped (v2)", _bass_kw("a"))
+
+
+def p17b():
+    """READING 2 — DENSE: the one thing probe 16 did prove.  Unison detune, a
+    sine sub, drive 2.0, the dirt off, the gate cycle x1.3.  Crest 2.96 -> ~1.4,
+    i.e. about 4 dB more RMS at the same peak: the same note, bigger and
+    connected.  Its spectrum barely moved, so if "commodore" survives this, the
+    problem was never weight."""
+    return _bass_reading("2. dense (unison + sine sub + drive + longer gate)", BASS_DENSE)
+
+
+def p17c():
+    """READING 3 — SQUARE: the only reading that measured audibly different up
+    top — a square oscillator triples the 800 Hz-3 kHz share (0.041 against
+    v2's 0.013), with the sub pulled back to 0.35 and the floor at 900 Hz so
+    harmonics survive the whole note instead of just its attack.  Hollow and
+    nasal rather than round: the Nitzer / DAF end of the palette."""
+    return _bass_reading("3. square oscillator, sub back, floor open", BASS_SQUARE)
+
+
+def p17d():
+    """READING 4 — THE OCTAVE DOUBLE: reading 2 plus a quiet copy of the line an
+    octave up, darkly filtered.  This is how the lead already gets its weight in
+    ruin_v2's choruses (DOUBLED), and it is the standard way a bass reads as BIG
+    without more low end — the octave is what the midrange, and a small speaker,
+    actually hear.  The idea probe 16 never tried, and my bet."""
+    return _bass_reading("4. dense + the octave double", BASS_DENSE, octave=OCTAVE_GAIN)
+
+
+def p17e():
+    """READING 5 — WIDE: reading 4 with the octave copy panned against the root
+    line.  EBM_1990s.md §9 says bass mono-centre, so this is a DECLARED
+    deviation and that is why it is last: it reads bigger on headphones and
+    loses weight on a club system.  Judge it knowing that."""
+    return _bass_reading("5. dense + octave, panned wide", BASS_DENSE, octave=OCTAVE_GAIN, wide=True)
+
+
 PROBES = [("01a", "drone_flat_cell", p01a), ("01b", "drone_as_phrase", p01b),
           ("01c", "phrase_with_moving_pitch", p01c), ("02", "sub_at_fsharp", p02),
           ("03", "hats_none_8ths_16ths", p03), ("04", "chorus_roots", p04),
@@ -800,7 +1016,12 @@ PROBES = [("01a", "drone_flat_cell", p01a), ("01b", "drone_as_phrase", p01b),
           ("12a", "hook_offbeat_chorus", p12a), ("12b", "hook_litany_chorus", p12b),
           ("12c", "hook_hammer_chorus", p12c), ("13", "the_seams", p13),
           ("14a", "varied_litany_form", p14a), ("14b", "varied_organ_answers", p14b),
-          ("14c", "varied_double_early", p14c), ("15a", "verse2_hammer", p15a), ("15b", "verse2_riff", p15b)]
+          ("14c", "varied_double_early", p14c), ("15a", "verse2_hammer", p15a), ("15b", "verse2_riff", p15b),
+          ("16a", "bass_as_shipped", p16a), ("16b", "bass_dirt_off", p16b), ("16c", "bass_sine_sub", p16c),
+          ("16d", "bass_unison", p16d), ("16e", "bass_drive", p16e), ("16f", "bass_floor_up", p16f),
+          ("16g", "bass_sustain", p16g), ("16h", "bass_growl_env", p16h), ("16i", "bass_open_body", p16i),
+          ("17a", "bass_control", p17a), ("17b", "bass_dense", p17b), ("17c", "bass_square", p17c),
+          ("17d", "bass_octave_double", p17d), ("17e", "bass_octave_wide", p17e)]
 
 if __name__ == "__main__":
     only = {x.strip() for x in ARGS.only.split(",") if x.strip()}

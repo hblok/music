@@ -78,6 +78,7 @@ user has listened to — new demos get new names).
 | `machine.py` | `machine`, `retrigger` | the vocal-slot TREATMENT (takes any mono array — a spoken take, or a bark): intercom band, crude dirt (hold 3, 8 bits), ring mod, drive; the sequencer retrigger stutter | `band`, `hold/bits`, `ring_hz`, `drive`; `retrigger(x, step_s, n, head)` |
 | `rom.py` | `strings`, `choir`, `voice` | the 1999 ROM orchestra (VNV's four sample modules): a detuned unison saw stack, slow attack, static filter — bowed, or sung through formants. Stiff by construction (fixed detune phases), no flutter, no drift, no chorus. `hold=1` by default | `voices`/`detune` (the stack), `attack`, `cutoff`, `octave`, `bow`, `vowel`/`q` (choir), `hold`/`lowpass` (era) |
 | `riff.py` | `chug`, `riff` | the one guitar: Karplus-Strong power chord, double-tracked, palm-mute or open, tanh amp, cab, body thump. A texture, one track only (declared) | `drive`, `mute`, `body`, `cab`, cell with x/b/3/5/o |
+| `sh101_bass_ruin.py` | `note`, `render_cell` (+ `CELLS`, `svf_lowpass` re-exported) | **a FORK of `sh101_bass.py`, not an edit** — the same engine plus `detune` (unison spread in CENTS: a doubled-101 / Pro One thickness the real 101 cannot do) and `sub_wave` ('square' the 101's own buzzy sub-octave, or 'sine' — far less peak per unit of low end, so the note gets *denser* as `sub` rises under the peak-1.0 contract). Bit-identical to the original at its defaults (asserted in its audition), so it is a superset. Its docstring records the four tuning dead ends, so they are not re-run | `detune` (12-25 c), `sub_wave`; everything else as `sh101_bass` |
 | `devices.py` | `FIGURES`, `RUN`, `run`, `roll`, `riser`, `downsweep`, `silent_beat`, `delay`, `pingpong`, `DOTTED_8TH` | the ARRANGEMENT events no_access v3 proved and the 2026-09-16 batch lacked: kick figures A/B/C, the snare run on the last beat, the 2-bar roll (8ths → 16ths → 32nds), the riser under it and the downsweep after the hit, the composed silent beat, the dotted-8th delay (mono or ping-pong). Take a rendered hit; return one event on the grid. **The two delays return WET taps at the input's scale — `pingpong` a (L, R) pair** — the one contract exception, so the track adds them at its own gain | `run(hit, n, gain)`, `roll(hit, gain=(a, b, c))`, `riser(bars)`, `silent_beat(n, t0, t1)`, `delay(x, time_s, feedback, taps, damp)` |
 
 `_common.py` — SR, BPM/STEP/BAR, `midi_to_hz`, `norm`, `dirt`, `gate`,
@@ -99,6 +100,20 @@ user has listened to — new demos get new names).
 Raw on purpose: no reverb, no sidechain, no master — those are the track's.
 
 A/B and stem workflow for the track scripts: `../LISTENING.md`.
+
+## Changing an instrument a shipped track uses: FORK, don't edit
+
+A module here is imported by several tracks, and each of those has a
+listen verdict attached to a specific render.  Editing the module risks
+changing what a judged track sounds like the next time it is rendered.
+So when one track needs a voice changed, **copy the function into a
+`<module>_<track>.py` fork** and point only that track at it (agreed
+2026-09-18, after `sh101_bass.py` was edited in place for ruin v3 and
+reverted).  A fork should import what it does not change — the ruin fork
+takes `CELLS` and `svf_lowpass` from the original and overrides `note()`
+alone — and should assert in its audition that its defaults reproduce the
+module it forked, so a track can move to it with no other change.  If a
+fork later wins everywhere, that is the moment to fold it back in.
 
 ## Declared exceptions (argue them in the track's notes doc)
 

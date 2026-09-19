@@ -573,3 +573,86 @@ pre heavier; it still lands), −7.8 dB into the break. All checks pass.
 Kept for the verdict: `ruin.wav` (v1) is untouched, so the A/B is the
 two full renders, or slices of both — `--slice 24 48` is pre 1 + chorus
 1, where every change but the way in is audible at once.
+
+## Built v3 (2026-09-18) — `ruin_v3.py` → `/workspace/music/ruin_v3.wav`
+
+Verdict on v2: *"not bad at all. However, the main problem is the bass
+line (stem). The SH-101 bass is just too timid. It reads like a 1980s
+commodore game, as opposed to a heavy bold EBM goth track."* v3 changes
+the bass and nothing else — the arrangement, the litany, the seam kit,
+the way in, the doubles and the master are v2's.
+
+### The fork, not an edit
+
+`instruments/sh101_bass_ruin.py` is a **fork** of the library module.
+`sh101_bass.py` is imported by reliquary, no_access, watchfire and the
+procession probes, every one of which has a verdict attached to a
+render, so editing it risks changing what a judged track sounds like
+when re-rendered. (It *was* edited first, and reverted — the fork rule is
+now written down in `instruments/README.md`.) The fork overrides `note()`
+alone, imports `CELLS` and `svf_lowpass` from the original, and asserts
+in its audition that its defaults are bit-identical, so it is a superset.
+Two new knobs, both TODO.md §6's deferred "second oscillator":
+`detune` (unison spread in cents) and `sub_wave` ('square' | 'sine').
+
+### Four theories that measured DOWN (recorded so they are not re-run)
+
+Probe 16 was a cumulative ladder built on "the note has no midrange":
+
+1. **The EPS dirt is not the 8-bit read** at this register — `hold=1` and
+   `hold=2` measure identically (crest 2.96, centroid ~130 Hz). The note
+   is lowpassed long before the decimation has anything to alias. This
+   was my first suspect and it is simply wrong.
+2. **The filter floor does nothing** — 800 / 1500 / 2500 Hz all give the
+   same spectrum, because a `1/k**1.1` saw at 92.5 Hz has almost no
+   harmonic energy for the filter to pass in the first place.
+3. **A parallel band-passed distorted "grind" layer** only cost crest
+   (1.36 → 2.18) and moved the 200–800 Hz share by a rounding error.
+4. **The sub-120 share is ~0.85 even with `sub=0.0`** — at F♯2 the
+   *fundamental* (92.5 Hz) is itself under 120 Hz, so that share was
+   never a fault to fix. This killed the whole "it is all rumble"
+   framing, including my own earlier push to *raise* the sub.
+
+And one measurement that killed the simplest reading of all: in a v2
+verse **the bass stem runs 6.9 dB LOUDER than the drums** (−18.4 against
+−25.3 dBFS), so "timid" was never a level problem.
+
+Spectral share did not predict the verdict. Probe 17 therefore stopped
+arguing from numbers and rendered five readings that differ audibly.
+
+### The five readings (probes 17a–17e), and what v3 ships
+
+| probe | reading | measured |
+|---|---|---|
+| `17a` | the control (v2) | stem crest 2.96, in-context sub-60 0.60 |
+| `17b` | **dense** — unison 18 c, sine sub 0.8, drive 2.0, dirt off, gate cycle ×1.3 | crest 2.96 → 1.96, **+2 dB RMS at the same peak**: a wall, not a blip |
+| `17c` | **square** — square oscillator, sub back to 0.35, floor 900 Hz | triples the 800 Hz–3 kHz share, but sub-60 collapses to 0.04 — hollow, Nitzer/DAF, gives up the low end |
+| `17d` | **octave** — dense + a quiet copy an octave up, floor 1400 Hz, gain 0.30 | sub-60 **0.60 → 0.49** while the bass gets louder: the size moves into the midrange, where small speakers live |
+| `17e` | **wide** — the octave copy panned | a declared deviation (§9 says bass mono-centre): bigger on headphones, thinner on a club system |
+
+**v3 ships `17d`**, as `BASS_READING = "octave"` — one word switches to
+any of the five, so the verdict costs a re-render and no edit. The gate
+stretch (0.50 → 0.65) is a declared deviation from the 1993 "gate ≤ 0.5"
+figure, argued on the grounds that the gap is exactly what made it a
+blip.
+
+### Two things tuned alongside the bass (both forced, both measured)
+
+The denser bass broke two of v2's checks, which is why they moved:
+
+1. **The composed holes filled in.** At gate ×1.3 the note on step 8 of
+   the `hole` cell rang past beat 4 and the hole measured under 6 dB
+   deep. The stretch now applies to the ENGINE cells only (`hammer`,
+   `walk`); the pre-chorus half-time cells keep v2's 0.5. Holes back to
+   12.5 / 9.5 dB.
+2. **The chorus stopped clearing its verse.** The denser bass lifted the
+   verses +2.8 dB but the choruses only +1.7 (the chorus sub clamps at
+   1.0, and its roots climb to D3/C♯3 where there is less low end to
+   gain), so the arc fell to +1.5/+1.3. `SECTION_GAIN` sits the verses
+   back one more notch: 0.84/0.86 → 0.78/0.80. Arc restored to
+   **+2.0 / +1.8 dB**.
+
+All checks pass. Arc: verse 1 0.202 → pre 1 0.229 → chorus 1 0.239 →
+final 0.248, −10.6 dB into the break. v1 and v2 are kept, so the A/B is
+three renders; `--solo bass,bassoct --slice 16 24` is the stem the
+verdict was about.
