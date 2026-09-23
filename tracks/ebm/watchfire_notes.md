@@ -406,3 +406,10 @@ From the v2 verdict above:
 
 All checks pass. Listen verdict pending. `--solo voice,chant,lead --slice 96 112`
 is the trough on its own.
+
+Verdict on watchfire_v2.1 (2026-09-23):
+- *"Voice sounds good, actually. It sounds like a male."* The voice
+  (RyanNeural, machine() without ring mod) is a keeper.
+- It could be even **slower and a bit darker**.
+- It could be **more prominent**, but then it needs more to say: **a
+  longer phrase** — to be thought through. **For v3**, not a v2.x tweak.
