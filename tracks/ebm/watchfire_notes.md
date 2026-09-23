@@ -385,3 +385,24 @@ Verdict on watchfire_v2:
 - the juno bass sounds great
 - the hihat stabs are maybe still a bit too high pitched. (but hihats always are...)
 - the only thing the track lacks now, is vocals or a voice...
+## v2.1 (2026-09-23) — `watchfire_v2_1.py` → `/workspace/music/watchfire_v2.1.wav`
+
+From the v2 verdict above:
+- **`--bass juno` is the default.** Chorus 2's engine gain 1.0 → 0.97 so
+  the final stays the loudest section (it lost by 0.1 dB with juno).
+- **Darker hats:** highpass 7500 → 4500 Hz, a 7 kHz lowpass, open hats
+  0.26 → 0.20.
+- **The hook answers itself:** the second statement of each chorus and
+  the final's pass 2 sing `ANSWER_B` — phrase B lower, no F♯4 peak,
+  hanging on A3 (the v's third) instead of F♯. State / answer / state /
+  answer / state / answer / resolve.
+- **The voice: "Keep the fire."** edge-tts `en-GB-RyanNeural`, −15 %,
+  −8 Hz, cached at `/workspace/music/vocals/watchfire/tts/keep_the_fire.wav`
+  (drop your own take at `/workspace/music/vocals/watchfire/keep_the_fire.wav`
+  and it wins). Through `machine()` without ring mod (a man, not a robot),
+  wet 0.35. Two slots, both in the trough: bar 100 plain over the chant,
+  bar 108 retriggered ("keep-keep-keep the fire") with a ping-pong tail
+  into the roll.
+
+All checks pass. Listen verdict pending. `--solo voice,chant,lead --slice 96 112`
+is the trough on its own.
