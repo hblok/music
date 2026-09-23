@@ -348,3 +348,40 @@ remove it.
 3. Answer the eight questions above, now that the alternatives are
    audible.
 4. Only then `watchfire.py`.
+
+## v2 (2026-09-23) — `watchfire_v2.py` → `/workspace/music/watchfire_v2.wav`
+
+Verdict on v1: *"not bad, but still lands a bit flat. The lead is in a
+happy / jolly scale — can we make it more dark and goth? The stompy beat
+or 'bass' is still commodore-like."*
+
+- **Harmony:** Bm G D Em → **Bm G Em F♯m** (i VI iv v). The D-major III
+  was the relative-major chord; the minor v leans back without a leading
+  tone. Bar 135 plays Bm under the one resolution.
+- **Hook:** the B3→A4 climb (with the bright C♯) became a descending
+  recitation F♯4…F♯3 with **C♮ (♭2)** as the neighbour; every statement
+  ends on F♯, the last on B. Register 54–66, strings darker
+  (`cutoff 2400`, `bow 0.08`).
+- **Low end:** the kick + a sub-boom (no_access's recipe) own the
+  downbeat; the verse/rise bass moves to the `offbeat` cell (unused until
+  now), the chorus keeps `rolling`. `--bass dense|juno|v1`: `dense` (the
+  ruin fork's unison + sine sub, gate 0.65) is the default render;
+  `watchfire_v2_juno.wav` is the Juno-preset reading (fails "final is
+  the loudest" by a hair — fine for an A/B, not a ship).
+- **Seams (TODO §2b):** roll + riser into both choruses and out of the
+  trough, the silent beat before the final, downsweeps after the chorus
+  hits, figure B every 4th bar, snare runs closing 8-bar phrases,
+  dotted-8th ping-pong on the statement tails, a quarter-note delay in
+  the trough, open hats in verse 2.
+- Not done from §2b: the chant in contrary motion, varied hook statements
+  (state / vary / answer).
+
+Listen verdict pending. `--solo bass,boom,drums --slice 16 24` is the
+stem the "commodore" remark was about.
+
+Verdict on watchfire_v2:
+- Really good improvement. Pads and bass sounds much fuller and heavier.
+- Everything is darker - this sounds like a goth EBM.
+- the juno bass sounds great
+- the hihat stabs are maybe still a bit too high pitched. (but hihats always are...)
+- the only thing the track lacks now, is vocals or a voice...
