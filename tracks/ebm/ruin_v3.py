@@ -101,7 +101,7 @@ from seethe import seethe                                                 # noqa
 from sh101_bass_ruin import CELLS, note                                    # noqa: E402
 
 # ------------------------------------------------------------- the piece
-NAME = "ruin_v3"                                      # bump per iteration (ruin_v3.1 ...)
+NAME = "ruin_v3.4"                                      # bump per iteration (ruin_v3.1 ...)
 TOTAL_BARS = 104
 TAIL_BARS = 4                                         # hard stop at 104; the bed and the last hit decay
 END = (TOTAL_BARS + TAIL_BARS) * BAR
@@ -157,7 +157,7 @@ BASS = {
     "dense":  {"tone": {"detune": 18.0, "sub_wave": "sine", "drive": 2.0, "hold": 1},
                "gate_mul": 1.3, "floor_hz": 500.0, "octave": 0.0, "wide": False},
     "octave": {"tone": {"detune": 18.0, "sub_wave": "sine", "drive": 2.0, "hold": 1},
-               "gate_mul": 1.3, "floor_hz": 500.0, "octave": 0.30, "wide": False},
+               "gate_mul": 1.3, "floor_hz": 200.0, "octave": 0.30, "wide": False},
     "wide":   {"tone": {"detune": 18.0, "sub_wave": "sine", "drive": 2.0, "hold": 1},
                "gate_mul": 1.3, "floor_hz": 500.0, "octave": 0.30, "wide": True},
     "square": {"tone": {"detune": 18.0, "sub_wave": "sine", "drive": 2.2, "hold": 1,
@@ -347,8 +347,8 @@ def place_wide(layer, x, t, gain=1.0, spread=0.012):
 LAYER_NAMES = ["bed", "pad", "organ", "bass", "bassoct", "drums", "lead", "hit", "fx"]
 WETS = {"bed": 0.0, "pad": 0.35, "organ": 0.32, "bass": 0.0, "bassoct": 0.0, "drums": 0.08,
         "lead": 0.25, "hit": 0.30, "fx": 0.3}
-WEIGHTS = {"bed": 0.30, "pad": 0.20, "organ": 0.28, "bass": 0.42, "bassoct": 0.42 * BASS["octave"],
-           "drums": 0.46, "lead": 0.44, "hit": 0.24, "fx": 0.12}
+WEIGHTS = {"bed": 0.30, "pad": 0.20, "organ": 0.28, "bass": 0.10, "bassoct": 0.42 * BASS["octave"],
+           "drums": 0.46, "lead": 0.46, "hit": 0.24, "fx": 0.12}
 
 ap = argparse.ArgumentParser(description="Ruin v2 — see the docstring")
 ap.add_argument("--solo", default="", help="comma-separated layer names to render alone")
