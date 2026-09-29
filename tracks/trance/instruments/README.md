@@ -2,12 +2,18 @@
 
 Every synth voice, drum and texture recipe that exists in the trance
 generators, indexed so a new track can *pick* instruments without
-re-reading every script. The catalog is documentation only — the code
-convention stays **copy, don't import** (standalone scripts, duplicated
-helpers, per `../CLAUDE.md`). The definitive source for each entry is
-the named `script:function`; deep parameter recipes for the signature
+re-reading every script. The definitive source for each entry is the
+named `script:function`; deep parameter recipes for the signature
 instruments live in `../CLAUDE.md` ("Synthesis recipes") and are not
 duplicated here.
+
+**Two forms.** The `.md` catalog files hold the function source as
+documentation. The same voices are also **importable** as `.py` modules
+in this directory (added 2026-09-29, see "Importable library" below) --
+the same deliberate departure from "copy, don't import" that
+`tracks/dune/instruments` and `tracks/ebm/instruments` made. **No existing
+trance track script was modified**; the track scripts stay standalone and
+keep their own copies.
 
 **Code docs** (function source extracted, ready to copy):
 `drums.md` · `basses.md` · `leads.md` · `keys.md` · `plucks.md` · `pads.md` · `textures.md` · `voice.md`
@@ -157,3 +163,79 @@ duplicated here.
 - **silver_wire** — silver wire lead 303 (acid melody grammar + anti-arc
   CUT_PROFILE), register-jump low answers, K-b-b-b / sub-duty bass split,
   psy/straight kit split, G# borrowed color, no break (composed trough)
+
+## Importable library
+
+```python
+import sys, pathlib
+sys.path.insert(0, str(pathlib.Path(__file__).parent / "instruments"))
+from drums import make_kick, make_hat
+from basses import bass_note
+```
+
+```bash
+cd tracks/trance/instruments
+python3 drums.py            # -> auditions/drums.wav  (gitignored scratch)
+python3 leads.py --out /tmp/leads.wav
+```
+
+Each module's `__main__` renders every function (gaps between hits) and
+asserts finite / non-silent / peak <= 1.5 (`_common.run_audition`).
+`voice.py` is the exception (needs network/ffmpeg the first time; it only
+checks the contract and degrades gracefully).
+
+| module | functions (public name <- script:function) |
+|---|---|
+| `_common.py` | `SR`, reference `BPM`/`BEAT`/`STEP`, `midi_to_hz`, `add_at`, `write_wav`, `run_audition` |
+| `drums.py` | `make_kick`, `make_hat`, `make_clap`, `make_ride`, `make_crash` (lost_v6) · `make_snare` (adrift) · `make_shaker` (nachtkind_v3) · `make_tom`, `make_tick` (eisgang_v3) · `heart` · `make_slam`, `make_anvil`, `make_tap` (tech_noir_v3) · psy kit `make_kick_psy`, `make_clap_psy`, `make_zap` (maschinenherz) · variants `make_kick_frankfurt` (nachtkind_v3), `make_hat_psy` (maschinenherz_v2) |
+| `basses.py` | `bass_note` (lost_v6), `bass_note_tide` (adrift), `bass_hit`, `thud_bass`, `psy_bass_note`, `sub_note` |
+| `leads.py` | `lead_phrase`, `lead_phrase_reed`, `brass_phrase`, `love_phrase`, `skyline_note`, `lead_line`, `make_signal`, `acid_note`, `acid_note_silverwire`, `voice_phrase` |
+| `keys.py` | `piano_note` (nachtkind_v3), `piano_note_dream` (adrift), `bell_note` (farlight_v2), `bell_note_answer` (penumbra) |
+| `plucks.py` | `pluck`, `seq_pluck`, `make_stab`, `stab_hit`, `stab_penumbra` |
+| `pads.py` | `pad_chord`, `pad_chord_juno`, `strings_line`, `strings_chord`, `choir_voice`, `cello_line` (pads return a stereo `(L, R)` pair) |
+| `textures.py` | `swell`, `riser`, `cloud` (stereo), `roll_hits`, `shiver_stab`, `cutoff_at` -- layer-writing originals converted to return events |
+| `voice.py` | `get_voice` (spoken-word drop; needs edge-tts + ffmpeg first run) |
+| `morgenland.py` | `santur_note`, `santur_trem`, `acid_path`, `make_sub_boom`, `swell`, `pad_chord_open` |
+| `flightpath.py` | `buzz_path`, `cell_timbre`, `bass_stab`, `chord_stab`, `wedge`, `make_sub_boom`, `hammer_ev`/`chain_ev`/`trill_ev`/`swell_ev`/`transpose_ev` |
+
+Conventions of the port:
+
+- **Verbatim.** Function bodies, module constants (`SMEAR_SOS`, `TIMBRE`,
+  ...), and the `lru`-style dict caches were copied from the script; a
+  cache dict is never shared between two different source scripts. Where two
+  scripts use the same function name the second gets a suffix
+  (`bass_note_tide`, `stab_penumbra`, ...); a helper that differs between
+  scripts (e.g. `glide_curve`, `tau` 0.05 vs 0.04) is carried per-function
+  with a suffix.
+- **Reference tempo.** Functions that read `BEAT`/`STEP` for their default
+  durations use `_common.BPM = 138` (the scripts run 130-145). Pass `dur`
+  where the signature has one.
+- **Own seed per module** (`np.random.default_rng(<track seed>)`).
+- **Identity separation still applies**: "owned by" voices are listed in
+  each module docstring; reusing one is a declared choice in the new
+  track's notes.
+
+### Deliberately not extracted
+
+- Retired: lost_v3 bass, hollow-pulse lead (`eisgang.py:lead_line` v1),
+  skyline piano, hybrid sung voice (`unsung.py`), `unsung_probe.py`.
+- Arrangement glue: `silent_beat`, `tide_out`, `ice_crack`, `ladder_bars`,
+  `arp_bars`, `place_*`, `build_half`/`resolve_slides`/`build_sentence`/
+  `osc_bar` (melody-construction grammars -- composition, not a voice).
+- `make_doum` / `make_tek` (morgenland) -- same recipe as
+  `tracks/dune/instruments/darbuka.py` at default arguments; import that.
+
+### Survey of the remaining scripts (diff results, 2026-09-29)
+
+Each was diffed function-by-function against the extracted canonical
+version; only real differences were added.
+
+| script | result |
+|---|---|
+| `morgenland.py` / `_v2` / `_v3` | new: santur, `acid_path`, sub boom, pad, swell -> `morgenland.py`. Darbuka pair = dune's. v1/v2 `acid_note` = maschinenherz's with Q 6 / tanh 1.5 (= `acid_note_silverwire`) plus v2 sung vibrato, which `acid_path` carries. Hat/clap/kick = psy-kit tuning variants |
+| `flightpath.py` | new: `buzz_path` family etc. -> `flightpath.py`. Kick/hat/snare/ride are tuning variants of the 909 kit |
+| `farlight.py` (v1) | `lead_phrase` byte-identical to `farlight_v2`; `bass_note` = lost_v6 minus comments; `bell_note`/`pluck` covered by v2. Nothing new |
+| `nachtkind_v1.py`, `_v2.py` | superseded `bass_note` (Q 3.5 / tanh 1.5 = the pre-warmth bass; v2 sub 0.35), `lead_phrase`, kick; no `make_shaker` exists in v1/v2. Historic tuning of the v3 voices -- not extracted |
+| `tech_noir_v2.py`, `generate_tech_noir.py` | `make_slam` differs by a no-op term (`np.maximum(gate, exp*0.0)`) plus comments; `brass_phrase`/`love_phrase` comment-only vs v3. Nothing new |
+| `silver_wire.py`, `_v3.py` | v1 `acid_note` = `acid_note_silverwire` tuning; v3 adds `make_sub_boom` (byte-identical to morgenland's) and the big-room master; kick/hat = psy-kit variants |
+| `maschinenherz_v2.py`, `lost_v4.py` | v2 = v1 + big-room master (glue, `make_sub_boom` = morgenland's with a comment diff, `make_hat_psy`, a 2.0 s crash tuning); lost_v4 `piano_note` identical to lost_v6, `lead_phrase` comment-only diff, `riser` only lacks the gain argument |
