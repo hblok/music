@@ -15,7 +15,7 @@ Extracted VERBATIM from the trance track scripts (which are unchanged):
   - `swell_ev` <- `flightpath.py:swell_ev` -- event kind: rising swell figure
   - `transpose_ev` <- `flightpath.py:transpose_ev` -- transpose an event list
 
-See ../CLAUDE.md and README.md for the sound-ownership / identity rules.
+See ../CLAUDE.md and README.md for the identity rules.
 Seed 1900 = flightpath (the year of the Bumblebee).
 """
 from __future__ import annotations
@@ -190,4 +190,8 @@ AUDITION = [
 ]
 
 if __name__ == "__main__":
+    ev = trill_ev(60)
+    assert len(ev) == 16 and ev[-1][3] is None and ev[0][3] == 60
+    assert len(hammer_ev(60)) == 16 and len(swell_ev(60)) == 16 and len(swell_ev(60, True)) == 12
+    assert transpose_ev(ev, 2)[0][0] == 63 and cell_timbre(0) == "A" and cell_timbre(32) == "B"
     run_audition("flightpath", AUDITION)

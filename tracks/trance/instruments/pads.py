@@ -9,7 +9,7 @@ Extracted VERBATIM from the trance track scripts (which are unchanged):
   - `choir_voice` <- `adrift.py:choir_voice` -- breath choir, OWNED by adrift
   - `cello_line` <- `lost_v6.py:cello_line` -- solo bowed cello
 
-See ../CLAUDE.md and README.md for the sound-ownership / identity rules.
+See ../CLAUDE.md and README.md for the identity rules.
 Seed 130 = lost_v6.
 """
 from __future__ import annotations

@@ -8,7 +8,7 @@ Extracted VERBATIM from the trance track scripts (which are unchanged):
   - `bell_note` <- `farlight_v2.py:bell_note` -- OWNED by farlight
   - `bell_note_answer` <- `penumbra.py:bell_note` -- answer bell
 
-See ../CLAUDE.md and README.md for the sound-ownership / identity rules.
+See ../CLAUDE.md and README.md for the identity rules.
 Seed 1993 = nachtkind_v3.
 """
 from __future__ import annotations

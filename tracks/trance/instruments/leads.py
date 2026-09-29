@@ -14,7 +14,7 @@ Extracted VERBATIM from the trance track scripts (which are unchanged):
   - `acid_note_silverwire` <- `silver_wire_v2.py:acid_note` -- sharper 303, OWNED by silver_wire
   - `voice_phrase` <- `maschinenherz.py:voice_phrase` -- love-voice port (declared borrow)
 
-See ../CLAUDE.md and README.md for the sound-ownership / identity rules.
+See ../CLAUDE.md and README.md for the identity rules.
 Seed 130 = lost_v6.
 """
 from __future__ import annotations

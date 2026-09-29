@@ -22,7 +22,7 @@ Extracted VERBATIM from the trance track scripts (which are unchanged):
   - `make_kick_frankfurt` <- `nachtkind_v3.py:make_kick` -- tuning variant: shorter, 48+102 Hz, 1.5-6 kHz click, no sub (nachtkind v1-v3)
   - `make_hat_psy` <- `maschinenherz_v2.py:make_hat` -- tuning variant: 6.5/7 kHz HP, 160 ms open (maschinenherz_v2 / morgenland / silver_wire_v3)
 
-See ../CLAUDE.md and README.md for the sound-ownership / identity rules.
+See ../CLAUDE.md and README.md for the identity rules.
 Seed 130 = lost_v6 (the BPM); each script seeds its own, this module seeds once.
 """
 from __future__ import annotations

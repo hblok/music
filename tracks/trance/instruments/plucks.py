@@ -8,7 +8,7 @@ Extracted VERBATIM from the trance track scripts (which are unchanged):
   - `stab_hit` <- `eisgang_v3.py:stab_hit` -- hammer stab, OWNED by eisgang
   - `stab_penumbra` <- `penumbra.py:stab` -- penumbra stab variant
 
-See ../CLAUDE.md and README.md for the sound-ownership / identity rules.
+See ../CLAUDE.md and README.md for the identity rules.
 Seed 130 = lost_v6.
 """
 from __future__ import annotations
