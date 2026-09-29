@@ -105,6 +105,42 @@ python3 -m inspector.analyse <file.mp3> [--plots] [--separate]
 - **Do not commit generated WAV files** — they are large and ephemeral.
 - Do not delete or `.gitignore` tracked files without asking first.
 
+## Cross-track workflow & composition doctrine
+
+Applies to every track directory (`dune/`, `trance/`, `ambient/`, `tracks/*`) —
+genre-specific rules live in each directory's own `CLAUDE.md`; read that
+first, this is only the cross-cutting part.
+
+- **Probe before you build.** For a new track: (1) a notes doc with open
+  questions, (2) a probe script rendering short (4-8 bar) samples of the
+  instruments/drum figures/bed/refrain with a printed PASS/FAIL per
+  question, (3) listen verdicts, (4) only then the full track script.
+- **One song at a time.** Never build or revise several tracks in the same
+  session/batch — it converges everything on the same skeleton. Ideas for
+  other tracks go into their notes/TODO, not code.
+- **Develop motifs, don't drop them.** One continuous performance cursor
+  across the whole arrangement (bridge seams with pickups/ringing chords,
+  no dead air); a good motif is stated, varied, made to answer itself, and
+  brought back later — not stated once and abandoned after 4 bars. Skip
+  long atmospheric intros.
+- **Events, not carpets.** A distinctive small sound (ticks, blips, a
+  motif) is a short EVENT with a musical answer — never a continuous
+  30-40s texture; repeated as wallpaper it loses its character and starts
+  to annoy.
+- **Refrain/melody voices need sustain.** Never hand the tune to a
+  percussive/decaying voice — it reads as a toy ("xylophone"). Percussive
+  attacks are for groove and texture, not the lead.
+- **Background beds stay low and irregular.** A constant drone/wind/pad
+  layer: hard low-pass near the fundamental (no exposed mid tone),
+  irregular multi-rate movement (never a fixed-rate beat/LFO — reads as a
+  repetitive alarm), and low gain (a felt floor, not a heard wall).
+- **Output: FLAC, not mp3**, for the compressed deliverable (WAV stays
+  primary).
+- **TTS singing/performing is a dead end** — tried multiple times, always
+  rejected on naturalness. A short spoken TTS phrase for a sample/interlude
+  slot (e.g. `tracks/ebm`'s `machine.py` chain) is fine; don't retry TTS
+  *singing* without a genuinely new idea.
+
 ## Python style guide
 
 These rules apply everywhere in this repo:
