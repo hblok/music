@@ -10,7 +10,7 @@ Extracted VERBATIM from the trance track scripts (which are unchanged):
   - `swell` <- `morgenland_v3.py:swell` -- 250-2400 Hz single-band swell, t^2.5 (variant of textures.swell)
   - `pad_chord_open` <- `morgenland_v3.py:pad_chord` -- open-fifth pad, wider (det +-0.12 %, cross 0.40)
 
-See ../CLAUDE.md and README.md for the sound-ownership / identity rules.
+See ../CLAUDE.md and README.md for the identity rules.
 Seed 1001 = morgenland (C Phrygian dominant, Maqam Hijaz).
 """
 from __future__ import annotations

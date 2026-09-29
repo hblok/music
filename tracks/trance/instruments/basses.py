@@ -11,7 +11,7 @@ Extracted VERBATIM from the trance track scripts (which are unchanged):
   - `psy_bass_note` <- `maschinenherz.py:psy_bass_note` -- K-b-b-b psy bass (also silver_wire)
   - `sub_note` <- `silver_wire_v2.py:sub_note` -- sub-duty bass, OWNED by silver_wire
 
-See ../CLAUDE.md and README.md for the sound-ownership / identity rules.
+See ../CLAUDE.md and README.md for the identity rules.
 Seed 130 = lost_v6.
 """
 from __future__ import annotations
