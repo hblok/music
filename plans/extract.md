@@ -9,7 +9,14 @@ library. Survey date 2026-09-29.
 - `tracks/dune/instruments/` — 17 modules from the `generate_*.py` tracks
   (kick, darbuka, drums, frame_drum, tick_clock, hoofbeat, bass, acid, fx, choir,
   duduk_ney, war_horn, strings, sung_voice, navigator, impact_fx).
-- `tracks/trance/instruments/*.md` — **documentation catalog only**, no `.py`.
+- `tracks/trance/instruments/*.md` — documentation catalog; the importable
+  `.py` library (drums, basses, leads, keys, plucks, pads, textures, voice,
+  morgenland, flightpath + `_common`) now exists too (sections 1, 1a, 1b).
+- `tracks/psy/instruments/` — sections 2 (leads, bass, pads, drums, fx).
+- `tracks/ambient/instruments/` — section 3 (`lost_ambient.py`, `persian.py`;
+  persian depends on forge, see its README).
+- **Still open:** section 4 (house — needs a user decision) and section 5
+  (dune leftovers — only on request).
 
 ## Method (copy it, don't reinvent)
 
